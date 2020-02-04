@@ -3,4 +3,9 @@ This repository contains code and data for the study on drivers of shrub species
 
 The repository is maintained by Jonathan von Oppen ( jonathan.vonoppen \[at\] bios.au.dk )
 
+# File structure
+The data folder contains species tables as well as pre-processed data for abiotic and biotic predictors.
+
+The scripts folder contains the R code written for processing data and running analyses. 
+
 tbc
