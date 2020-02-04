@@ -228,7 +228,7 @@ write("
       # }
 
       for (i in 1:N_discrete){ 
-        y.dis[i] ~ dbern(mu[i])
+        cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_compet[UV_taxonXplotgroup.dis[i]]*compet.dis[i] + 
                         # b_slope[UV_taxonXplotgroup.dis[i]]*slope.dis[i] + 
                         b_sri[UV_taxonXplotgroup.dis[i]]*sri.dis[i] + 
@@ -244,7 +244,7 @@ write("
       # }
 
       for (i in 1:N_cont){
-        y.cont[i] ~ dbeta(p[i], q[i])
+        cov.cont[i] ~ dbeta(p[i], q[i])
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
         logit(mu2[i]) <- b_compet[UV_taxonXplotgroup.dis[i]]*compet.cont[i] + 
@@ -263,12 +263,12 @@ write("
     # INTERCEPTS ONLY (mean per taxon and site)
 
       for (i in 1:N_discrete){ 
-        y.dis.int[i] ~ dbern(mu.int[i])
+        cov.dis.int[i] ~ dbern(mu.int[i])
         logit(mu.int[i]) <- b1.int[UV_site.dis[i],UV_taxon.dis[i]]
       }
 
       for (i in 1:N_cont){
-        y.cont.int[i] ~ dbeta(p.int[i], q.int[i])
+        cov.cont.int[i] ~ dbeta(p.int[i], q.int[i])
         p.int[i] <- mu2.int[i] * phi.int
         q.int[i] <- (1 - mu2.int[i]) * phi.int
         logit(mu2.int[i]) <- b1.int[UV_site.cont[i],UV_taxon.cont[i]]
