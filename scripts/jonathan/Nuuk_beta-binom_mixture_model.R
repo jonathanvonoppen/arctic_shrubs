@@ -29,11 +29,11 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
 # complete set - local path -> check if updated!
 # env_cov_bio <- read.csv("//uni.au.dk/Users/au630524/Documents/Jonathan/Project/A_Nuuk_community_competition_controls/Data/processed/godthaabsfjord_plots_fusion_table_with_pred_spp_rel_cover_compet_per_plot_group.csv", header = T)
 # subset of species with competition data:
-env_cov_bio <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_spp_compet_subset_rel_cover_compet_per_plot_group.csv", header = T)
+env_cov_bio <- read.csv("data/Nuuk_fusion_table_plotgroupXtaxon_level.csv", header = T)
 
 # >> on plot level ----
 # subset of species with competition data:
-env_cov_bio <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_spp_compet_subset_rel_cover_compet_per_plot.csv", header = T)
+env_cov_bio <- read.csv("data/Nuuk_fusion_table_plotXtaxon_level.csv", header = T)
 
 
 # Prepare data ####
