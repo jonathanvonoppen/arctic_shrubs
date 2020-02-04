@@ -1,5 +1,5 @@
 #####################################################################################################################################################
-# Shrub cover changes across the Nuuk Fjord inland gradient                                                                                         #
+# Drivers of shrub abundance across the Nuuk Fjord inland gradient                                                                                         #
 # Code to perform mixture model accounting for proportions of discrete & continuous data                                                            #
 #                                                                                                                                                   #
 # by Jonathan von Oppen (based on code and workflow by Anne Bjorkman)                                                                               #
