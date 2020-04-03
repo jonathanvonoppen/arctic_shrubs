@@ -33,7 +33,7 @@ env_cov_bio <- read.csv("data/Nuuk_fusion_table_plotgroupXtaxon_level.csv", head
 
 # >> on plot level ----
 # subset of species with competition data:
-env_cov_bio <- read.csv("data/Nuuk_fusion_table_plotXtaxon_level.csv", header = T)
+env_cov_bio <- read.csv("data/Nuuk_fusion_table_plotXtaxon_level.csv", header = T, stringsAsFactors = F)
 
 
 # Prepare data ####
@@ -42,6 +42,9 @@ env_cov_bio_sub <- env_cov_bio %>% select(plot.group.name, site, date, year, lon
                               starts_with("bio_"),   # WorldClim predictors
                               wc_alt, ddeg, sri, mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
                               taxon, cover, compet)   # taxon, cover response, competition pressure
+
+# REMOVE Rhododendron tomentosum because it is so low abundance it doesn't converge
+env_cov_bio_sub <- env_cov_bio_sub[env_cov_bio_sub$taxon %in% c("Rhododendron tomentosum","Cassiope tetragona")==F,]
 
 # ORDER data
 
@@ -96,11 +99,11 @@ shrub_gradient_jags.data <- list(
   N_sites = length(unique(env_cov_bio_sub$site)),
   N_plotgroups = length(unique(env_cov_bio_sub$plot.group.name)),
   N_taxa = length(unique(env_cov_bio_sub$taxon)),
-  UV_taxonXplotgroup.tot = env_cov_bio_sub$taxon_plotgroup.NUM[!duplicated(env_cov_bio_sub$taxon_plotgroup.NUM)], #one value per tXpg
+  # UV_taxonXplotgroup.tot = env_cov_bio_sub$taxon_plotgroup.NUM,
   N_taxonXplotgroup.tot = length(unique(env_cov_bio_sub$taxon_plotgroup.NUM)),
   cov.dis = y.dis$cover,
  # UV_plotgroup.dis = y.dis$plot.group.NUM,
- # UV_site.dis = y.dis$site.NUM,
+  UV_site.dis = y.dis$site.NUM,
  # year.dis = y.dis$year,
   UV_taxon.dis = y.dis$taxon.NUM,
   sri.dis = y.dis$sriC,
@@ -120,18 +123,18 @@ shrub_gradient_jags.data <- list(
   year.cont = y.cont$year,
   UV_taxon.cont = y.cont$taxon.NUM,
   sri.cont = y.cont$sriC,
-  ndvi.yos.cont = y.cont$mean_summ_ndvi_yosC,
-  ndvi.long.cont = y.cont$cv_mean_summ_ndvi_2001_to_yosC,
-  continental.cont = y.cont$Perc_dist_coast_linesC,
+  # ndvi.yos.cont = y.cont$mean_summ_ndvi_yosC,
+  # ndvi.long.cont = y.cont$cv_mean_summ_ndvi_2001_to_yosC,
+  # continental.cont = y.cont$Perc_dist_coast_linesC,
   compet.cont = y.cont$competC,
   N_cont = nrow(y.cont),
   N_sites.cont = length(unique(y.cont$site)),
   N_plotgroups.cont = length(unique(y.cont$plot.group.name)),
   N_taxa.cont = length(unique(y.cont$taxon)),
   UV_taxonXplotgroup.cont = y.cont$taxon_plotgroup.NUM,
- # N_taxonXplotgroup.cont = length(unique(y.cont$taxon_plotgroup.NUM)),
-  xhat = seq(from = min(env_cov_bio_sub$cover), to = max(env_cov_bio_sub$cover), by = (1/150)),
-  N_xhat = length(seq(from = min(env_cov_bio_sub$cover), to = max(env_cov_bio_sub$cover), by = (1/150))),
+  # N_taxonXplotgroup.cont = length(unique(y.cont$taxon_plotgroup.NUM)),
+  # xhat = seq(from = min(env_cov_bio_sub$cover), to = max(env_cov_bio_sub$cover), by = (1/150)),
+  # N_xhat = length(seq(from = min(env_cov_bio_sub$cover), to = max(env_cov_bio_sub$cover), by = (1/150))),
   # how to include multiple continuous predictors? check other lectures too!
   # environmental predictors -> set target predictor name to env.*
   env.tot = env_cov_bio_sub$bio_1C[!duplicated(env_cov_bio_sub$taxon_plotgroup.NUM)]#, # one value per tXpg, amt = annual mean temperature = bio_1
@@ -169,13 +172,9 @@ write("
     
     # priors
       
-        for (i in 1:N_sites){
-        for (j in 1:N_taxa){
-          # a1[i,j] ~ dunif(-10,10)
-          intercept[i,j] ~ dnorm(0,0.0001)
-          # b1.int[i,j] ~ dnorm(0,0.0001)     # for the intercepts only-models
+        for (i in 1:N_taxa){
+          intercept[i] ~ dnorm(0,0.0001) # intercept per taxon instead of site-taxon?
         }
-      }
       
       for (i in 1:N_taxa){   # same level as main effect of interest, i.e. taxon X plotgroup # AB - make this slope per taxon (not taxon-plotgroup?)
         b_compet[i] ~ dnorm(0,0.0001)
@@ -183,26 +182,15 @@ write("
         b_sri[i] ~ dnorm(0,0.0001)
       }
 
-
-     # sigma.plotgroup.a~dunif(0,100)
-     # tau.plotgroup.a<-1/(sigma.plotgroup.a*sigma.plotgroup.a)
-
       sigma.taxonXplotgroup~dunif(0,100)
       tau.taxonXplotgroup<-1/(sigma.taxonXplotgroup*sigma.taxonXplotgroup)
 
-     # sigma.taxonXplotgroup2~dunif(0,100)
-     # tau.taxonXplotgroup2<-1/(sigma.taxonXplotgroup2*sigma.taxonXplotgroup2)
-
-
       for (i in 1:N_taxa){
-        # a.env.x[i]~dnorm(0,0.001)
-        # a.env.x2[i]~dnorm(0, 0.001)
         b.env.x[i]~dnorm(0, 0.001)
         b.env.x2[i]~dnorm(0, 0.001)
       }
 
       phi~dgamma(0.1,0.1)
-     # phi.int~dgamma(0.1,0.1)
       
     # LIKELIHOOD for discrete part
 
@@ -230,7 +218,9 @@ write("
 
       for (j in 1:N_taxonXplotgroup.tot){ # length of total plotgroup per taxon combinations
         b_taxonXplotgroup[j] ~ dnorm(mu.taxonXplotgroup[j],tau.taxonXplotgroup)
-        mu.taxonXplotgroup[j] <- intercept[UV_site.tot[j], UV_taxon.tot[j]] + b.env.x[UV_taxon.tot[j]]*env.tot[j] + b.env.x2[UV_taxon.tot[j]]*(env.tot[j]^2) # add more plotgroup-level predictors
+        mu.taxonXplotgroup[j] <- intercept[UV_taxon.tot[j]] + # slope per taxon not site-taxon?
+                    b.env.x[UV_taxon.tot[j]]*env.tot[j] + 
+                    b.env.x2[UV_taxon.tot[j]]*(env.tot[j]^2) # add more plotgroup-level predictors
       }
 
     
@@ -242,14 +232,14 @@ write("
 
 # Parameters to monitor ####
 
-params <- c("b.env.x","b.env.x2","intercept","b_compet", "b_sri","b_taxonXplotgroup[1]","b_taxonXplotgroup[2]","b_taxonXplotgroup[3]","sigma.taxonXplotgroup","phi") # add b_slope when added to df
+params <- c("b.env.x","b.env.x2","intercept","b_compet", "b_sri","b_taxonXplotgroup[1]","b_taxonXplotgroup[2]","b_taxonXplotgroup[3]","b_taxonXplotgroup[483]","sigma.taxonXplotgroup","phi") # add b_slope when added to df
 # "a.env.x","a.env.x2",
 
 # 5) RUN MODEL
 
 model_out.shrub_gradient <- jags(shrub_gradient_jags.data, inits = NULL, params, 
                                  model.file = "shrub_gradient.jags", n.chains = 3, 
-                                 n.iter = 10000, n.burnin = 8000, n.thin=2, DIC=FALSE, 
+                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
                                  working.directory=NULL, progress.bar = "text") 
 
 plot(model_out.shrub_gradient) #check convergence, etc.
@@ -266,4 +256,4 @@ round(plogis(coeff.shrub_gradient[coeff.shrub_gradient$Param=="intercept","mean"
 # coeff.shrub_gradient[coeff.shrub_gradient$Param=="b1.intBT",]
 # coeff.shrub_gradient[coeff.shrub_gradient$Param=="b1BT",]
 
-plot(aggregate(env_cov_bio_sub$cover,by=list(env_cov_bio_sub$site,env_cov_bio_sub$taxon),FUN=mean)$x,round(plogis(coeff.shrub_gradient[coeff.shrub_gradient$Param=="intercept","mean"]),4))
+plot(aggregate(env_cov_bio_sub$cover,by=list(env_cov_bio_sub$taxon),FUN=mean)$x,round(plogis(coeff.shrub_gradient[coeff.shrub_gradient$Param=="intercept","mean"]),4))
