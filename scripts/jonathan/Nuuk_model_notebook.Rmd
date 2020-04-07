@@ -2,67 +2,86 @@
 title: "Nuuk Fjord: Drivers of shrub abundance - development of beta-binomial mixture model"
 author: "Jonathan von Oppen"
 date: "07/04/2020"
-output: 
-html_notebook: default
+output: html_notebook
 code_folding: show
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# Dependencies ####
+## Dependencies ####
 Packages included:
+
 * tidyverse - for convenient code flow, data wrangling and plotting
 * rjags & R2jags - to link JAGS and R
+* skimr - for data summary
+* Rmarkdown - to produce this neat little documentation
 ```{r, message = FALSE}
 # load pacman package from the repository, if you do not already have it
 if (!require('pacman')) install.packages('pacman', repos="https://cloud.r-project.org")
 pacman::p_load(tidyverse, # set of packages for data manipulation, exploration and visualisation
                rjags,     # to link JAGS and R
                R2jags,    # to link JAGS and R
-               rmarkdown, 
-               knitr)     # for R Markdown formatting
+               skimr,     # for quick dataframe inspection
+               rmarkdown) # for R Markdown formatting
 ```
-# Import data ####
-Analyses conducted on fusion table at **plot group $\times$ taxon level**
+## Import data ####
+Analyses conducted on fusion table at **plot group $\times$ taxon level**: 621 observations for 94 variables
 ```{r}
-env_cov_bio <- read.csv(file.path(getwd(), "data", "Nuuk_fusion_table_plotgroupXtaxon_level.csv"), header = T)
-head(env_cov_bio)
+env_cov_bio <- read.csv("../../data/Nuuk_fusion_table_plotgroupXtaxon_level.csv", header = T)
 ```
-Only taxa with competition data included, i.e.
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show/Hide Data Summary </button>
+<div id="BlockName" class="collapse">
 ```{r}
-tibble(levels(env_cov_bio$taxon))
+skim(env_cov_bio)
 ```
-# Prepare data for JAGS model ####
-## Selection of variables relevant for analysis
+
+## Prepare data for JAGS model ####
+### Selection of variables relevant for analysis
 including predictors
-* Information on site, plot group, sampling location (lat, lon, altitude), sampling date
-* elevation-adjusted WorldClim predictors (*bio_X_rect*)
-* solar radiation index (SRI, following [XX et al. ]), slope (erosion measure) & moisture availability (Jakob, yet to come)
+
+* Information on site, plot group, sampling location (lat, lon, altitude), sampling date 
+* elevation-adjusted WorldClim predictors (*bio_X_rect*) 
+* solar radiation index (SRI, following [Keating et al. 2007](http://www.bioone.org/doi/abs/10.2193/2006-359)), slope (erosion measure) & moisture availability (-> Jakob, yet to come)
 * year-of-sampling & long-term (=2001-yos average) NDVI
 * continentality as percent distance from coast lines
 * taxon (see above for levels)
 * competition pressure in the community (as summed abundance of taller-growing shrub species within a plot, averaged within plot groups)
+
 and response variable 
+
 * cover (as relative no. hits per plot, averaged within plot groups)
 ```{r}
-env_cov_bio_sub <- env_cov_bio %>% select(plot.group.name, site, date, year, long, lat, location,   # plot info / metadata
-                              starts_with("bio_"),   # WorldClim predictors
-                              wc_alt, ddeg, sri, mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
-                              taxon, cover, compet)   # taxon, cover response, competition pressure
+env_cov_bio_sub <- env_cov_bio %>% 
+  select(plot.group.name, site, date, year, long, lat, location,   # plot info / metadata
+         starts_with("bio_"),   # WorldClim predictors
+         wc_alt, ddeg, sri, inclin_down,  # environmental data
+         mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines, 
+         taxon, cover, compet)   # taxon, cover response, competition pressure
 head(env_cov_bio_sub)
 ```
 
-## Abundance check & selection of taxa
+### Abundance check & selection of taxa
+
+Only taxa with competition data are included, i.e.
+```{r}
+tibble(levels(env_cov_bio_sub$taxon))
+```
+
 Some of the target taxa show low abundance for most of the plot groups:
 ```{r}
 # Summary of zeros per taxon & as percentage of all 69 plotgroups:
-env_cov_bio %>% group_by(taxon) %>% summarise_at(vars(cover), list(~sum(. == 0))) %>% rename(zeros = cover) %>% mutate(zeros_perc = zeros/69) %>% arrange(desc(zeros))
+env_cov_bio_sub %>% group_by(taxon) %>% 
+  summarise_at(vars(cover), list(~sum(. == 0))) %>% 
+  rename(zeros = cover) %>% 
+  mutate(zeros_perc = zeros/69) %>% 
+  arrange(desc(zeros))
 ```
 
 To ensure model convergence, we remove *Cassiope tetragona* & *Phyllodoce coerulea* (moving down the list):
 ```{r}
-env_cov_bio_sub <- env_cov_bio_sub[env_cov_bio_sub$taxon %in% c("Cassiope tetragona", "Phyllodoce coerulea")==F,] %>% 
+env_cov_bio_sub <- env_cov_bio_sub[env_cov_bio_sub$taxon %in% c("Cassiope tetragona", 
+                                                                "Phyllodoce coerulea")==F,] %>% 
   droplevels(env_cov_bio_sub$taxon)
 head(env_cov_bio_sub, nlevels(env_cov_bio_sub$taxon))
 ```
