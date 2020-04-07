@@ -38,10 +38,12 @@ env_cov_bio <- read.csv("data/Nuuk_fusion_table_plotXtaxon_level.csv", header = 
 
 # Prepare data ####
 # Select relevant variables: plot info, WorldClim predictors, SRI, yos & long-term mean NDVI, distance to coast, cover, competitive pressure
-env_cov_bio_sub <- env_cov_bio %>% select(plot.group.name, site, date, year, long, lat, location,   # plot info / metadata
-                              starts_with("bio_"),   # WorldClim predictors
-                              wc_alt, ddeg, sri, mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
-                              taxon, cover, compet)   # taxon, cover response, competition pressure
+env_cov_bio_sub <- env_cov_bio %>% 
+  select(plot.group.name, site, date, year, long, lat, location,   # plot info / metadata
+  starts_with("bio_"),   # WorldClim predictors
+  wc_alt, ddeg, sri, inclin_down, 
+  mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
+  taxon, cover, compet)   # taxon, cover response, competition pressure
 
 # REMOVE Cassiope tetragona & others because it is so low abundance it doesn't converge. Summary of zeros:
 # env_cov_bio %>% group_by(taxon) %>% summarise_at(vars(cover), list(~sum(. == 0))) %>% rename(zeros = cover) %>% mutate(zeros_perc = zeros/69)
