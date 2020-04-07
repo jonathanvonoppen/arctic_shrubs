@@ -43,8 +43,10 @@ env_cov_bio_sub <- env_cov_bio %>% select(plot.group.name, site, date, year, lon
                               wc_alt, ddeg, sri, mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
                               taxon, cover, compet)   # taxon, cover response, competition pressure
 
-# REMOVE Rhododendron tomentosum because it is so low abundance it doesn't converge
-env_cov_bio_sub <- env_cov_bio_sub[env_cov_bio_sub$taxon %in% c("Rhododendron tomentosum","Cassiope tetragona")==F,]
+# REMOVE Cassiope tetragona & others because it is so low abundance it doesn't converge. Summary of zeros:
+# env_cov_bio %>% group_by(taxon) %>% summarise_at(vars(cover), list(~sum(. == 0))) %>% rename(zeros = cover) %>% mutate(zeros_perc = zeros/69)
+# !!! Model crashes if >2 taxa removed !!! (JvO 06 Apr 20)
+env_cov_bio_sub <- env_cov_bio_sub[env_cov_bio_sub$taxon %in% c("Cassiope tetragona", "Phyllodoce coerulea")==F,]
 
 # ORDER data
 
