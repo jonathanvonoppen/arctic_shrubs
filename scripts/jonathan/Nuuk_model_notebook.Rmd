@@ -1,8 +1,11 @@
 ---
-title: "Nuuk Fjord: Drivers of shrub abundance - development of beta-binomial mixture model"
+title: 'Nuuk Fjord: Drivers of shrub abundance - development of beta-binomial mixture
+  model'
 author: "Jonathan von Oppen"
 date: "07/04/2020"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 code_folding: show
 ---
 
@@ -61,7 +64,7 @@ env_cov_bio_sub <- env_cov_bio %>%
 head(env_cov_bio_sub)
 ```
 
-### Abundance check & selection of taxa
+### Abundance check & selection of taxa ####
 
 Only taxa with competition data are included, i.e.
 ```{r}
