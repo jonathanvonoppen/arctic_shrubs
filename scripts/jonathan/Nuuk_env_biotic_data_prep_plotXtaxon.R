@@ -173,6 +173,8 @@ env_cov <- env_pred_nuuk.bio %>% group_by(site_alt_plotgroup_id) %>%
   mutate_at(occ_cols, funs(cov = ./25)) %>%   # cover = n_hits per 25 pins
   rename_at(vars(ends_with("cov")), funs(str_replace(.,"occ","cov"))) %>%
   rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov"))) %>% 
+  # discard ID variables below plotgroup level that have lost information value after averaging over plot groups
+  select(-c(plot, site_plot_id)) %>% 
   # %>% View()
 
 # # Calculate abundance measure (IF USING COVER PER PLOT): ----
@@ -202,7 +204,7 @@ env_cov_long_cov <- env_cov %>% select(-c(starts_with("occ"), ends_with("bio")))
   mutate(taxon = factor(taxon))
 
   # for competition values:
-env_cov_long_bio <- env_cov %>% select(site_plot_id, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(site_alt_plotgroup_id, [...])
+env_cov_long_bio <- env_cov %>% select(site_alt_plotgroup_id, ends_with("bio")) %>% # for PLOT level, change to [...] select(site_plot_id, [...])
   pivot_longer(cols = ends_with("bio"), 
                names_to = "taxon", 
                values_to = "compet", 
@@ -222,7 +224,7 @@ env_cov_long_bio <- env_cov %>% select(site_plot_id, ends_with("bio")) %>% # for
 
 # merge both long dataframes, insert NAs for taxa w/o compet values
 env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio, 
-                          by = c("site_plot_id", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
+                          by = c("site_alt_plotgroup_id", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_plot_id", [...])
   mutate(taxon = factor(taxon)) %>% 
   # correct species names
   mutate(taxon = recode(taxon, "Phyllodoce coerulea" = "Phyllodoce caerulea",
@@ -243,6 +245,6 @@ env_cov_long_spp_compet <- env_cov_long %>%
 write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plotgroups.csv")
 write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plotgroups.csv"))
 
-# >> for plot level: ----
-write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plots.csv")
-write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plots.csv"))
+# # >> for plot level: ----
+# write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plots.csv")
+# write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plots.csv"))
