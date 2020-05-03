@@ -160,26 +160,29 @@ env_pred_nuuk.bio <- mutate(env_pred_nuuk, occ_graminoids = occ_Juncaceae + occ_
 
 env_pred_nuuk.bio <- as.data.frame(env_pred_nuuk.bio)
 
-# Calculate abundance measure (IF USING COVER PER PLOT GROUP): ----
-# # compute "cover" (= rel. no. hits per plot group)
-# # env %>% group_by(plot.group.name) %>% summarise_each("mean") %>% View()
-# occ_cols <- env %>% select(starts_with("occ")) %>% colnames()
-# env_cov <- env %>% group_by(plot.group.name) %>%
-#   # calculate mean of numeric (plot-level) variables, take 1st entry of categorical (plot group-level) variables
-#   summarise_each(funs(if(is.numeric(.)) mean(.) else first(.))) %>%
-#   mutate_at(occ_cols, funs(cov = ./25)) %>%   # cover = n_hits per 25 pins
-#   rename_at(vars(ends_with("cov")), funs(str_replace(.,"occ","cov"))) %>%
-#   rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov")))
-#   # %>% View()
 
-# Calculate abundance measure (IF USING COVER PER PLOT): ----
-# compute "cover" (= rel. no. hits per plot)
+## !!!! EXECUTE ONE OF THE NEXT TWO CODE CHUNKS - COMMENT THE OTHER ONE OUT !!!! ## 
+
+# Calculate abundance measure (IF USING COVER PER PLOT GROUP): ----
+# compute "cover" (= rel. no. hits per plot group)
+# env %>% group_by(plot.group.name) %>% summarise_each("mean") %>% View()
 occ_cols <- env_pred_nuuk.bio %>% select(starts_with("occ")) %>% colnames()
-env_cov <- env_pred_nuuk.bio %>% 
+env_cov <- env_pred_nuuk.bio %>% group_by(site_alt_plotgroup_id) %>%
+  # calculate mean of numeric (plot-level) variables, take 1st entry of categorical (plot group-level) variables
+  summarise_each(funs(if(is.numeric(.)) mean(.) else first(.))) %>%
   mutate_at(occ_cols, funs(cov = ./25)) %>%   # cover = n_hits per 25 pins
   rename_at(vars(ends_with("cov")), funs(str_replace(.,"occ","cov"))) %>%
   rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov"))) %>% 
-# %>% View()
+  # %>% View()
+
+# # Calculate abundance measure (IF USING COVER PER PLOT): ----
+# # compute "cover" (= rel. no. hits per plot)
+# occ_cols <- env_pred_nuuk.bio %>% select(starts_with("occ")) %>% colnames()
+# env_cov <- env_pred_nuuk.bio %>% 
+#   mutate_at(occ_cols, funs(cov = ./25)) %>%   # cover = n_hits per 25 pins
+#   rename_at(vars(ends_with("cov")), funs(str_replace(.,"occ","cov"))) %>%
+#   rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov"))) %>% 
+# # %>% View()
 
 # Make the variable site into a factor to be used as a random factor
   mutate(site = as.factor(site)) %>% 
@@ -237,12 +240,9 @@ env_cov_long_spp_compet <- env_cov_long %>%
 
 # Write new table: ----
 # >> for plot group level: ----
-# complete set of species
-# write_csv(env_cov_long, path = "I:/C_Write/JonathanVonOppen/Project/A_Nuuk_community_competition_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_spp_rel_cover_compet_per_plot_group.csv")
-# only species with competition data
-write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_spp_compet_subset_rel_cover_compet_per_plot_group.csv")
+write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plotgroups.csv")
+write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plotgroups.csv"))
+
 # >> for plot level: ----
-# complete set of species:
-# write_csv(env_cov_long, path = "I:/C_Write/JonathanVonOppen/Project/A_Nuuk_community_competition_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_spp_rel_cover_compet_per_plot.csv")
-# only species with competition data:
-write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_spp_compet_subset_rel_cover_compet_per_plot.csv")
+write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plots.csv")
+write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plots.csv"))
