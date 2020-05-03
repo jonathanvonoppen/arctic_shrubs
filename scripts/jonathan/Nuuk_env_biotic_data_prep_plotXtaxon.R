@@ -83,53 +83,55 @@ spec_nuuk <- spec_nuuk %>%
 env_pred_nuuk <- env_pred_nuuk %>% 
   rename(site_plot_id = id)
 
-# Generate a plot group/site specific ID (site_plotgroup_alt) in the "env_pred_nuuk" and "spec_nuuk" tables
+# Generate a plot group/site specific ID (site_alt_plotgroup_id) in the "env_pred_nuuk" and "spec_nuuk" tables
 env_pred_nuuk <- env_pred_nuuk %>% 
   # create plot group number (3 x 6 within any isocline)
-  mutate(plot_group = rep(c(rep(1, 6), rep(2, 6), rep(3, 6)), 
+  mutate(plotgroup = rep(c(rep(1, 6), rep(2, 6), rep(3, 6)), 
                              nrow(env_pred_nuuk) / 18)) %>% 
-  # create unique identifier of site_plotgroup_alt
-  mutate(site_alt_plot_group_id = paste(site, alt, plot_group, sep="_"))
+  # create unique identifier of site_alt_plotgroup
+  mutate(site_alt_plotgroup_id = paste(site, alt, plotgroup, sep="_"))
 
 
 spec_nuuk <- spec_nuuk %>% 
-  # Every plot has 19 spp x 25 pins and we want it repeated per 6 plots for each isocline (3 each)
-  mutate(plot_group = rep(c(rep(1, 19*25*6), rep(2, 19*25*6), rep(3, 19*25*6)), 
-                          nrow(spec_nuuk) / 19*25*6 * 3)) %>% 
+  # Every plot has 19 spp x 25 pins and we want it repeated per 6 plots (19*25*6 = 2850) for each isocline (3 each) (3*2850=)
+  mutate(plotgroup = rep(c(rep(1, 2850), rep(2, 2850), rep(3, 2850)), 
+                          nrow(spec_nuuk) / 8550)) %>% 
   
-  mutate(plot_group_alt_id = NA)
+  mutate(site_alt_plotgroup_id = NA)
 
 plotname <- unique(spec_nuuk$site_plot_id)
 for (i in 1:length(plotname)){
   env_pred_nuuk.sub <- subset(env_pred_nuuk, env_pred_nuuk$site_plot_id == plotname[i])
-  spec_nuuk$site_alt_plot_group_id[spec_nuuk$site_plot_id == plotname[i]] <- env_pred_nuuk.sub$site_alt_plot_group_id
+  spec_nuuk$site_alt_plotgroup_id[spec_nuuk$site_plot_id == plotname[i]] <- env_pred_nuuk.sub$site_alt_plotgroup_id
 }
 
-# Generate an isocline group/site specific ID (alt.group.name)
-env_pred_nuuk$alt.group.name <- paste(env_pred_nuuk$site, env_pred_nuuk$alt, sep="_")
+# Generate an isocline group/site specific ID (site_alt_id)
+env_pred_nuuk$site_alt_id <- paste(env_pred_nuuk$site, env_pred_nuuk$alt, sep="_")
 
-spec_nuuk$alt.group.name <- NA
+spec_nuuk$site_alt_id <- NA
 for (j in 1:length(plotname)){
   env_pred_nuuk.sub.2 <- subset(env_pred_nuuk, env_pred_nuuk$site_plot_id == plotname[j])
-  spec_nuuk$alt.group.name[spec_nuuk$site_plot_id == plotname[j]] <- env_pred_nuuk.sub.2$alt.group.name
+  spec_nuuk$site_alt_id[spec_nuuk$site_plot_id == plotname[j]] <- env_pred_nuuk.sub.2$site_alt_id
 }
 
 # Calculate height-dependent measure of competition pressure: ----
-# Order the tables according to this variable - very important for the following loop output
-spec_nuuk <- spec_nuuk[order(spec_nuuk[,"site_plot_id"]),]
-env_pred_nuuk <- env_pred_nuuk[order(env_pred_nuuk[,"site_plot_id"]),]
+# Order the tables according to site_plot_id variable - very important for the following loop output
+spec_nuuk <- spec_nuuk %>% 
+  arrange(site_plot_id) #[order(spec_nuuk[,"site_plot_id"]),]
+env_pred_nuuk <- env_pred_nuuk %>% 
+  arrange(site_plot_id) # [order(env_pred_nuuk[,"site_plot_id"]),]
 
 
 # Generate species list
-spp <- unique(spec_nuuk$taxon)
+taxon_list <- unique(spec_nuuk$taxon)
 
 # Compute species specific occurrence variables in the "env_pred_nuuk" table
-for (i in 1:length(spp)){
-  sub <- subset(spec_nuuk, spec_nuuk$taxon==spp[i])
-  #Sums the number of times a given species is present at a given plot(plot.name)
-  col <- paste("occ", "_", gsub(" ", "_", spp[i]), sep="")
-  #col <- spp[i]
-  env_pred_nuuk[col] <- as.numeric(tapply(sub$presence, sub$plot.name, sum))
+for (i in 1:length(taxon_list)){
+  sub <- subset(spec_nuuk, spec_nuuk$taxon == taxon_list[i])
+  #Sums the number of times a given species is present at a given plot(site_plot_id)
+  col <- paste("occ", "_", gsub(" ", "_", taxon_list[i]), sep = "")
+  #col <- taxon_list[i]
+  env_pred_nuuk[col] <- as.numeric(tapply(sub$presence, sub$site_plot_id, sum))
 }
 
 # Generate biotic predictors per species:
@@ -156,7 +158,7 @@ env_pred_nuuk.bio <- mutate(env_pred_nuuk, occ_graminoids = occ_Juncaceae + occ_
                   phy.coe.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum + occ_Empetrum_nigrum + occ_Salix_arctophila,
                   cas.tet.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum + occ_Empetrum_nigrum + occ_Salix_arctophila + occ_Phyllodoce_coerulea)
 
-env <- as.data.frame(env.bio)
+env_pred_nuuk.bio <- as.data.frame(env_pred_nuuk.bio)
 
 # Calculate abundance measure (IF USING COVER PER PLOT GROUP): ----
 # # compute "cover" (= rel. no. hits per plot group)
@@ -172,16 +174,17 @@ env <- as.data.frame(env.bio)
 
 # Calculate abundance measure (IF USING COVER PER PLOT): ----
 # compute "cover" (= rel. no. hits per plot)
-occ_cols <- env %>% select(starts_with("occ")) %>% colnames()
-env_cov <- env %>% 
+occ_cols <- env_pred_nuuk.bio %>% select(starts_with("occ")) %>% colnames()
+env_cov <- env_pred_nuuk.bio %>% 
   mutate_at(occ_cols, funs(cov = ./25)) %>%   # cover = n_hits per 25 pins
   rename_at(vars(ends_with("cov")), funs(str_replace(.,"occ","cov"))) %>%
-  rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov")))
+  rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov"))) %>% 
 # %>% View()
 
 # Make the variable site into a factor to be used as a random factor
-env_cov$site <- as.factor(env_cov$site)
-env_cov <- as.data.frame(env_cov) %>% droplevels()
+  mutate(site = as.factor(site)) %>% 
+  as.data.frame %>% 
+  droplevels()
 
 # Transform to long format with one observation per species per plot (group): ----
   # for cover values:
@@ -191,12 +194,12 @@ env_cov_long_cov <- env_cov %>% select(-c(starts_with("occ"), ends_with("bio")))
                values_to = "cover", 
                values_drop_na = FALSE) %>% 
   # remove "occ_" & "_" from taxon
-  mutate(taxon = str_remove(taxon,"cov_")) %>% 
-  mutate(taxon = str_replace(taxon,"_"," "))
+  mutate(taxon = str_remove(taxon, "cov_")) %>% 
+  mutate(taxon = str_replace(taxon, "_", " "))
 env_cov_long_cov$taxon <- as.factor(env_cov_long_cov$taxon)
 
   # for competition values:
-env_cov_long_bio <- env_cov %>% select(plot.name, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(plot.group.name, [...])
+env_cov_long_bio <- env_cov %>% select(plot.name, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(site_alt_plotgroup_id, [...])
   pivot_longer(cols = ends_with("bio"), 
                names_to = "taxon", 
                values_to = "compet", 
@@ -216,7 +219,7 @@ env_cov_long_bio$taxon <- as.factor(env_cov_long_bio$taxon)
 
 # merge both long dataframes, insert NAs for taxa w/o compet values
 env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio, 
-                          by = c("plot.name","taxon"))  # for PLOT GROUP level, change to [...] c("plot.group.name", [...])
+                          by = c("plot.name","taxon"))  # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
   # correct species names
 env_cov_long$taxon <- env_cov_long$taxon %>% 
   recode("Phyllodoce coerulea" = "Phyllodoce caerulea", 
@@ -224,7 +227,7 @@ env_cov_long$taxon <- env_cov_long$taxon %>%
          "Ledum palustre" = "Rhododendron tomentosum")
 env_cov_long$taxon <- as.factor(env_cov_long$taxon)
 
-# insert value 0 for competitive pressure for Ledum palustre (= tallest-growing species)
+# insert value 0 for competitive pressure for Ledum palustre aka Rhododendron tomentosum (= tallest-growing species)
 env_cov_long <- env_cov_long %>% 
   mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet))
 
