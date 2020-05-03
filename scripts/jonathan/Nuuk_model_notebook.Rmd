@@ -12,7 +12,7 @@ code_folding: show
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Dependencies ####
+## Dependencies
 Packages included:
 
 * tidyverse - for convenient code flow, data wrangling and plotting
@@ -28,10 +28,10 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
                skimr,     # for quick dataframe inspection
                rmarkdown) # for R Markdown formatting
 ```
-## Import data ####
+## Import data
 Analyses conducted on fusion table at **plot group $\times$ taxon level**: 621 observations for 94 variables
 ```{r}
-env_cov_bio <- read.csv("../../data/Nuuk_fusion_table_plotgroupXtaxon_level.csv", header = T)
+env_cov_bio <- read.csv("../../data/nuuk_env_cover_plotgroups", header = T)
 ```
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show/Hide Data Summary </button>
 <div id="BlockName" class="collapse">
@@ -39,7 +39,7 @@ env_cov_bio <- read.csv("../../data/Nuuk_fusion_table_plotgroupXtaxon_level.csv"
 skim(env_cov_bio)
 ```
 
-## Prepare data for JAGS model ####
+## Prepare data for JAGS model 
 ### Selection of variables relevant for analysis
 including predictors
 
