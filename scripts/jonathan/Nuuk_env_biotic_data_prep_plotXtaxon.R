@@ -195,11 +195,11 @@ env_cov_long_cov <- env_cov %>% select(-c(starts_with("occ"), ends_with("bio")))
                values_drop_na = FALSE) %>% 
   # remove "occ_" & "_" from taxon
   mutate(taxon = str_remove(taxon, "cov_")) %>% 
-  mutate(taxon = str_replace(taxon, "_", " "))
-env_cov_long_cov$taxon <- as.factor(env_cov_long_cov$taxon)
+  mutate(taxon = str_replace(taxon, "_", " ")) %>% 
+  mutate(taxon = factor(taxon))
 
   # for competition values:
-env_cov_long_bio <- env_cov %>% select(plot.name, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(site_alt_plotgroup_id, [...])
+env_cov_long_bio <- env_cov %>% select(site_plot_id, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(site_alt_plotgroup_id, [...])
   pivot_longer(cols = ends_with("bio"), 
                names_to = "taxon", 
                values_to = "compet", 
@@ -214,21 +214,19 @@ env_cov_long_bio <- env_cov %>% select(plot.name, ends_with("bio")) %>% # for PL
                         "emp.nig" = "Empetrum nigrum",
                         "sal.arc" = "Salix arctophila",
                         "phy.coe" = "Phyllodoce coerulea",
-                        "cas.tet" = "Cassiope tetragona"))
-env_cov_long_bio$taxon <- as.factor(env_cov_long_bio$taxon)
+                        "cas.tet" = "Cassiope tetragona")) %>% 
+  mutate(taxon = factor(taxon))
 
 # merge both long dataframes, insert NAs for taxa w/o compet values
 env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio, 
-                          by = c("plot.name","taxon"))  # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
+                          by = c("site_plot_id", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
+  mutate(taxon = factor(taxon)) %>% 
   # correct species names
-env_cov_long$taxon <- env_cov_long$taxon %>% 
-  recode("Phyllodoce coerulea" = "Phyllodoce caerulea", 
-         "Ledum groenlandicum" = "Rhododendron groenlandicum", 
-         "Ledum palustre" = "Rhododendron tomentosum")
-env_cov_long$taxon <- as.factor(env_cov_long$taxon)
-
+  mutate(taxon = recode(taxon, "Phyllodoce coerulea" = "Phyllodoce caerulea",
+                        "Ledum groenlandicum" = "Rhododendron groenlandicum", 
+                        "Ledum palustre" = "Rhododendron tomentosum")) %>% 
+  
 # insert value 0 for competitive pressure for Ledum palustre aka Rhododendron tomentosum (= tallest-growing species)
-env_cov_long <- env_cov_long %>% 
   mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet))
 
 # filter dataset to only include species we have competition values for: ----
