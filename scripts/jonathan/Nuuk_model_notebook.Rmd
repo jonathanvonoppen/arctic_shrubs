@@ -28,10 +28,12 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
                skimr,     # for quick dataframe inspection
                rmarkdown) # for R Markdown formatting
 ```
-## Import data
+## Multi-species model
+
+### Import data
 Analyses conducted on fusion table at **plot group $\times$ taxon level**: 621 observations for 94 variables
 ```{r}
-env_cov_bio <- read.csv("../../data/nuuk_env_cover_plotgroups", header = T)
+env_cov_bio <- read.csv("../../data/nuuk_env_cover_plotgroups.csv", header = T)
 ```
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show/Hide Data Summary </button>
 <div id="BlockName" class="collapse">
@@ -39,8 +41,8 @@ env_cov_bio <- read.csv("../../data/nuuk_env_cover_plotgroups", header = T)
 skim(env_cov_bio)
 ```
 
-## Prepare data for JAGS model 
-### Selection of variables relevant for analysis
+### Prepare data for JAGS model 
+### a) Selection of variables relevant for analysis
 including predictors
 
 * Information on site, plot group, sampling location (lat, lon, altitude), sampling date 
@@ -64,7 +66,7 @@ env_cov_bio_sub <- env_cov_bio %>%
 head(env_cov_bio_sub)
 ```
 
-### Abundance check & selection of taxa ####
+### b) Abundance check & selection of taxa
 
 Only taxa with competition data are included, i.e.
 ```{r}
@@ -81,7 +83,7 @@ env_cov_bio_sub %>% group_by(taxon) %>%
   arrange(desc(zeros))
 ```
 
-To ensure model convergence, we remove *Cassiope tetragona* & *Phyllodoce coerulea* (moving down the list):
+To improve the chance of model convergence, we remove *Cassiope tetragona* & *Phyllodoce coerulea* (moving down the list):
 ```{r}
 env_cov_bio_sub <- env_cov_bio_sub[env_cov_bio_sub$taxon %in% c("Cassiope tetragona", 
                                                                 "Phyllodoce coerulea")==F,] %>% 
@@ -90,3 +92,45 @@ head(env_cov_bio_sub, nlevels(env_cov_bio_sub$taxon))
 ```
 **!!! Model crashes if >2 taxa removed !!!** (JvO 06 Apr 20)
 
+-> re-try with breaking up the model for the separate species
+
+
+# Single-species models
+
+## Import data
+This dataset is a new one containing predictors extracted from downscaled CHELSA climate data.
+
+Analyses conducted on fusion table at **plot group $\times$ taxon level**: 621 observations for 94 variables
+```{r}
+env_cov_bio <- read.csv("../../data/nuuk_env_cover_plotgroups.csv", header = T)
+```
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show/Hide Data Summary </button>
+<div id="BlockName" class="collapse">
+```{r}
+skim(env_cov_bio)
+```
+
+### Prepare data for JAGS model 
+### a) Selection of variables relevant for analysis
+including predictors
+
+* Information on site, plot group, sampling location (lat, lon, altitude), sampling year 
+* downscaled CHELSA predictors (*[...]_ts_XX*) 
+* solar radiation index (SRI, following [Keating et al. 2007](http://www.bioone.org/doi/abs/10.2193/2006-359), yet to come), slope (erosion measure) & moisture availability (-> Jakob, yet to come)
+* taxon (see above for levels)
+* competition pressure in the community (as summed abundance of taller-growing shrub species within a plot, averaged within plot groups)
+
+and response variable 
+
+* cover (as relative no. hits per plot, averaged within plot groups)
+```{r}
+env_cov_bio_sub <- env_cov_bio %>% 
+  select(plot.group.name, site, date, year, long, lat, location,   # plot info / metadata
+         starts_with("bio_"),   # WorldClim predictors
+         wc_alt, ddeg, sri, inclin_down,  # environmental data
+         mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines, 
+         taxon, cover, compet)   # taxon, cover response, competition pressure
+head(env_cov_bio_sub)
+```
+
+[subsetting, data compilation, model, output]
