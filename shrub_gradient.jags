@@ -4,34 +4,47 @@
     
     # priors
       
-        for (i in 1:N_taxa){
-          intercept[i] ~ dnorm(0,0.0001) # intercept per taxon instead of site-taxon?
-        }
+      # for (i in 1:N_taxa){
+      #   intercept[i] ~ dnorm(0,0.0001) # intercept per taxon instead of site-taxon?
+      # }
+      # 
+      # for (i in 1:N_taxa){   # same level as main effect of interest, i.e. taxon X plotgroup # AB - make this slope per taxon (not taxon-plotgroup?)
+      #   b_compet[i] ~ dnorm(0,0.0001)
+      #   # b_slope[i] ~ dnorm(0,0.0001)
+      #   b_sri[i] ~ dnorm(0,0.0001)
+      # }
+      # 
+      # sigma.taxonXplotgroup~dunif(0,100)
+      # tau.taxonXplotgroup<-1/(sigma.taxonXplotgroup*sigma.taxonXplotgroup)
+      # 
+      # for (i in 1:N_taxa){
+      #   b.env.x[i]~dnorm(0, 0.001)
+      #   b.env.x2[i]~dnorm(0, 0.001)
+      # }
       
-      for (i in 1:N_taxa){   # same level as main effect of interest, i.e. taxon X plotgroup # AB - make this slope per taxon (not taxon-plotgroup?)
-        b_compet[i] ~ dnorm(0,0.0001)
-        # b_slope[i] ~ dnorm(0,0.0001)
-        b_sri[i] ~ dnorm(0,0.0001)
-      }
+      
+      intercept ~ dnorm(0, 0.0001)
+      
+      b_compet ~ dnorm(0, 0.0001)
+      b_sri ~ dnorm(0, 0.0001)
+      # b_slope ~ dnorm(0, 0.0001)
 
-      sigma.taxonXplotgroup~dunif(0,100)
-      tau.taxonXplotgroup<-1/(sigma.taxonXplotgroup*sigma.taxonXplotgroup)
-
-      for (i in 1:N_taxa){
-        b.env.x[i]~dnorm(0, 0.001)
-        b.env.x2[i]~dnorm(0, 0.001)
-      }
-
-      phi~dgamma(0.1,0.1)
+      sigma.plotgroup ~ dunif(0,100)
+      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
+      
+      b.env.x ~ dnorm(0, 0.001)
+      b.env.x2 ~ dnorm(0, 0.001)
+      
+      phi ~ dgamma(0.1, 0.1)
+      
       
     # LIKELIHOOD for discrete part
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_compet[UV_taxon.dis[i]]*compet.dis[i] + # slope per taxon NOT per taxon-plotgroup?
-                        # b_slope[UV_taxon.dis[i]]*slope.dis[i] + 
-                        b_sri[UV_taxon.dis[i]]*sri.dis[i] + 
-                        b_taxonXplotgroup[UV_taxonXplotgroup.dis[i]] # beta by taxon X plotgroup combination, iterating over plots
+        logit(mu[i]) <- b_compet*compet.dis[i] #+ # slope per taxon NOT per taxon-plotgroup?
+                        # b_slope[i]*slope.dis[i] + 
+                        # b_sri[i]*sri.dis[i] 
       }
       
       
@@ -41,18 +54,17 @@
         cov.cont[i] ~ dbeta(p[i], q[i])
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
-        logit(mu2[i]) <- b_compet[UV_taxon.cont[i]]*compet.cont[i] + 
-                         # b_slope[UV_taxon.cont[i]]*slope.cont[i] + 
-                         b_sri[UV_taxon.cont[i]]*sri.cont[i] + 
-                         b_taxonXplotgroup[UV_taxonXplotgroup.cont[i]] # beta by taxon X plotgroup combination, iterating over plots
+        logit(mu2[i]) <- b_compet*compet.cont[i] #+ # slope per taxon NOT per taxon-plotgroup?
+                        # b_slope[i]*slope.cont[i] + 
+                        # b_sri[i]*sri.cont[i] 
       }
 
 
-      for (j in 1:N_taxonXplotgroup.tot){ # length of total plotgroup per taxon combinations
-        b_taxonXplotgroup[j] ~ dnorm(mu.taxonXplotgroup[j],tau.taxonXplotgroup)
-        mu.taxonXplotgroup[j] <- intercept[UV_taxon.tot[j]] + # slope per taxon not site-taxon?
-                    b.env.x[UV_taxon.tot[j]]*env.tot[j] + 
-                    b.env.x2[UV_taxon.tot[j]]*(env.tot[j]^2) # add more plotgroup-level predictors
+      for (j in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
+        mu.plotgroup[j] <- intercept + # slope per taxon not site-taxon?
+                    b.env.x * env.tot[j] + 
+                    b.env.x2 * (env.tot[j]^2) # add more plotgroup-level predictors
       }
 
     
