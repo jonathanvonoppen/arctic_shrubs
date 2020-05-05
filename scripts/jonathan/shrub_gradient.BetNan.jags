@@ -1,0 +1,52 @@
+
+  
+  model{
+    
+    # priors
+      
+      intercept ~ dnorm(0, 0.0001)
+      
+      b_compet ~ dnorm(0, 0.0001)
+      # b_sri ~ dnorm(0, 0.0001)
+      # b_slope ~ dnorm(0, 0.0001)
+
+      sigma.plotgroup ~ dunif(0,100)
+      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
+      
+      b.env.x ~ dnorm(0, 0.001)
+      b.env.x2 ~ dnorm(0, 0.001)
+      
+      phi ~ dgamma(0.1, 0.1)
+      
+      
+    # LIKELIHOOD for discrete part
+
+      for (i in 1:N_discrete){ 
+        cov.dis[i] ~ dbern(mu[i])
+        logit(mu[i]) <- b_compet*compet.dis[i] #+ # slope per taxon NOT per taxon-plotgroup?
+                        # b_slope[i]*slope.dis[i] + 
+                        # b_sri[i]*sri.dis[i] 
+      }
+      
+      
+    # LIKELIHOOD for continuous part
+
+      for (i in 1:N_cont){
+        cov.cont[i] ~ dbeta(p[i], q[i])
+        p[i] <- mu2[i] * phi
+        q[i] <- (1 - mu2[i]) * phi
+        logit(mu2[i]) <- b_compet*compet.cont[i] #+ # slope per taxon NOT per taxon-plotgroup?
+                        # b_slope[i]*slope.cont[i] + 
+                        # b_sri[i]*sri.cont[i] 
+      }
+
+
+      for (j in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
+        mu.plotgroup[j] <- intercept + # slope per taxon not site-taxon?
+                    b.env.x * env.tot[j] + 
+                    b.env.x2 * (env.tot[j]^2) # add more plotgroup-level predictors
+      }
+
+      }
+  
