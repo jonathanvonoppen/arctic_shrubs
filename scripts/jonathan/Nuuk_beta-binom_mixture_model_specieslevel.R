@@ -63,9 +63,9 @@ env_cov_bio_sub$taxon.NUM <- as.numeric(factor(env_cov_bio_sub$taxon, levels = u
 taxa.num <- data.frame(taxon = levels(env_cov_bio_sub$taxon), 
                        num = env_cov_bio_sub$taxon.NUM[1:nlevels(env_cov_bio_sub$taxon)]) #%>% print()
 
-# Create unique taxon-plotgroup combination variable
-env_cov_bio_sub$taxon_plotgroup <- paste(env_cov_bio_sub$site_alt_plotgroup_id, env_cov_bio_sub$taxon, sep="_")
-env_cov_bio_sub$taxon_plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$taxon_plotgroup, levels = unique(env_cov_bio_sub$taxon_plotgroup)))
+# # Create unique taxon-plotgroup combination variable
+# env_cov_bio_sub$taxon_plotgroup <- paste(env_cov_bio_sub$site_alt_plotgroup_id, env_cov_bio_sub$taxon, sep="_")
+# env_cov_bio_sub$taxon_plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$taxon_plotgroup, levels = unique(env_cov_bio_sub$taxon_plotgroup)))
 
 # scale numeric predictors
 num_pred <- env_cov_bio_sub %>% select(ends_with("_ts_10"), matches("sri"), 
@@ -100,7 +100,7 @@ BetNan.cont <- filter(BetNan.tot, cover_discrete == 0)
 
 
 # Compile data into list ####
-shrub_gradient_jags.data <- list(
+shrub_gradient_jags.BetNan.data <- list(
  # cov.tot = BetNan.tot$cover,
   UV_plotgroup.tot = BetNan.tot$plotgroup.NUM,
  # UV_site.tot = BetNan.tot$site.NUM[!duplicated(BetNan.tot$taxon_plotgroup.NUM)], #one value per tXpg
@@ -174,7 +174,7 @@ shrub_gradient_jags.data <- list(
   # pseasonalitBetNan.dis = BetNan.dis$bio_15C,
   # pseasonalitBetNan.cont = BetNan.cont$bio_15C
 )
-str(shrub_gradient_jags.data)
+str(shrub_gradient_jags.BetNan.data)
 
 # JAGS model #### 
 # adapted from Bayesian course: rain -> env = target variable,
@@ -253,7 +253,7 @@ write("
 
     
       }
-  ","shrub_gradient.jags")
+  ","shrub_gradient.BetNan.jags")
 
 # Initial values ####
 # not strictly necessary here (?)
@@ -265,23 +265,23 @@ params <- c("b.env.x","b.env.x2","intercept","b_compet", "b_sri","b_plotgroup[1]
 
 # 5) RUN MODEL
 
-model_out.shrub_gradient <- jags(shrub_gradient_jags.data, inits = NULL, params, 
+model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data, inits = NULL, params, 
                                  model.file = "shrub_gradient.jags", n.chains = 3, 
                                  n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
                                  working.directory=NULL, progress.bar = "text") 
 
-plot(model_out.shrub_gradient) #check convergence, etc.
+plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
 
 # extract coefficients 
-coeff.shrub_gradient<-as.data.frame(model_out.shrub_gradient$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.BetNan<-as.data.frame(model_out.shrub_gradient.BetNan$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
 
 # add identifying info to data frame
-coeff.shrub_gradient$Param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient),"[[]",fixed=FALSE), "[", 1))
+coeff.shrub_gradient.BetNan$Param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.BetNan),"[[]",fixed=FALSE), "[", 1))
 
 #compare modeled intercepts with raw-data means - why are they different, especially for the Savanna?
 aggregate(env_cov_bio_sub$cover,by=list(env_cov_bio_sub$site,env_cov_bio_sub$taxon),FUN=mean)$x
-round(plogis(coeff.shrub_gradient[coeff.shrub_gradient$Param=="intercept","mean"]),3)
-# coeff.shrub_gradient[coeff.shrub_gradient$Param=="b1.intBT",]
+round(plogis(coeff.shrub_gradient.BetNan[coeff.shrub_gradient.BetNan$Param=="intercept","mean"]),3)
+# coeff.shrub_gradient.BetNan[coeff.shrub_gradient.BetNan$Param=="b1.intBT",]
 # coeff.shrub_gradient[coeff.shrub_gradient$Param=="b1BT",]
 
-plot(aggregate(env_cov_bio_sub$cover,by=list(env_cov_bio_sub$taxon),FUN=mean)$x,round(plogis(coeff.shrub_gradient[coeff.shrub_gradient$Param=="intercept","mean"]),4))
+plot(aggregate(env_cov_bio_sub$cover,by=list(env_cov_bio_sub$taxon),FUN=mean)$x,round(plogis(coeff.shrub_gradient.BetNan[coeff.shrub_gradient.BetNan$Param=="intercept","mean"]),4))
