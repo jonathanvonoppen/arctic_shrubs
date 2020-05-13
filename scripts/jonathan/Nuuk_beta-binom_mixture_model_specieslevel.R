@@ -37,7 +37,48 @@ env_cov_bio <- read.csv("data/Nuuk_env_cover_plotgroups.csv", header = T)
 # subset of species with competition data:
 env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
 
+# Make plots for cover against predictors for each species
+env_cov_bio.long <- env_cov_bio %>% 
+  select(taxon,
+         inclin_down,
+         ends_with("ts_30"),
+         twi_90m,
+         compet,
+         cover) %>% 
+  # pivot to long format
+  pivot_longer(cols = c(inclin_down,
+                           ends_with("ts_30"),
+                           twi_90m,
+                           compet),
+               names_to = "predictor",
+               values_to = "pred_value")
 
+# build function
+pred.plot.grid <- function(df){
+  
+  taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
+  
+  for(taxon_nr in 1:length(taxa)){
+    plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
+                   aes(y = cover, group = taxon)) +
+      geom_point(aes(x = pred_value), colour = "darkgrey") +
+      geom_smooth(aes(x = pred_value), method = "lm", colour = "black", se = TRUE, na.rm = TRUE) +
+      facet_wrap(~predictor, scales = "free", ncol = 3) +
+      scale_y_continuous("relative no. pin hits per plot group",
+                         limits = c(0, max(df %>% 
+                                             filter(taxon == taxa[taxon_nr]) %>% 
+                                             pull(cover)))) +
+      labs(x = "predictor value") +
+      ggtitle(paste0(taxa[taxon_nr], " cover ~ predictors")) +
+      theme_bw() +
+      theme(legend.position = "none")
+    print(plot)
+  }
+}
+
+# run
+pred.plot.grid(env_cov_bio.long)
+  
 # Prepare data ####
 # Select relevant variables: plot info, WorldClim predictors, SRI, yos & long-term mean NDVI, distance to coast, cover, competitive pressure
 env_cov_bio_sub <- env_cov_bio %>% 
