@@ -2,12 +2,11 @@
 title: 'Nuuk Fjord: Drivers of shrub abundance - development of beta-binomial mixture
   model'
 author: "Jonathan von Oppen"
-date: "05/05/2020"
+date: "13/05/2020"
 output:
-  html_document:
+  html_notebook:
+    code_folding: hide
     df_print: paged
-df_print: paged
-code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -61,6 +60,53 @@ env_cov_bio_sub <- env_cov_bio %>%
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
 head(env_cov_bio_sub)
+```
+
+### Make exploratory plots for relationships between predictors and cover
+
+Let's create some plots to show possible effects of predictor variables on cover for the different species:
+
+```{r, message = FALSE}
+env_cov_bio.long <- env_cov_bio %>% 
+  select(taxon,
+         inclin_down,
+         ends_with("ts_30"),
+         twi_90m,
+         compet,
+         cover) %>% 
+  # pivot to long format
+  pivot_longer(cols = c(inclin_down,
+                           ends_with("ts_30"),
+                           twi_90m,
+                           compet),
+               names_to = "predictor",
+               values_to = "pred_value")
+
+# build function
+pred.plot.grid <- function(df){
+  
+  taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
+  
+  for(taxon_nr in 1:length(taxa)){
+    plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
+                   aes(y = cover, group = taxon)) +
+      geom_point(aes(x = pred_value), colour = "darkgrey") +
+      geom_smooth(aes(x = pred_value), method = "lm", colour = "black", se = TRUE, na.rm = TRUE) +
+      facet_wrap(~predictor, scales = "free", ncol = 3) +
+      scale_y_continuous("relative no. pin hits per plot group",
+                         limits = c(0, max(df %>% 
+                                             filter(taxon == taxa[taxon_nr]) %>% 
+                                             pull(cover)))) +
+      labs(x = "predictor value") +
+      ggtitle(paste0(taxa[taxon_nr], " cover ~ predictors")) +
+      theme_bw() +
+      theme(legend.position = "none")
+    print(plot)
+  }
+}
+
+# run
+pred.plot.grid(env_cov_bio.long)
 ```
 
 ## Multi-species model
