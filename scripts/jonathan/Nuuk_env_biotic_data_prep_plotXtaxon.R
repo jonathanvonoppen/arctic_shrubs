@@ -224,7 +224,7 @@ env_cov_long_bio <- env_cov %>% select(site_alt_plotgroup_id, ends_with("bio")) 
 
 # merge both long dataframes, insert NAs for taxa w/o compet values
 env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio, 
-                          by = c("site_alt_plotgroup_id", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_plot_id", [...])
+                          by = c("site_alt_plotgroup_id", "taxon")) %>%   # for PLOT level, change to [...] c("site_plot_id", [...])
   mutate(taxon = factor(taxon)) %>% 
   # correct species names
   mutate(taxon = recode(taxon, "Phyllodoce coerulea" = "Phyllodoce caerulea",
@@ -232,7 +232,24 @@ env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio,
                         "Ledum palustre" = "Rhododendron tomentosum")) %>% 
   
 # insert value 0 for competitive pressure for Ledum palustre aka Rhododendron tomentosum (= tallest-growing species)
-  mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet))
+  mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet)) %>% 
+  
+# reorder columns & select variables
+  select(site_alt_plotgroup_id, site, alt, plotgroup,               # site/alt/plotgroup IDs
+         long, lat, year,                                           # WGS84 coordinates, year of sampling
+         starts_with("tempjja_"),                                   # summer mean temperatures
+         starts_with("tempmax_"),                                   # average yearly JJA max temperature
+         starts_with("tempmin_"),                                   # average yearly JFMA min temperature
+         starts_with("tempcont_"),                                  # temp. continentality = average yearly amplitude (tempmax - tempmin)
+         starts_with("precipjja_"),                                 # average yearly cumulative summer (JJA) precipitation
+         starts_with("precipjfmam_"),                               # average yearly cumulative winter-spring (JFMAM) precipitation
+         starts_with("precipmam_"),                                 # average yearly cumulative spring (MAM) precipitation
+         inclin_down, inclin_dir,                                   # terrain variables
+         twi_90m, ndwi, tcws,                                       # moisture variables
+         sri,                                                       # solar radiation
+         ndvi, compet,                                              # biotic variables: productivity, height-derived competitive pressure
+         taxon,
+         cover)                                                     # response variable: relative no. pin hits per plot group
 
 # filter dataset to only include species we have competition values for: ----
 spp_compet <- levels(droplevels(env_cov_long$taxon[!is.na(env_cov_long$compet)]))
