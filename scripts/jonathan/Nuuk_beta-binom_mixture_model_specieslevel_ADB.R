@@ -34,10 +34,10 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
 env_cov_bio <- read.csv("data/Nuuk_env_cover_plotgroups.csv", header = T)
 
 # >> on plot level ----
-# subset of species with competition data:
-env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
+# # subset of species with competition data:
+# env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
 
-# Make plots for cover against predictors for each species
+# Make plots for cover against predictors for each species ----
 env_cov_bio.long <- env_cov_bio %>% 
   select(taxon,
          inclin_down,
@@ -236,7 +236,7 @@ write("
 params <- c("b.env.x","b.env.x2","intercept","b_compet", "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi") # add b_slope when added to df
 # "a.env.x","a.env.x2","b_sri",
 
-# 5) RUN MODEL
+# Run model ----
 
 model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data, inits = NULL, params, 
                                  model.file = "shrub_gradient.BetNan.jags", n.chains = 3, #AB change file name
