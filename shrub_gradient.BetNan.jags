@@ -4,25 +4,6 @@
     
     # priors
       
-      # for (i in 1:N_taxa){
-      #   intercept[i] ~ dnorm(0,0.0001) # intercept per taxon instead of site-taxon?
-      # }
-      # 
-      # for (i in 1:N_taxa){   # same level as main effect of interest, i.e. taxon X plotgroup # AB - make this slope per taxon (not taxon-plotgroup?)
-      #   b_compet[i] ~ dnorm(0,0.0001)
-      #   # b_slope[i] ~ dnorm(0,0.0001)
-      #   b_sri[i] ~ dnorm(0,0.0001)
-      # }
-      # 
-      # sigma.taxonXplotgroup~dunif(0,100)
-      # tau.taxonXplotgroup<-1/(sigma.taxonXplotgroup*sigma.taxonXplotgroup)
-      # 
-      # for (i in 1:N_taxa){
-      #   b.env.x[i]~dnorm(0, 0.001)
-      #   b.env.x2[i]~dnorm(0, 0.001)
-      # }
-      
-      
       intercept ~ dnorm(0, 0.0001)
       
       b_compet ~ dnorm(0, 0.0001)
@@ -42,7 +23,8 @@
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_compet*compet.dis[i] #+ # slope per taxon NOT per taxon-plotgroup?
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]]+ #AB added this
+                        b_compet*compet.dis[i] #+ 
                         # b_slope[i]*slope.dis[i] + 
                         # b_sri[i]*sri.dis[i] 
       }
@@ -54,7 +36,8 @@
         cov.cont[i] ~ dbeta(p[i], q[i])
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
-        logit(mu2[i]) <- b_compet*compet.cont[i] #+ # slope per taxon NOT per taxon-plotgroup?
+        logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]]+ #AB added this
+                        b_compet*compet.cont[i] #+
                         # b_slope[i]*slope.cont[i] + 
                         # b_sri[i]*sri.cont[i] 
       }
@@ -62,7 +45,7 @@
 
       for (j in 1:N_plotgroups){ # length of total plotgroups
         b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
-        mu.plotgroup[j] <- intercept + # slope per taxon not site-taxon?
+        mu.plotgroup[j] <- intercept + 
                     b.env.x * env.tot[j] + 
                     b.env.x2 * (env.tot[j]^2) # add more plotgroup-level predictors
       }
