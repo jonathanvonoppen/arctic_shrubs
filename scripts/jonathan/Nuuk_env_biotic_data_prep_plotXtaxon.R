@@ -235,7 +235,7 @@ env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio,
   mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet)) %>% 
   
 # reorder columns & select variables
-  select(site_alt_plotgroup_id, site, alt, plotgroup,               # site/alt/plotgroup IDs
+  select(site_alt_plotgroup_id, site_alt_id, site, alt, plotgroup,  # site/alt/plotgroup IDs
          long, lat, year,                                           # WGS84 coordinates, year of sampling
          starts_with("tempjja_"),                                   # summer mean temperatures
          starts_with("tempmax_"),                                   # average yearly JJA max temperature
