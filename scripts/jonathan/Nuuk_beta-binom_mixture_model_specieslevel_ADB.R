@@ -83,7 +83,7 @@ pred.plot.grid(env_cov_bio.long)
 # Select relevant variables: plot info, WorldClim predictors, SRI, yos & long-term mean NDVI, distance to coast, cover, competitive pressure
 env_cov_bio_sub <- env_cov_bio %>% 
   select(site_alt_plotgroup_id, site, site_alt_id, year, long, lat,  # plot info / metadata
-  ends_with("_ts_10"),   # CHELSA predictors averaged over 10-year period prior to study year
+  ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
   inclin_down, twi_90m, #sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
@@ -109,7 +109,9 @@ taxa.num <- data.frame(taxon = levels(as.factor(env_cov_bio_sub$taxon)), # I had
 # env_cov_bio_sub$taxon_plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$taxon_plotgroup, levels = unique(env_cov_bio_sub$taxon_plotgroup)))
 
 # scale numeric predictors
-num_pred <- env_cov_bio_sub %>% select(ends_with("_ts_10"), matches("sri"), 
+num_pred <- env_cov_bio_sub %>% select(ends_with("_ts_30"), 
+                                       matches("sri"), 
+                                       matches("inclin_down"),
                                        starts_with("twi"), 
                                        matches("compet"))
 for(i in 1:length(num_pred)){
@@ -148,6 +150,8 @@ shrub_gradient_jags.BetNan.data <- list(
   cov.dis = BetNan.dis$cover,
   plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
   #UV_plotgroup.dis = BetNan.dis$plotgroup.NUM,
+  inclin_down.dis = BetNan.dis$inclin_downC,
+  twi_90m.dis = BetNan.dis$twi_90mC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
   #N_sites.dis = length(unique(BetNan.dis$site)),
@@ -157,11 +161,18 @@ shrub_gradient_jags.BetNan.data <- list(
   #UV_plotgroup.cont = BetNan.cont$plotgroup.NUM,
   #UV_site.cont = BetNan.cont$site.NUM,
   #year.cont = BetNan.cont$year,
+  inclin_down.cont = BetNan.cont$inclin_downC,
+  twi_90m.cont = BetNan.cont$twi_90mC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
   #N_sites.cont = length(unique(BetNan.cont$site)),
   #N_plotgroups.cont = length(unique(BetNan.cont$site_alt_plotgroup_id)),
-  env.tot = BetNan.tot$tempjja_ts_10C[!duplicated(BetNan.tot$plotgroup.NUM)]#, # one value per tXpg, amt = annual mean temperature = bio_1
+  tempjja.tot = BetNan.tot$tempjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
+  tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
 )
 
 str(shrub_gradient_jags.BetNan.data)
@@ -180,15 +191,25 @@ write("
       
       intercept ~ dnorm(0, 0.0001)
       
-      b_compet ~ dnorm(0, 0.0001)
-      b_sri ~ dnorm(0, 0.0001)
-      # b_slope ~ dnorm(0, 0.0001)
+      b.compet ~ dnorm(0, 0.0001)
+      b.sri ~ dnorm(0, 0.0001)
+      b.inclin_down ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      b.env.x ~ dnorm(0, 0.001)
-      b.env.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
+      b.tempmax.x ~ dnorm(0, 0.001)
+      b.tempmax.x2 ~ dnorm(0, 0.001)
+      b.tempmin.x ~ dnorm(0, 0.001)
+      b.tempmin.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.precipjja.x ~ dnorm(0, 0.001)
+      b.precipjja.x2 ~ dnorm(0, 0.001)
+      b.precipjfmam.x ~ dnorm(0, 0.001)
+      b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -198,9 +219,9 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]]+ #AB added this
-                        b_compet*compet.dis[i] #+ 
-                        # b_slope[i]*slope.dis[i] + 
-                        # b_sri[i]*sri.dis[i] 
+                        b.compet*compet.dis[i] + 
+                        b.inclin_down[i]*inclin_down.dis[i] #+ 
+                        # b.sri[i]*sri.dis[i] 
       }
       
       
@@ -211,17 +232,27 @@ write("
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
         logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]]+ #AB added this
-                        b_compet*compet.cont[i] #+
-                        # b_slope[i]*slope.cont[i] + 
-                        # b_sri[i]*sri.cont[i] 
+                        b.compet*compet.cont[i] +
+                        b.inclin_down[i]*inclin_down.cont[i] #+ 
+                        # b.sri[i]*sri.cont[i] 
       }
 
 
       for (j in 1:N_plotgroups){ # length of total plotgroups
         b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
         mu.plotgroup[j] <- intercept + 
-                    b.env.x * env.tot[j] + 
-                    b.env.x2 * (env.tot[j]^2) # add more plotgroup-level predictors
+                    b.tempjja.x * tempjja.tot[j] + 
+                    b.tempjja.x2 * (tempjja.tot[j]^2) + # add more plotgroup-level predictors
+                    b.tempmax.x * tempmax.tot[j] + 
+                    b.tempmax.x2 * (tempmax.tot[j]^2) +
+                    b.tempmin.x * tempmin.tot[j] + 
+                    b.tempmin.x2 * (tempmin.tot[j]^2) +
+                    b.tempcont.x * tempcont.tot[j] + 
+                    b.tempcont.x2 * (tempcont.tot[j]^2) +
+                    b.precipjja.x * precipjja.tot[j] + 
+                    b.precipjja.x2 * (precipjja.tot[j]^2) +
+                    b.precipjfmam.x * precipjfmam.tot[j] + 
+                    b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
       }
 
     
@@ -233,7 +264,7 @@ write("
 
 # Parameters to monitor ####
 
-params <- c("b.env.x","b.env.x2","intercept","b_compet", "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi") # add b_slope when added to df
+params <- c("b.tempjja.x","b.tempjja.x2","intercept","b_compet", "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi") # add b_slope when added to df
 # "a.env.x","a.env.x2","b_sri",
 
 # Run model ----
