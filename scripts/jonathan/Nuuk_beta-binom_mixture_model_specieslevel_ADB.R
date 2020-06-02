@@ -31,30 +31,33 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
 # complete set - local path -> check if updated!
 # env_cov_bio <- read.csv("//uni.au.dk/Users/au630524/Documents/Jonathan/Project/A_Nuuk_community_competition_controls/Data/processed/godthaabsfjord_plots_fusion_table_with_pred_spp_rel_cover_compet_per_plot_group.csv", header = T)
 # subset of species with competition data:
-env_cov_bio <- read.csv("data/Nuuk_env_cover_plotgroups.csv", header = T)
+# env_cov_bio <- read.csv("data/Nuuk_env_cover_plotgroups.csv", header = T)
 
 # >> on plot level ----
 # # subset of species with competition data:
-# env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
+env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
 
 # Make plots for cover against predictors for each species ----
 env_cov_bio.long <- env_cov_bio %>% 
   select(taxon,
          inclin_down,
          ends_with("ts_30"),
+         sri,
          twi_90m,
          compet,
          cover) %>% 
   # pivot to long format
   pivot_longer(cols = c(inclin_down,
-                           ends_with("ts_30"),
-                           twi_90m,
-                           compet),
+                        ends_with("ts_30"),
+                        sri,
+                        twi_90m,
+                        compet),
                names_to = "predictor",
                values_to = "pred_value")
 
-# build function
-pred.plot.grid <- function(df){
+# build functions
+# linear smoothing
+pred.plot.grid.linear <- function(df){
   
   taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
   
@@ -62,7 +65,32 @@ pred.plot.grid <- function(df){
     plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
                    aes(y = cover, group = taxon)) +
       geom_point(aes(x = pred_value), colour = "darkgrey") +
-      geom_smooth(aes(x = pred_value), method = "lm", colour = "black", se = TRUE, na.rm = TRUE) +
+      geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ x, 
+                  colour = "black", se = TRUE, na.rm = TRUE) +
+      facet_wrap(~predictor, scales = "free", ncol = 3) +
+      scale_y_continuous("relative no. pin hits per plot group",
+                         limits = c(0, max(df %>% 
+                                             filter(taxon == taxa[taxon_nr]) %>% 
+                                             pull(cover)))) +
+      labs(x = "predictor value") +
+      ggtitle(paste0(taxa[taxon_nr], " cover ~ predictors")) +
+      theme_bw() +
+      theme(legend.position = "none")
+    print(plot)
+  }
+}
+
+# quadratic smoothing
+pred.plot.grid.quadratic <- function(df){
+  
+  taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
+  
+  for(taxon_nr in 1:length(taxa)){
+    plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
+                   aes(y = cover, group = taxon)) +
+      geom_point(aes(x = pred_value), colour = "darkgrey") +
+      geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), 
+                  colour = "black", se = TRUE, na.rm = TRUE) +
       facet_wrap(~predictor, scales = "free", ncol = 3) +
       scale_y_continuous("relative no. pin hits per plot group",
                          limits = c(0, max(df %>% 
@@ -77,14 +105,15 @@ pred.plot.grid <- function(df){
 }
 
 # run
-pred.plot.grid(env_cov_bio.long)
+pred.plot.grid.linear(env_cov_bio.long)
+pred.plot.grid.quadratic(env_cov_bio.long)
   
 # Prepare data ####
 # Select relevant variables: plot info, WorldClim predictors, SRI, yos & long-term mean NDVI, distance to coast, cover, competitive pressure
 env_cov_bio_sub <- env_cov_bio %>% 
-  select(site_alt_plotgroup_id, site, site_alt_id, year, long, lat,  # plot info / metadata
+  select(site_alt_plotgroup_id, plot, site, site_alt_id, year, long, lat,  # plot info / metadata
   ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
-  inclin_down, twi_90m, #sri, 
+  inclin_down, twi_90m, sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
 
@@ -144,29 +173,27 @@ BetNan.cont <- filter(BetNan.tot, cover_discrete == 0)
 
 # Compile data into list ####
 shrub_gradient_jags.BetNan.data <- list(
-  #UV_plotgroup.tot = BetNan.tot$plotgroup.NUM,
-  #N_sites = length(unique(BetNan.tot$site)),
   N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
+  
+  # plot level predictors, for discrete...
   cov.dis = BetNan.dis$cover,
   plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
-  #UV_plotgroup.dis = BetNan.dis$plotgroup.NUM,
   inclin_down.dis = BetNan.dis$inclin_downC,
+  sri.dis = BetNan.dis$sriC,
   twi_90m.dis = BetNan.dis$twi_90mC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
-  #N_sites.dis = length(unique(BetNan.dis$site)),
-  #N_plotgroups.dis = length(unique(BetNan.dis$site_alt_plotgroup_id)),
+  
+  # ...and continuous part of the data
   cov.cont = BetNan.cont$cover,
   plotgroup.cont = BetNan.cont$plotgroup.NUM, #AB added this
-  #UV_plotgroup.cont = BetNan.cont$plotgroup.NUM,
-  #UV_site.cont = BetNan.cont$site.NUM,
-  #year.cont = BetNan.cont$year,
   inclin_down.cont = BetNan.cont$inclin_downC,
+  sri.cont = BetNan.cont$sriC,
   twi_90m.cont = BetNan.cont$twi_90mC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
-  #N_sites.cont = length(unique(BetNan.cont$site)),
-  #N_plotgroups.cont = length(unique(BetNan.cont$site_alt_plotgroup_id)),
+  
+  # plot group level predictors
   tempjja.tot = BetNan.tot$tempjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
   tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
@@ -194,6 +221,7 @@ write("
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
       b.inclin_down ~ dnorm(0, 0.0001)
+      b.twi_90m ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
@@ -218,10 +246,11 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]]+ #AB added this
-                        b.compet*compet.dis[i] + 
-                        b.inclin_down[i]*inclin_down.dis[i] #+ 
-                        # b.sri[i]*sri.dis[i] 
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+                        b.compet * compet.dis[i] + 
+                        b.inclin_down * inclin_down.dis[i] +
+                        b.twi_90m * twi_90m.dis[i] + 
+                        b.sri * sri.dis[i] 
       }
       
       
@@ -231,18 +260,21 @@ write("
         cov.cont[i] ~ dbeta(p[i], q[i])
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
-        logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]]+ #AB added this
-                        b.compet*compet.cont[i] +
-                        b.inclin_down[i]*inclin_down.cont[i] #+ 
-                        # b.sri[i]*sri.cont[i] 
+        logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]] + #AB added this, ~= random effect of plot group
+                        b.compet * compet.cont[i] + 
+                        b.inclin_down * inclin_down.cont[i] +
+                        b.twi_90m * twi_90m.cont[i] + 
+                        b.sri * sri.cont[i] 
       }
 
 
       for (j in 1:N_plotgroups){ # length of total plotgroups
         b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
         mu.plotgroup[j] <- intercept + 
+                    
+                    # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[j] + 
-                    b.tempjja.x2 * (tempjja.tot[j]^2) + # add more plotgroup-level predictors
+                    b.tempjja.x2 * (tempjja.tot[j]^2) + 
                     b.tempmax.x * tempmax.tot[j] + 
                     b.tempmax.x2 * (tempmax.tot[j]^2) +
                     b.tempmin.x * tempmin.tot[j] + 
@@ -264,8 +296,18 @@ write("
 
 # Parameters to monitor ####
 
-params <- c("b.tempjja.x","b.tempjja.x2","intercept","b_compet", "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi") # add b_slope when added to df
-# "a.env.x","a.env.x2","b_sri",
+params <- c("intercept",
+            "b.tempjja.x", "b.tempjja.x2",
+            "b.tempmax.x", "b.tempmax.x2",
+            "b.tempmin.x", "b.tempmin.x2",
+            "b.tempcont.x", "b.tempcont.x2",
+            "b.precipjja.x", "b.precipjja.x2",
+            "b.precipjfmam.x", "b.precipjfmam.x2",
+            "b.compet", 
+            "b.inclin_down", 
+            "b.sri",
+            "b.twi_90m",
+            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi") 
 
 # Run model ----
 
