@@ -70,7 +70,7 @@ and response variable
 * cover (as relative no. hits per plot)
 ```{r}
 env_cov_bio_sub <- env_cov_bio %>% 
-  select(site_alt_plotgroup_id, plot, site, site_alt_id, year, long, lat,  # plot info / metadata
+  select(site_alt_plotgroup_id, plot, site, site_alt_id, year, long, lat, alt,  # plot info / metadata
   ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
   inclin_down, twi_90m, sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
@@ -110,7 +110,7 @@ Check for correlation between predictors:
 predictors_set <- env_cov_bio_sub %>% 
   select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
          inclin_down, twi_90m, sri,    # environmental data
-         compet) %>% 
+         compet, alt) %>% 
   names()
 # create basic correlation matrix
 (cor_mat <- env_cov_bio_sub %>% 
