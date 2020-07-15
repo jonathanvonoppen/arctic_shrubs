@@ -40,6 +40,7 @@ env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFa
 # Make plots for cover against predictors for each species
 env_cov_bio.long <- env_cov_bio %>% 
   select(taxon,
+         alt,
          inclin_down,
          ends_with("ts_30"),
          twi_90m,
@@ -47,9 +48,10 @@ env_cov_bio.long <- env_cov_bio %>%
          cover) %>% 
   # pivot to long format
   pivot_longer(cols = c(inclin_down,
-                           ends_with("ts_30"),
-                           twi_90m,
-                           compet),
+                        alt,
+                        ends_with("ts_30"),
+                        twi_90m,
+                        compet),
                names_to = "predictor",
                values_to = "pred_value")
 
@@ -82,9 +84,9 @@ pred.plot.grid(env_cov_bio.long)
 # Prepare data ####
 # Select relevant variables: plot info, WorldClim predictors, SRI, yos & long-term mean NDVI, distance to coast, cover, competitive pressure
 env_cov_bio_sub <- env_cov_bio %>% 
-  select(site_alt_plotgroup_id, site, site_alt_id, year, long, lat,  # plot info / metadata
-  ends_with("_ts_10"),   # CHELSA predictors averaged over 10-year period prior to study year
-  inclin_down, twi_90m, #sri, 
+  select(site_alt_plotgroup_id, site, alt, site_alt_id, year, long, lat,  # plot info / metadata
+  ends_with("_ts_30"),   # CHELSA predictors averaged over 30-year period prior to study year
+  inclin_down, twi_90m, sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
 
@@ -98,9 +100,14 @@ env_cov_bio_sub <- env_cov_bio %>%
 env_cov_bio_sub <- env_cov_bio_sub[order(env_cov_bio_sub$site_alt_plotgroup_id, env_cov_bio_sub$taxon),]
 
 # Create integer versions of factors
-env_cov_bio_sub$plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$site_alt_plotgroup_id, levels=unique(env_cov_bio_sub$site_alt_plotgroup_id)))
-env_cov_bio_sub$site.NUM <- as.numeric(factor(env_cov_bio_sub$site, levels = unique(env_cov_bio_sub$site)))
-env_cov_bio_sub$taxon.NUM <- as.numeric(factor(env_cov_bio_sub$taxon, levels = unique(env_cov_bio_sub$taxon)))
+env_cov_bio_sub$plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$site_alt_plotgroup_id, 
+                                                   levels=unique(env_cov_bio_sub$site_alt_plotgroup_id)))
+env_cov_bio_sub$site_alt.NUM <- as.numeric(factor(env_cov_bio_sub$site_alt_id,
+                                                  levels = unique(env_cov_bio_sub$site_alt_id)))
+env_cov_bio_sub$site.NUM <- as.numeric(factor(env_cov_bio_sub$site, 
+                                              levels = unique(env_cov_bio_sub$site)))
+env_cov_bio_sub$taxon.NUM <- as.numeric(factor(env_cov_bio_sub$taxon, 
+                                               levels = unique(env_cov_bio_sub$taxon)))
 taxa.num <- data.frame(taxon = levels(env_cov_bio_sub$taxon), 
                        num = env_cov_bio_sub$taxon.NUM[1:nlevels(env_cov_bio_sub$taxon)]) #%>% print()
 
@@ -109,7 +116,9 @@ taxa.num <- data.frame(taxon = levels(env_cov_bio_sub$taxon),
 # env_cov_bio_sub$taxon_plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$taxon_plotgroup, levels = unique(env_cov_bio_sub$taxon_plotgroup)))
 
 # scale numeric predictors
-num_pred <- env_cov_bio_sub %>% select(ends_with("_ts_10"), matches("sri"), 
+num_pred <- env_cov_bio_sub %>% select(alt,
+                                       ends_with("_ts_30"), 
+                                       sri, 
                                        starts_with("twi"), 
                                        matches("compet"))
 for(i in 1:length(num_pred)){
@@ -142,78 +151,39 @@ BetNan.cont <- filter(BetNan.tot, cover_discrete == 0)
 
 # Compile data into list ####
 shrub_gradient_jags.BetNan.data <- list(
- # cov.tot = BetNan.tot$cover,
-  UV_plotgroup.tot = BetNan.tot$plotgroup.NUM,
- # UV_site.tot = BetNan.tot$site.NUM[!duplicated(BetNan.tot$taxon_plotgroup.NUM)], #one value per tXpg
- # year.tot = BetNan.tot$year,
- # UV_taxon.tot = BetNan.tot$taxon.NUM[!duplicated(BetNan.tot$taxon_plotgroup.NUM)], #one value per tXpg
- # sri.tot = BetNan.tot$sriC,
- # ndvi.yos.tot = BetNan.tot$mean_summ_ndvi_yosC,
- # ndvi.long.tot = BetNan.tot$cv_mean_summ_ndvi_2001_to_yosC,
- # continental.tot = BetNan.tot$Perc_dist_coast_linesC,
- # compet.tot = BetNan.tot$competC,
- # N_tot = nrow(BetNan.tot),
-  N_sites = length(unique(BetNan.tot$site)),
-  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
- # N_taxa = length(unique(BetNan.tot$taxon)),
-  # UV_taxonXplotgroup.tot = BetNan.tot$taxon_plotgroup.NUM,
- # N_taxonXplotgroup.tot = length(unique(BetNan.tot$taxon_plotgroup.NUM)),
+  
+  # plot level predictors, for discrete...
   cov.dis = BetNan.dis$cover,
-  UV_plotgroup.dis = BetNan.dis$plotgroup.NUM,
- # UV_site.dis = BetNan.dis$site.NUM,
- # year.dis = BetNan.dis$year,
- # UV_taxon.dis = BetNan.dis$taxon.NUM,
- # sri.dis = BetNan.dis$sriC,
- # ndvi.yos.dis = BetNan.dis$mean_summ_ndvi_yosC,
- # ndvi.long.dis = BetNan.dis$cv_mean_summ_ndvi_2001_to_yosC,
- # continental.dis = BetNan.dis$Perc_dist_coast_linesC,
+  plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
+  isocline.dis = BetNan.dis$site_alt.NUM,
+  # inclin_down.dis = BetNan.dis$inclin_downC,
+  sri.dis = BetNan.dis$sriC,
+  twi_90m.dis = BetNan.dis$twi_90mC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
-  N_sites.dis = length(unique(BetNan.dis$site)),
-  N_plotgroups.dis = length(unique(BetNan.dis$site_alt_plotgroup_id)),
- # N_taxa.dis = length(unique(BetNan.dis$taxon)),
- # UV_taxonXplotgroup.dis = BetNan.dis$taxon_plotgroup.NUM,
- # N_taxonXplotgroup.dis = length(unique(BetNan.dis$taxon_plotgroup.NUM)),
+  
+  # ...and continuous part of the data
   cov.cont = BetNan.cont$cover,
-  UV_plotgroup.cont = BetNan.cont$plotgroup.NUM,
-  UV_site.cont = BetNan.cont$site.NUM,
-  year.cont = BetNan.cont$year,
- # UV_taxon.cont = BetNan.cont$taxon.NUM,
- # sri.cont = BetNan.cont$sriC,
-  # ndvi.yos.cont = BetNan.cont$mean_summ_ndvi_yosC,
-  # ndvi.long.cont = BetNan.cont$cv_mean_summ_ndvi_2001_to_yosC,
-  # continental.cont = BetNan.cont$Perc_dist_coast_linesC,
+  plotgroup.cont = BetNan.cont$plotgroup.NUM, #AB added this
+  isocline.cont = BetNan.cont$site_alt.NUM,
+  # inclin_down.cont = BetNan.cont$inclin_downC,
+  sri.cont = BetNan.cont$sriC,
+  twi_90m.cont = BetNan.cont$twi_90mC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
-  N_sites.cont = length(unique(BetNan.cont$site)),
-  N_plotgroups.cont = length(unique(BetNan.cont$site_alt_plotgroup_id)),
- # N_taxa.cont = length(unique(BetNan.cont$taxon)),
- # UV_taxonXplotgroup.cont = BetNan.cont$taxon_plotgroup.NUM,
-  # N_taxonXplotgroup.cont = length(unique(BetNan.cont$taxon_plotgroup.NUM)),
-  # xhat = seq(from = min(BetNan.tot$cover), to = max(BetNan.tot$cover), by = (1/150)),
-  # N_xhat = length(seq(from = min(BetNan.tot$cover), to = max(BetNan.tot$cover), by = (1/150))),
-  # how to include multiple continuous predictors? check other lectures too!
-  # environmental predictors -> set target predictor name to env.*
-  env.tot = BetNan.tot$tempjja_ts_10C[!duplicated(BetNan.tot$plotgroup.NUM)]#, # one value per tXpg, amt = annual mean temperature = bio_1
-  # env.dis = BetNan.dis$bio_1C,
-  # env.plotgroup.dis = BetNan.dis$bio_1C[!duplicated(BetNan.dis$plot.group.NUM)],
-  # env.cont = BetNan.cont$bio_1C,
-  # env.plotgroup.cont = BetNan.dis$bio_1C[!duplicated(BetNan.dis$plot.group.NUM)],
-  # prec.tot = BetNan.tot$bio_12C,           # prec = annual precipitation = bio_12
-  # prec.dis = BetNan.dis$bio_12C,
-  # prec.cont = BetNan.cont$bio_12C,
-  # isotherm.tot = BetNan.tot$bio_3C,        # isotherm = isothermality (diurnal range / annual range) = bio_3
-  # isotherm.dis = BetNan.dis$bio_3C,
-  # isotherm.cont = BetNan.cont$bio_3C,
-  # pdriest.tot = BetNan.tot$bio_14C,        # pdriest = precip of driest month = bio_14
-  # pdriest.dis = BetNan.dis$bio_14C,
-  # pdriest.cont = BetNan.cont$bio_14C,
-  # tseasonality.tot = BetNan.tot$bio_4C,    # tseasonality = temp seasonality (SD*100) = bio_4
-  # tseasonalitBetNan.dis = BetNan.dis$bio_4C,
-  # tseasonalitBetNan.cont = BetNan.cont$bio_4C,
-  # pseasonality.tot = BetNan.tot$bio_15C,   # pseasonality = precip seasonality (coff. of variation) = bio_15
-  # pseasonalitBetNan.dis = BetNan.dis$bio_15C,
-  # pseasonalitBetNan.cont = BetNan.cont$bio_15C
+  
+  # plot group level predictors
+  tempjja.tot = BetNan.tot$tempjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
+  # tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  # tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
+  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
+  
+  # site/alt level predictors
+  alt.tot = BetNan.tot$altC[!duplicated(BetNan.tot$site_alt.NUM)],
+  N_isoclines = length(unique(BetNan.tot$site_alt_id))
 )
 str(shrub_gradient_jags.BetNan.data)
 
@@ -229,36 +199,33 @@ write("
     
     # priors
       
-      # for (i in 1:N_taxa){
-      #   intercept[i] ~ dnorm(0,0.0001) # intercept per taxon instead of site-taxon?
-      # }
-      # 
-      # for (i in 1:N_taxa){   # same level as main effect of interest, i.e. taxon X plotgroup # AB - make this slope per taxon (not taxon-plotgroup?)
-      #   b_compet[i] ~ dnorm(0,0.0001)
-      #   # b_slope[i] ~ dnorm(0,0.0001)
-      #   b_sri[i] ~ dnorm(0,0.0001)
-      # }
-      # 
-      # sigma.taxonXplotgroup~dunif(0,100)
-      # tau.taxonXplotgroup<-1/(sigma.taxonXplotgroup*sigma.taxonXplotgroup)
-      # 
-      # for (i in 1:N_taxa){
-      #   b.env.x[i]~dnorm(0, 0.001)
-      #   b.env.x2[i]~dnorm(0, 0.001)
-      # }
-      
-      
       intercept ~ dnorm(0, 0.0001)
       
-      b_compet ~ dnorm(0, 0.0001)
-      b_sri ~ dnorm(0, 0.0001)
-      # b_slope ~ dnorm(0, 0.0001)
+      b.compet ~ dnorm(0, 0.0001)
+      b.sri ~ dnorm(0, 0.0001)
+      # b.inclin_down ~ dnorm(0, 0.0001)
+      b.twi_90m ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      b.env.x ~ dnorm(0, 0.001)
-      b.env.x2 ~ dnorm(0, 0.001)
+      sigma.isocline ~ dunif(0,100)
+      tau.isocline <- 1/(sigma.isocline * sigma.isocline)
+      
+      b.alt.x ~ dnorm(0, 0.001)
+      b.alt.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempmax.x ~ dnorm(0, 0.001)
+      # b.tempmax.x2 ~ dnorm(0, 0.001)
+      # b.tempmin.x ~ dnorm(0, 0.001)
+      # b.tempmin.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.precipjja.x ~ dnorm(0, 0.001)
+      b.precipjja.x2 ~ dnorm(0, 0.001)
+      # b.precipjfmam.x ~ dnorm(0, 0.001)
+      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -267,9 +234,12 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_compet*compet.dis[i] #+ # slope per taxon NOT per taxon-plotgroup?
-                        # b_slope[i]*slope.dis[i] + 
-                        # b_sri[i]*sri.dis[i] 
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.dis[i]] +
+                        b.compet * compet.dis[i] + 
+                        # b.inclin_down * inclin_down.dis[i] +
+                        b.twi_90m * twi_90m.dis[i] + 
+                        b.sri * sri.dis[i] 
       }
       
       
@@ -279,17 +249,42 @@ write("
         cov.cont[i] ~ dbeta(p[i], q[i])
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
-        logit(mu2[i]) <- b_compet*compet.cont[i] #+ # slope per taxon NOT per taxon-plotgroup?
-                        # b_slope[i]*slope.cont[i] + 
-                        # b_sri[i]*sri.cont[i] 
+        logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.cont[i]] +
+                        b.compet * compet.cont[i] +
+                        # b.inclin_down * inclin_down.cont[i] +
+                        b.twi_90m * twi_90m.cont[i] + 
+                        b.sri * sri.cont[i] 
       }
 
 
       for (j in 1:N_plotgroups){ # length of total plotgroups
         b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
-        mu.plotgroup[j] <- intercept + # slope per taxon not site-taxon?
-                    b.env.x * env.tot[j] + 
-                    b.env.x2 * (env.tot[j]^2) # add more plotgroup-level predictors
+        mu.plotgroup[j] <- intercept + 
+                    
+                    # plot group level predictors, linear and quadratic term
+                    b.tempjja.x * tempjja.tot[j] + 
+                    b.tempjja.x2 * (tempjja.tot[j]^2) + 
+                    # b.tempmax.x * tempmax.tot[j] + 
+                    # b.tempmax.x2 * (tempmax.tot[j]^2) +
+                    # b.tempmin.x * tempmin.tot[j] + 
+                    # b.tempmin.x2 * (tempmin.tot[j]^2) +
+                    b.tempcont.x * tempcont.tot[j] + 
+                    b.tempcont.x2 * (tempcont.tot[j]^2) +
+                    b.precipjja.x * precipjja.tot[j] + 
+                    b.precipjja.x2 * (precipjja.tot[j]^2) # +
+                    # b.precipjfmam.x * precipjfmam.tot[j] + 
+                    # b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
+      }
+      
+      
+      for (k in 1:N_isoclines){ #length of total isoclines
+        b_isocline[k] ~ dnorm(mu.isocline[k],tau.isocline)
+        mu.isocline[k] <- intercept + 
+        
+                    # isocline-level predictors, liear and quadratic term
+                    b.alt.x * alt.tot[k] +
+                    b.alt.x2 * (alt.tot[k]^2)
       }
 
     
@@ -301,13 +296,27 @@ write("
 
 # Parameters to monitor ####
 
-params <- c("b.env.x","b.env.x2","intercept","b_compet", "b_sri","b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi") # add b_slope when added to df
+params <- c("intercept",
+            "b.alt.x", "b.alt.x2",
+            "b.tempjja.x", "b.tempjja.x2",
+            # "b.tempmax.x", "b.tempmax.x2",
+            # "b.tempmin.x", "b.tempmin.x2",
+            "b.tempcont.x", "b.tempcont.x2",
+            "b.precipjja.x", "b.precipjja.x2",
+            # "b.precipjfmam.x", "b.precipjfmam.x2",
+            "b.compet", 
+            # "b.inclin_down", 
+            "b.sri",
+            "b.twi_90m",
+            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
+            "b_isocline[1]","b_isocline[2]","b_isocline[21]",
+            "sigma.plotgroup","phi")
 # "a.env.x","a.env.x2",
 
 # 5) RUN MODEL
 
 model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data, inits = NULL, params, 
-                                 model.file = "shrub_gradient.jags", n.chains = 3, 
+                                 model.file = "shrub_gradient.BetNan.jags", n.chains = 3, 
                                  n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
                                  working.directory=NULL, progress.bar = "text") 
 

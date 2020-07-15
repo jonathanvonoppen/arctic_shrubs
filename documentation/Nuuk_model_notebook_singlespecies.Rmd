@@ -166,6 +166,8 @@ env_cov_bio_sub$plotgroup.NUM <- as.numeric(factor(env_cov_bio_sub$site_alt_plot
                                                    levels = unique(env_cov_bio_sub$site_alt_plotgroup_id)))
 env_cov_bio_sub$plot.NUM <- as.numeric(factor(env_cov_bio_sub$plot,
                                               levels = unique(env_cov_bio_sub$plot)))
+env_cov_bio_sub$site_alt.NUM <- as.numeric(factor(env_cov_bio_sub$site_alt_id,
+                                              levels = unique(env_cov_bio_sub$site_alt_id)))
 env_cov_bio_sub$site.NUM <- as.numeric(factor(env_cov_bio_sub$site, levels = unique(env_cov_bio_sub$site)))
 env_cov_bio_sub$taxon.NUM <- as.numeric(factor(env_cov_bio_sub$taxon, levels = unique(env_cov_bio_sub$taxon)))
 ```
@@ -178,7 +180,8 @@ data.frame(taxon = levels(env_cov_bio_sub$taxon),
 
 Numeric predictors were scaled: 
 ```{r}
-num_pred <- env_cov_bio_sub %>% select(ends_with("_ts_30"), 
+num_pred <- env_cov_bio_sub %>% select(alt,
+                                       ends_with("_ts_30"), 
                                        sri, 
                                        starts_with("twi"), 
                                        matches("compet"))
@@ -210,11 +213,11 @@ JAGS needs data input in list format, so I provided all relevant variables as fo
 ```{r}
 # Compile data into list ####
 shrub_gradient_jags.BetNan.data <- list(
-  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
   
   # plot level predictors, for discrete...
   cov.dis = BetNan.dis$cover,
   plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
+  isocline.dis = BetNan.dis$site_alt.NUM,
   # inclin_down.dis = BetNan.dis$inclin_downC,
   sri.dis = BetNan.dis$sriC,
   twi_90m.dis = BetNan.dis$twi_90mC,
@@ -224,6 +227,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # ...and continuous part of the data
   cov.cont = BetNan.cont$cover,
   plotgroup.cont = BetNan.cont$plotgroup.NUM, #AB added this
+  isocline.cont = BetNan.cont$site_alt.NUM,
   # inclin_down.cont = BetNan.cont$inclin_downC,
   sri.cont = BetNan.cont$sriC,
   twi_90m.cont = BetNan.cont$twi_90mC,
@@ -235,8 +239,13 @@ shrub_gradient_jags.BetNan.data <- list(
   # tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   # tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
+  precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
+  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
+  
+  # site/alt level predictors
+  alt.tot = BetNan.tot$altC[!duplicated(BetNan.tot$site_alt.NUM)],
+  N_isoclines = length(unique(BetNan.tot$site_alt_id))
 )
 str(shrub_gradient_jags.BetNan.data)
 ```
@@ -259,6 +268,11 @@ write("
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
+      sigma.isocline ~ dunif(0,100)
+      tau.isocline <- 1/(sigma.isocline * sigma.isocline)
+      
+      b.alt.x ~ dnorm(0, 0.001)
+      b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
       # b.tempmax.x ~ dnorm(0, 0.001)
@@ -280,6 +294,7 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.dis[i]] +
                         b.compet * compet.dis[i] + 
                         # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
@@ -294,6 +309,7 @@ write("
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
         logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.cont[i]] +
                         b.compet * compet.cont[i] +
                         # b.inclin_down * inclin_down.cont[i] +
                         b.twi_90m * twi_90m.cont[i] + 
@@ -319,6 +335,16 @@ write("
                     # b.precipjfmam.x * precipjfmam.tot[j] + 
                     # b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
       }
+      
+      
+      for (k in 1:N_isoclines){ #length of total isoclines
+        b_isocline[k] ~ dnorm(mu.isocline[k],tau.isocline)
+        mu.isocline[k] <- intercept + 
+        
+                    # isocline-level predictors, liear and quadratic term
+                    b.alt.x * alt.tot[k] +
+                    b.alt.x2 * (alt.tot[k]^2)
+      }
 
     
       }
@@ -328,6 +354,7 @@ write("
 ...and the parameters to be monitored:
 ```{r}
 params <- c("intercept",
+            "b.alt.x", "b.alt.x2",
             "b.tempjja.x", "b.tempjja.x2",
             # "b.tempmax.x", "b.tempmax.x2",
             # "b.tempmin.x", "b.tempmin.x2",
@@ -338,7 +365,9 @@ params <- c("intercept",
             # "b.inclin_down", 
             "b.sri",
             "b.twi_90m",
-            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]","sigma.plotgroup","phi")
+            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
+            "b_isocline[1]","b_isocline[2]","b_isocline[21]",
+            "sigma.plotgroup","phi")
 ```
 
 ### > run & evaluate model

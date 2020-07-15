@@ -14,6 +14,11 @@
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
+      sigma.isocline ~ dunif(0,100)
+      tau.isocline <- 1/(sigma.isocline * sigma.isocline)
+      
+      b.alt.x ~ dnorm(0, 0.001)
+      b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
       # b.tempmax.x ~ dnorm(0, 0.001)
@@ -35,6 +40,7 @@
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.dis[i]] +
                         b.compet * compet.dis[i] + 
                         # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
@@ -49,6 +55,7 @@
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
         logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.cont[i]] +
                         b.compet * compet.cont[i] +
                         # b.inclin_down * inclin_down.cont[i] +
                         b.twi_90m * twi_90m.cont[i] + 
@@ -73,6 +80,16 @@
                     b.precipjja.x2 * (precipjja.tot[j]^2) # +
                     # b.precipjfmam.x * precipjfmam.tot[j] + 
                     # b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
+      }
+      
+      
+      for (k in 1:N_isoclines){ #length of total isoclines
+        b_isocline[k] ~ dnorm(mu.isocline[k],tau.isocline)
+        mu.isocline[k] <- intercept + 
+        
+                    # isocline-level predictors, liear and quadratic term
+                    b.alt.x * alt.tot[k] +
+                    b.alt.x2 * (alt.tot[k]^2)
       }
 
     
