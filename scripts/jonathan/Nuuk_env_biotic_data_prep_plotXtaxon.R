@@ -234,6 +234,14 @@ env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio,
 # insert value 0 for competitive pressure for Ledum palustre aka Rhododendron tomentosum (= tallest-growing species)
   mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet)) %>% 
   
+# add extracted values for Terrain Ruggedness Index (by Jakob Assmann, for procedure see scripts/others/extract_tri_jonathan_plots_nuuk_JA.R)
+  left_join(read.csv(file.path("data", "nuuk_env_cover_plots_with_tri.csv"), 
+                     header = T) %>% 
+                                  select(plot, 
+                                         tri) %>% 
+                                  distinct(plot, .keep_all = T),
+            by = c("plot")) %>% 
+  
 # reorder columns & select variables
   select(site_alt_plotgroup_id, site_alt_id, site, alt, plotgroup, plot,  # site/alt/plotgroup/plot IDs
          long, lat, year,                                           # WGS84 coordinates, year of sampling
@@ -244,7 +252,7 @@ env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio,
          starts_with("precipjja_"),                                 # average yearly cumulative summer (JJA) precipitation
          starts_with("precipjfmam_"),                               # average yearly cumulative winter-spring (JFMAM) precipitation
          starts_with("precipmam_"),                                 # average yearly cumulative spring (MAM) precipitation
-         inclin_down, inclin_dir,                                   # terrain variables
+         inclin_down, inclin_dir, tri,                              # terrain variables
          twi_90m, ndwi, tcws,                                       # moisture variables
          sri,                                                       # solar radiation
          ndvi, compet,                                              # biotic variables: productivity, height-derived competitive pressure
