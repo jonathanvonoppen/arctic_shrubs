@@ -42,6 +42,7 @@ env_cov_bio.long <- env_cov_bio %>%
   select(taxon,
          alt,
          inclin_down,
+         tri,
          ends_with("ts_30"),
          twi_90m,
          compet,
@@ -49,6 +50,7 @@ env_cov_bio.long <- env_cov_bio %>%
   # pivot to long format
   pivot_longer(cols = c(inclin_down,
                         alt,
+                        tri,
                         ends_with("ts_30"),
                         twi_90m,
                         compet),
@@ -86,7 +88,7 @@ pred.plot.grid(env_cov_bio.long)
 env_cov_bio_sub <- env_cov_bio %>% 
   select(site_alt_plotgroup_id, site, alt, site_alt_id, year, long, lat,  # plot info / metadata
   ends_with("_ts_30"),   # CHELSA predictors averaged over 30-year period prior to study year
-  inclin_down, twi_90m, sri, 
+  inclin_down, twi_90m, tri, sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
 
@@ -118,6 +120,7 @@ taxa.num <- data.frame(taxon = levels(env_cov_bio_sub$taxon),
 # scale numeric predictors
 num_pred <- env_cov_bio_sub %>% select(alt,
                                        ends_with("_ts_30"), 
+                                       tri,
                                        sri, 
                                        starts_with("twi"), 
                                        matches("compet"))
@@ -158,6 +161,7 @@ shrub_gradient_jags.BetNan.data <- list(
   isocline.dis = BetNan.dis$site_alt.NUM,
   # inclin_down.dis = BetNan.dis$inclin_downC,
   sri.dis = BetNan.dis$sriC,
+  tri.dis = BetNan.dis$triC,
   twi_90m.dis = BetNan.dis$twi_90mC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
@@ -168,6 +172,7 @@ shrub_gradient_jags.BetNan.data <- list(
   isocline.cont = BetNan.cont$site_alt.NUM,
   # inclin_down.cont = BetNan.cont$inclin_downC,
   sri.cont = BetNan.cont$sriC,
+  tri.cont = BetNan.cont$triC,
   twi_90m.cont = BetNan.cont$twi_90mC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
@@ -204,6 +209,7 @@ write("
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
       # b.inclin_down ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
       b.twi_90m ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
@@ -239,52 +245,54 @@ write("
                         b.compet * compet.dis[i] + 
                         # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
-                        b.sri * sri.dis[i] 
+                        b.sri * sri.dis[i] +
+                        b.tri * tri.dis[i] 
       }
       
       
     # LIKELIHOOD for continuous part
 
-      for (i in 1:N_cont){
-        cov.cont[i] ~ dbeta(p[i], q[i])
-        p[i] <- mu2[i] * phi
-        q[i] <- (1 - mu2[i]) * phi
-        logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]] + #AB added this, ~= random effect of plot group
-                        b_isocline[isocline.cont[i]] +
-                        b.compet * compet.cont[i] +
-                        # b.inclin_down * inclin_down.cont[i] +
-                        b.twi_90m * twi_90m.cont[i] + 
-                        b.sri * sri.cont[i] 
+      for (j in 1:N_cont){
+        cov.cont[j] ~ dbeta(p[j], q[j])
+        p[j] <- mu2[j] * phi
+        q[j] <- (1 - mu2[j]) * phi
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
+                        b_isocline[isocline.cont[j]] +
+                        b.compet * compet.cont[j] +
+                        # b.inclin_down * inclin_down.cont[j] +
+                        b.twi_90m * twi_90m.cont[j] + 
+                        b.sri * sri.cont[j] + 
+                        b.tri * tri.cont[j]
       }
 
 
-      for (j in 1:N_plotgroups){ # length of total plotgroups
-        b_plotgroup[j] ~ dnorm(mu.plotgroup[j],tau.plotgroup)
-        mu.plotgroup[j] <- intercept + 
+      for (k in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
+        mu.plotgroup[k] <- intercept + 
                     
                     # plot group level predictors, linear and quadratic term
-                    b.tempjja.x * tempjja.tot[j] + 
-                    b.tempjja.x2 * (tempjja.tot[j]^2) + 
-                    # b.tempmax.x * tempmax.tot[j] + 
-                    # b.tempmax.x2 * (tempmax.tot[j]^2) +
-                    # b.tempmin.x * tempmin.tot[j] + 
-                    # b.tempmin.x2 * (tempmin.tot[j]^2) +
-                    b.tempcont.x * tempcont.tot[j] + 
-                    b.tempcont.x2 * (tempcont.tot[j]^2) +
-                    b.precipjja.x * precipjja.tot[j] + 
-                    b.precipjja.x2 * (precipjja.tot[j]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[j] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
+                    b.tempjja.x * tempjja.tot[k] + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempmax.x * tempmax.tot[k] + 
+                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
+                    # b.tempmin.x * tempmin.tot[k] + 
+                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
+                    b.tempcont.x * tempcont.tot[k] + 
+                    b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] + 
+                    b.precipjja.x2 * (precipjja.tot[k]^2) # +
+                    # b.precipjfmam.x * precipjfmam.tot[k] + 
+                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
       }
       
       
-      for (k in 1:N_isoclines){ #length of total isoclines
-        b_isocline[k] ~ dnorm(mu.isocline[k],tau.isocline)
-        mu.isocline[k] <- intercept + 
+      for (l in 1:N_isoclines){ #length of total isoclines
+        b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
+        mu.isocline[l] <- intercept + 
         
-                    # isocline-level predictors, liear and quadratic term
-                    b.alt.x * alt.tot[k] +
-                    b.alt.x2 * (alt.tot[k]^2)
+                    # isocline-level predictors, linear and quadratic term
+                    b.alt.x * alt.tot[l] +
+                    b.alt.x2 * (alt.tot[l]^2)
       }
 
     
@@ -307,6 +315,7 @@ params <- c("intercept",
             "b.compet", 
             # "b.inclin_down", 
             "b.sri",
+            "b.tri",
             "b.twi_90m",
             "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
             "b_isocline[1]","b_isocline[2]","b_isocline[21]",
