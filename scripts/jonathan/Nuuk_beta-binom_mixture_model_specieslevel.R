@@ -31,7 +31,7 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
 # complete set - local path -> check if updated!
 # env_cov_bio <- read.csv("//uni.au.dk/Users/au630524/Documents/Jonathan/Project/A_Nuuk_community_competition_controls/Data/processed/godthaabsfjord_plots_fusion_table_with_pred_spp_rel_cover_compet_per_plot_group.csv", header = T)
 # subset of species with competition data:
-env_cov_bio <- read.csv("data/Nuuk_env_cover_plotgroups.csv", header = T)
+# env_cov_bio <- read.csv("data/Nuuk_env_cover_plotgroups.csv", header = T)
 
 # >> on plot level ----
 # subset of species with competition data:
@@ -41,17 +41,21 @@ env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFa
 env_cov_bio.long <- env_cov_bio %>% 
   select(taxon,
          alt,
-         inclin_down,
+         tempjja_ts_30,
+         tempcont_ts_30,
+         precipjja_ts_30,
+         sri,
          tri,
-         ends_with("ts_30"),
          twi_90m,
          compet,
          cover) %>% 
   # pivot to long format
-  pivot_longer(cols = c(inclin_down,
-                        alt,
+  pivot_longer(cols = c(alt,
+                        tempjja_ts_30,
+                        tempcont_ts_30,
+                        precipjja_ts_30,
+                        sri,
                         tri,
-                        ends_with("ts_30"),
                         twi_90m,
                         compet),
                names_to = "predictor",
@@ -66,7 +70,8 @@ pred.plot.grid <- function(df){
     plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
                    aes(y = cover, group = taxon)) +
       geom_point(aes(x = pred_value), colour = "darkgrey") +
-      geom_smooth(aes(x = pred_value), method = "lm", colour = "black", se = TRUE, na.rm = TRUE) +
+      geom_smooth(aes(x = pred_value), method = "lm", colour = "darkgreen", se = TRUE, na.rm = TRUE) +
+      geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), colour = "darkorange", se = TRUE, na.rm = TRUE) +
       facet_wrap(~predictor, scales = "free", ncol = 3) +
       scale_y_continuous("relative no. pin hits per plot group",
                          limits = c(0, max(df %>% 
@@ -297,7 +302,7 @@ write("
 
     
       }
-  ","shrub_gradient.BetNan.jags")
+  ", file.path("models", "shrub_gradient.BetNan.jags"))
 
 # Initial values ####
 # not strictly necessary here (?)
@@ -324,10 +329,16 @@ params <- c("intercept",
 
 # 5) RUN MODEL
 
-model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data, inits = NULL, params, 
-                                 model.file = "shrub_gradient.BetNan.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.BetNan.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text") 
 
 plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
 

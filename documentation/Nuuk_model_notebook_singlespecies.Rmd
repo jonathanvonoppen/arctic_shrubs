@@ -353,7 +353,7 @@ write("
 
     
       }
-  ","shrub_gradient.BetNan.jags")
+  ", file.path("models", "shrub_gradient.BetNan.jags"))
 ```
 
 ...and the parameters to be monitored:
@@ -379,10 +379,16 @@ params <- c("intercept",
 ### > run & evaluate model
 ```{r}
 # run model
-model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data, inits = NULL, params, 
-                                 model.file = "shrub_gradient.BetNan.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.BetNan.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text") 
 
 plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
 ```
