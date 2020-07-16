@@ -884,10 +884,16 @@ params <- c("intercept",
 ...and can run the model
 ```{r}
 # run model
-model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text") 
 
 plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
 ```
@@ -896,10 +902,16 @@ plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
 * no significant response to other variables
 
 ```{r}
-model_out.shrub_gradient.CasTet <- jags(shrub_gradient_jags.CasTet.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.CasTet <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.CasTet) #check convergence, etc.
 ```
@@ -908,10 +920,16 @@ plot(model_out.shrub_gradient.CasTet) #check convergence, etc.
 
 
 ```{r}
-model_out.shrub_gradient.EmpNig <- jags(shrub_gradient_jags.EmpNig.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.EmpNig <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.EmpNig) #check convergence, etc.
 ```
@@ -921,10 +939,16 @@ plot(model_out.shrub_gradient.EmpNig) #check convergence, etc.
 * negative response to temperature (quadratic)
 
 ```{r}
-model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.PhyCae.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.PhyCae) #check convergence, etc.
 ```
@@ -934,10 +958,16 @@ plot(model_out.shrub_gradient.PhyCae) #check convergence, etc.
 * less clearly converged (only 10 non-zero values)
 
 ```{r}
-model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.RhoGro.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.RhoGro) #check convergence, etc.
 ```
@@ -948,10 +978,16 @@ plot(model_out.shrub_gradient.RhoGro) #check convergence, etc.
 
 
 ```{r}
-model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.RhoTom.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.RhoTom) #check convergence, etc.
 ```
@@ -960,10 +996,16 @@ plot(model_out.shrub_gradient.RhoTom) #check convergence, etc.
 
 
 ```{r}
-model_out.shrub_gradient.SalArc <- jags(shrub_gradient_jags.SalArc.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.SalArc <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.SalArc) #check convergence, etc.
 ```
@@ -972,10 +1014,16 @@ plot(model_out.shrub_gradient.SalArc) #check convergence, etc.
 
 
 ```{r}
-model_out.shrub_gradient.SalGla <- jags(shrub_gradient_jags.SalGla.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.SalGla <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.SalGla) #check convergence, etc.
 ```
@@ -986,10 +1034,16 @@ plot(model_out.shrub_gradient.SalGla) #check convergence, etc.
 
 
 ```{r}
-model_out.shrub_gradient.VacUli <- jags(shrub_gradient_jags.VacUli.data, inits = NULL, params, 
-                                 model.file = "../scripts/jonathan/shrub_gradient.spec.jags", n.chains = 3, 
-                                 n.iter = 8000, n.burnin = 6000, n.thin=2, DIC=FALSE, 
-                                 working.directory=NULL, progress.bar = "text") 
+model_out.shrub_gradient.VacUli <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("models", "shrub_gradient.spec.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
 
 plot(model_out.shrub_gradient.VacUli) #check convergence, etc.
 ```
