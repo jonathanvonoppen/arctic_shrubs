@@ -72,7 +72,7 @@ pred.plot.grid <- function(df){
       geom_point(aes(x = pred_value), colour = "darkgrey") +
       geom_smooth(aes(x = pred_value), method = "lm", colour = "darkgreen", se = TRUE, na.rm = TRUE) +
       geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), colour = "darkorange", se = TRUE, na.rm = TRUE) +
-      facet_wrap(~predictor, scales = "free", ncol = 3) +
+      facet_wrap(~predictor, scales = "free", ncol = 4) +
       scale_y_continuous("relative no. pin hits per plot group",
                          limits = c(0, max(df %>% 
                                              filter(taxon == taxa[taxon_nr]) %>% 
@@ -295,9 +295,9 @@ write("
         b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
         mu.isocline[l] <- intercept + 
         
-                    # isocline-level predictors, linear and quadratic term
-                    b.alt.x * alt.tot[l] +
-                    b.alt.x2 * (alt.tot[l]^2)
+                    # isocline-level predictor, linear term
+                    b.alt.x * alt.tot[l] #+
+                    #b.alt.x2 * (alt.tot[l]^2)
       }
 
     
@@ -310,7 +310,7 @@ write("
 # Parameters to monitor ####
 
 params <- c("intercept",
-            "b.alt.x", "b.alt.x2",
+            "b.alt.x", #"b.alt.x2",
             "b.tempjja.x", "b.tempjja.x2",
             # "b.tempmax.x", "b.tempmax.x2",
             # "b.tempmin.x", "b.tempmin.x2",
