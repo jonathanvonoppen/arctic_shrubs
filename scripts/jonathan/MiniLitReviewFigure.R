@@ -11,10 +11,11 @@ rm(list = ls())
 
 # Dependencies ####
 if (!require('pacman')) install.packages('pacman', repos="https://cloud.r-project.org")
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse,
+               patchwork)
 
 # Import data ####
-lit <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/MiniReview/200123_tundra_shrub_drivers.csv", header = T)
+lit <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/Data/MiniReview/200716_tundra_shrub_drivers.csv", header = T)
 
 # Format data ####
 colnames(lit) <- lit %>% 
@@ -37,18 +38,38 @@ n_levels <- lit %>%
   summarise_at(vars(species, drivers), n_distinct) %>% 
   pivot_longer(-reference, names_to = "group", values_to = "freq")
 n_levels$group <- factor(n_levels$group, levels = c("species","drivers"))
-levels(n_levels$group)[levels(n_levels$group) == "species"] <- "no. species studied"
-levels(n_levels$group)[levels(n_levels$group) == "drivers"] <- "no. drivers studied"
+# levels(n_levels$group)[levels(n_levels$group) == "species"] <- "no. species studied"
+# levels(n_levels$group)[levels(n_levels$group) == "drivers"] <- "no. drivers studied"
 
 
 # Plot ####
-ggplot(n_levels) +
+species_count <- ggplot(n_levels %>% filter(group == "species")) +
   geom_bar(aes(x = freq), stat = "count", width = .9) +
-  facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
-  scale_y_continuous(limits = c(0,13), breaks = c(2,4,6,8,10,12)) +
-  labs(x = "number of studies") +
+  #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
+  scale_y_continuous(limits = c(0,12), breaks = c(3,6,9,12)) +
+  labs(x = "number of taxa studied",
+       y = "number of published studies") +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        strip.text = element_text(face = "bold", size = rel(1)), 
-        strip.background = element_rect(fill = "white", colour = "black"))
- 
+        axis.text = element_text(size = 32),
+        axis.title = element_text(size = 40),
+        axis.ticks = element_line(size = 1.5),
+        axis.line = element_line(size = 1.5))
+
+driver_count <- ggplot(n_levels %>% filter(group == "drivers")) +
+    geom_bar(aes(x = freq), stat = "count", width = .9) +
+    #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
+    scale_y_continuous(limits = c(0,14), breaks = c(3,6,9,12)) +
+    labs(x = "number of drivers studied",
+         y = "number of published studies") +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          axis.text = element_text(size = 32),
+          axis.title = element_text(size = 40),
+          axis.ticks = element_line(size = 1.5),
+          axis.line = element_line(size = 1.5))
+
+(driver_count / species_count) + 
+  plot_annotation(tag_levels = "a", 
+                  tag_suffix = ")") &
+  theme(plot.tag = element_text(size = 40))
