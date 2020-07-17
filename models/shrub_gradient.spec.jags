@@ -15,11 +15,11 @@
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
+      sigma.isocline ~ dunif(0,100)
+      tau.isocline <- 1/(sigma.isocline * sigma.isocline)
       
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
+      b.alt.x ~ dnorm(0, 0.001)
+      b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
       # b.tempmax.x ~ dnorm(0, 0.001)
@@ -41,12 +41,12 @@
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
+                        b_isocline[isocline.dis[i]] +
                         b.compet * compet.dis[i] + 
                         # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
                         b.sri * sri.dis[i] +
-                        b.tri * tri.dis[i] 
+                        b.tri * tri.dis[i]
       }
       
       
@@ -57,11 +57,11 @@
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
+                        b_isocline[isocline.cont[j]] +
                         b.compet * compet.cont[j] +
                         # b.inclin_down * inclin_down.cont[j] +
                         b.twi_90m * twi_90m.cont[j] + 
-                        b.sri * sri.cont[j] + 
+                        b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
 
@@ -86,14 +86,13 @@
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor, linear term
-      #               b.alt.x * alt.tot[l] #+
-      #               #b.alt.x2 * (alt.tot[l]^2)
-      # }
+      for (l in 1:N_isoclines){ #length of total isoclines
+        b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
+        mu.isocline[l] <- intercept + 
+        
+                    # isocline-level predictor
+                    b.alt.x * alt.tot[l]
+      }
 
     
       }
