@@ -37,6 +37,7 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
                R2jags,    # to link JAGS and R
                skimr,     # for quick dataframe inspection
                corrr,     # output correlation matrices as data frame
+               cowplot,   # combine plot panels
                rmarkdown) # for R Markdown formatting
 ```
 
@@ -1027,6 +1028,7 @@ coeff.shrub_gradient.BetNan$param <- as.vector(sapply(strsplit(rownames(coeff.sh
 (coeff.shrub_gradient.BetNan)
 
 model_plot_function <- function(model_coeff_output) {
+  theme_darkgreen <- "#13944D"
   target_vars <- c("b.tempjja.x", "b.tempjja.x2",
             "b.tempcont.x", "b.tempcont.x2",
             "b.precipjja.x", "b.precipjja.x2",
