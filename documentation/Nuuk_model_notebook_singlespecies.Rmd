@@ -3,15 +3,15 @@ title: 'Nuuk Fjord: Drivers of shrub abundance - beta-binomial mixture  model, s
 author: "Jonathan von Oppen"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
-  html_document:
-    df_print: paged
-    toc: no
   html_notebook:
     code_folding: hide
     df_print: paged
     toc: no
     toc_float:
       collapsed: no
+  html_document:
+    df_print: paged
+    toc: no
 editor_options: 
   chunk_output_type: inline
 ---
@@ -491,27 +491,6 @@ for (taxon_id in 1:nlevels(env_cov_bio_sub$taxon)){
 
 JAGS needs data input in list format, so I provided all relevant variables as follows:
 ```{r}
-# data_list_abbrev <- c()
-# extensions <- rep(c(".tot", ".dis", ".cont"), nlevels(env_cov_bio_sub$taxon))
-# for (dataset_id in 1:length(extensions)){
-#     
-#     # extract 3-letter genus name string
-#     data_list_abbrev[dataset_id] <- paste0(str_extract(levels(env_cov_bio_sub$taxon)[ceiling(dataset_id/3)], 
-#                                                       "^\\w{3}"),
-#     # extract and capitalise 3-letter species name string
-#     str_to_title(str_remove(str_extract(levels(env_cov_bio_sub$taxon)[ceiling(dataset_id/3)],
-#                                         "\\s\\w{3}"),
-#                             "\\s")),
-#   # add extensions
-#     extensions[dataset_id])
-# }
-# 
-# taxon_list_abbrev <- paste0(str_extract(levels(env_cov_bio_sub$taxon),
-#                                         "^\\w{3}"),
-#                             str_to_title(str_remove(str_extract(levels(env_cov_bio_sub$taxon),
-#                                                                 "\\s\\w{3}"),
-#                                                     "\\s")))
-
 # Compile data into lists
 # BetNan ----
 shrub_gradient_jags.BetNan.data <- list(
@@ -1158,7 +1137,7 @@ coeff.shrub_gradient.EmpNig$param <- as.vector(sapply(strsplit(rownames(coeff.sh
 (coeff.shrub_gradient.EmpNig)
 
 # effect size plot
-# model_plot_function(coeff.shrub_gradient.EmpNig)
+model_plot_function(coeff.shrub_gradient.EmpNig)
 
 ```
 
