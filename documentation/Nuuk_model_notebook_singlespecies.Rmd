@@ -6,12 +6,12 @@ output:
   html_notebook:
     code_folding: hide
     df_print: paged
-    toc: no
+    toc: yes
     toc_float:
       collapsed: no
   html_document:
     df_print: paged
-    toc: no
+    toc: yes
 editor_options: 
   chunk_output_type: inline
 ---
@@ -28,6 +28,7 @@ Packages included:
 * rjags & R2jags - to link JAGS and R
 * skimr - for data summary
 * corrr - to output correlation matrices in dataframe format
+* cowplot & patchwork - to combine plot panels
 * Rmarkdown - to produce this neat little documentation
 ```{r setup, message = FALSE}
 # load pacman package from the repository, if you do not already have it
@@ -38,7 +39,98 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
                skimr,     # for quick dataframe inspection
                corrr,     # output correlation matrices as data frame
                cowplot,   # combine plot panels
+               patchwork, # -"-
                rmarkdown) # for R Markdown formatting
+```
+
+Functions used: 
+
+* effect size plot function
+```{r}
+model_plot_function <- function(model_coeff_output) {
+  target_vars <- c("b.tempjja.x", "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
+                   "b.precipjja.x", "b.precipjja.x2",
+                   "b.sri",
+                   "b.tri",
+                   "b.twi_90m", 
+                   "b.compet")
+  solutions <- model_coeff_output
+  names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
+  solutions <- solutions %>% 
+    filter(variable %in% target_vars)
+  # solutions$variable <- factor(solutions$variable,
+  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
+  #                                          "b.tempcont.x", "b.tempcont.x2",
+  #                                          "b.precipjja.x", "b.precipjja.x2",
+  #                                          "b.sri",
+  #                                          "b.tri",
+  #                                          "b.twi_90m",
+  #                                          "b.compet"))
+  min_value <- floor(min(solutions$l95))
+  max_value <- ceiling(max(solutions$u95))
+  solutions$sig <- "ns"
+  solutions$sig[solutions$l95 < 0 & solutions$u95 < 0] <- "sig"
+  solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
+  label_colour <- rep("black", nrow(solutions))
+  label_colour[solutions$sig == "sig"] <- theme_darkgreen
+  label_face <- rep("plain", nrow(solutions))
+  label_face[solutions$sig == "sig"] <- "bold"
+  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
+  title_colour <- "black"
+  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
+  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
+  # if(response == "T1_mean") response <- "Soil"
+  # if(response == "T2_mean") response <- "Ground"
+  
+  
+  model_plot <- ggplot(solutions, aes(x = variable, y = post.mean,
+                                      ymin = l95, ymax = u95,
+                                      colour = sig)) +
+    geom_point() +
+    geom_errorbar(width = .8) +
+    theme_cowplot(18) +
+    ylab("Effect Size (scaled)") +
+    xlab("") +
+    #ggtitle("Betula nana") + # (paste0(response))
+    scale_colour_manual(values = c("black", theme_darkgreen)) +
+    scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
+    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
+    #         "b.tempcont.x", "b.tempcont.x2",
+    #         "b.precipjja.x", "b.precipjja.x2",
+    #         "b.sri",
+    #         "b.tri",
+    #         "b.twi_90m",
+    #         "b.compet"),
+    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
+    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
+    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+    #                             "solar radiation",
+  #                             "terrain ruggedness",
+  #                             "moisture availability",
+  #                             "competition")) +
+  annotate("segment", x = 0, xend = 11, y = 0, yend = 0) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
+          plot.title = element_text(colour = title_colour, face = "italic"),
+          legend.position = "none")
+  return(model_plot)
+}
+```
+
+Colour scheme:
+```{r}
+# Colour scheme ####
+theme_red <- "#E64447FF"
+theme_blue <- "#12435DFF"
+theme_lightblue <- "#1FA3AEFF"
+theme_grey <- "#EDEDEDFF"
+theme_yellow <- "#EEBE5BFF"
+
+# additional colours
+theme_darkblue <- "#1D5799"
+theme_darkgreen <- "#13944D"
+theme_orange <- "#B56A24"
+theme_purple <- "#8757B3"
 ```
 
 ## Single-species models
@@ -989,7 +1081,7 @@ model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # in
                                         params,                             # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
-                                        n.iter = 100000, n.burnin = 80000,     # no. iterations & burn-in fraction per chain
+                                        n.iter = 50000, n.burnin = 30000,     # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
                                         DIC = FALSE,                        # do not compute deviance, pD, and DIC
                                         working.directory = NULL, 
@@ -1001,81 +1093,32 @@ model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.BetNan<-as.data.frame(model_out.shrub_gradient.BetNan$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.BetNan <- model_out.shrub_gradient.BetNan$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.BetNan$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.BetNan),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.BetNan)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.BetNan),"[[]",fixed=FALSE), "[", 1))) #%>% print
 
-model_plot_function <- function(model_coeff_output) {
-  theme_darkgreen <- "#13944D"
-  target_vars <- c("b.tempjja.x", "b.tempjja.x2",
-            "b.tempcont.x", "b.tempcont.x2",
-            "b.precipjja.x", "b.precipjja.x2",
-            "b.sri",
-            "b.tri",
-            "b.twi_90m", 
-            "b.compet")
-  solutions <- model_coeff_output
-  names(solutions) <- c("post.mean", "post.sd", "l95", "u95", "Rhat", "variable")
-  solutions <- solutions %>% 
-    filter(variable %in% target_vars)
-  # solutions$variable <- factor(solutions$variable,
-  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
-  #                                          "b.tempcont.x", "b.tempcont.x2",
-  #                                          "b.precipjja.x", "b.precipjja.x2",
-  #                                          "b.sri",
-  #                                          "b.tri",
-  #                                          "b.twi_90m",
-  #                                          "b.compet"))
-  min_value <- floor(min(solutions$l95))
-  max_value <- ceiling(max(solutions$u95))
-  solutions$sig <- "ns"
-  solutions$sig[solutions$l95 < 0 & solutions$u95 < 0] <- "sig"
-  solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
-  label_colour <- rep("black", nrow(solutions))
-  label_colour[solutions$sig == "sig"] <- theme_darkgreen
-  label_face <- rep("plain", nrow(solutions))
-  label_face[solutions$sig == "sig"] <- "bold"
-  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
-  title_colour <- "black"
-  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
-  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
-  # if(response == "T1_mean") response <- "Soil"
-  # if(response == "T2_mean") response <- "Ground"
-  
-  
-  model_plot <- ggplot(solutions, aes(x = variable, y = post.mean,
-                                     ymin = l95, ymax = u95,
-                                     colour = sig)) +
-    geom_point() +
-    geom_errorbar(width = .8) +
-    theme_cowplot(18) +
-    ylab("Effect Size (scaled)") +
-    xlab("") +
-    #ggtitle("Betula nana") + # (paste0(response))
-    scale_colour_manual(values = c("black", theme_darkgreen)) +
-    scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
-    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
-    #         "b.tempcont.x", "b.tempcont.x2",
-    #         "b.precipjja.x", "b.precipjja.x2",
-    #         "b.sri",
-    #         "b.tri",
-    #         "b.twi_90m",
-    #         "b.compet"),
-    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
-    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
-    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
-    #                             "solar radiation",
-    #                             "terrain ruggedness",
-    #                             "moisture availability",
-    #                             "competition")) +
-    annotate("segment", x = 0, xend = 11, y = 0, yend = 0) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
-          plot.title = element_text(colour = title_colour, face = "italic"),
-          legend.position = "none")
-  return(model_plot)
+# add 90% CIs
+ci_90.BetNan <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.BetNan$BUGSoutput$sims.list)-4)){
+  ci_90.BetNan[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.BetNan$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.BetNan[param, 3] <- names(data.frame(model_out.shrub_gradient.BetNan$BUGSoutput$sims.list))[param]
 }
-model_plot_function(coeff.shrub_gradient.BetNan)
+
+# join to coefficients table
+coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>% 
+  left_join(ci_90.BetNan, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
+
+(effect_size_plot.BetNan <- model_plot_function(coeff.shrub_gradient.BetNan))
 ```
 
 * **negative response to temperature variability (sig)**
@@ -1102,11 +1145,32 @@ model_out.shrub_gradient.CasTet <- jags(shrub_gradient_jags.CasTet.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.CasTet<-as.data.frame(model_out.shrub_gradient.CasTet$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.CasTet <- model_out.shrub_gradient.CasTet$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.CasTet$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.CasTet),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.CasTet)
-model_plot_function(coeff.shrub_gradient.CasTet)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.CasTet),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.CasTet <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.CasTet$BUGSoutput$sims.list)-4)){
+  ci_90.CasTet[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.CasTet$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.CasTet[param, 3] <- names(data.frame(model_out.shrub_gradient.CasTet$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.CasTet <- coeff.shrub_gradient.CasTet %>% 
+  left_join(ci_90.CasTet, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
+
+# (effect_size_plot.CasTet <- model_plot_function(coeff.shrub_gradient.CasTet))
 ```
 
 * **not converging**: really large R-hat values (only 16 non-zero values)
@@ -1131,13 +1195,33 @@ model_out.shrub_gradient.EmpNig <- jags(shrub_gradient_jags.EmpNig.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.EmpNig<-as.data.frame(model_out.shrub_gradient.EmpNig$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.EmpNig <- model_out.shrub_gradient.EmpNig$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.EmpNig$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.EmpNig),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.EmpNig)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.EmpNig),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.EmpNig <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.EmpNig$BUGSoutput$sims.list)-4)){
+  ci_90.EmpNig[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.EmpNig$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.EmpNig[param, 3] <- names(data.frame(model_out.shrub_gradient.EmpNig$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>% 
+  left_join(ci_90.EmpNig, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
 
 # effect size plot
-model_plot_function(coeff.shrub_gradient.EmpNig)
+(effect_size_plot.EmpNig <- model_plot_function(coeff.shrub_gradient.EmpNig))
 
 ```
 
@@ -1165,10 +1249,31 @@ model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.PhyCae.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.PhyCae<-as.data.frame(model_out.shrub_gradient.PhyCae$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.PhyCae <- model_out.shrub_gradient.PhyCae$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.PhyCae$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.PhyCae),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.PhyCae)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.PhyCae),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.PhyCae <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.PhyCae$BUGSoutput$sims.list)-4)){
+  ci_90.PhyCae[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.PhyCae$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.PhyCae[param, 3] <- names(data.frame(model_out.shrub_gradient.PhyCae$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.PhyCae <- coeff.shrub_gradient.PhyCae %>% 
+  left_join(ci_90.PhyCae, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
+
 ```
 
 * **not converged** (only 10 non-zero values)
@@ -1193,13 +1298,33 @@ model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.RhoGro.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.RhoGro<-as.data.frame(model_out.shrub_gradient.RhoGro$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.RhoGro <- model_out.shrub_gradient.RhoGro$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.RhoGro$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.RhoGro),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.RhoGro)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.RhoGro),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.RhoGro <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.RhoGro$BUGSoutput$sims.list)-4)){
+  ci_90.RhoGro[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.RhoGro$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.RhoGro[param, 3] <- names(data.frame(model_out.shrub_gradient.RhoGro$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>% 
+  left_join(ci_90.RhoGro, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
 
 # effect size plot
-model_plot_function(coeff.shrub_gradient.RhoGro)
+(effect_size_plot.RhoGro <- model_plot_function(coeff.shrub_gradient.RhoGro))
 
 ```
 
@@ -1228,10 +1353,31 @@ model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.RhoTom.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.RhoTom<-as.data.frame(model_out.shrub_gradient.RhoTom$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.RhoTom <- model_out.shrub_gradient.RhoTom$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.RhoTom$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.RhoTom),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.RhoTom)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.RhoTom),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.RhoTom <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.RhoTom$BUGSoutput$sims.list)-4)){
+  ci_90.RhoTom[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.RhoTom$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.RhoTom[param, 3] <- names(data.frame(model_out.shrub_gradient.RhoTom$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.RhoTom <- coeff.shrub_gradient.RhoTom %>% 
+  left_join(ci_90.RhoTom, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
+
 ```
 
 * **not converging well**: relatively large R-hat values, large variation in parameter estimates (only 13 non-zero values)
@@ -1256,10 +1402,31 @@ model_out.shrub_gradient.SalArc <- jags(shrub_gradient_jags.SalArc.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.SalArc<-as.data.frame(model_out.shrub_gradient.SalArc$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.SalArc <- model_out.shrub_gradient.SalArc$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.SalArc$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.SalArc),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.SalArc)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.SalArc),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.SalArc <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.SalArc$BUGSoutput$sims.list)-4)){
+  ci_90.SalArc[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.SalArc$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.SalArc[param, 3] <- names(data.frame(model_out.shrub_gradient.SalArc$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.SalArc <- coeff.shrub_gradient.SalArc %>% 
+  left_join(ci_90.SalArc, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
+
 ```
 
 * **not converging well**: relatively large R-hat values, quite some variation in parameter estimates (only 13 non-zero values)
@@ -1284,13 +1451,33 @@ model_out.shrub_gradient.SalGla <- jags(shrub_gradient_jags.SalGla.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.SalGla<-as.data.frame(model_out.shrub_gradient.SalGla$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.SalGla <- model_out.shrub_gradient.SalGla$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.SalGla$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.SalGla),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.SalGla)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.SalGla),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.SalGla <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.SalGla$BUGSoutput$sims.list)-4)){
+  ci_90.SalGla[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.SalGla$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.SalGla[param, 3] <- names(data.frame(model_out.shrub_gradient.SalGla$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.SalGla <- coeff.shrub_gradient.SalGla %>% 
+  left_join(ci_90.SalGla, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
 
 # effect size plot
-model_plot_function(coeff.shrub_gradient.SalGla)
+(effect_size_plot.SalGla <- model_plot_function(coeff.shrub_gradient.SalGla))
 
 ```
 
@@ -1317,13 +1504,33 @@ model_out.shrub_gradient.VacUli <- jags(shrub_gradient_jags.VacUli.data,    # in
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
 # extract coefficients 
-coeff.shrub_gradient.VacUli<-as.data.frame(model_out.shrub_gradient.VacUli$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','Rhat')])
+coeff.shrub_gradient.VacUli <- model_out.shrub_gradient.VacUli$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
 # add identifying info to data frame
-coeff.shrub_gradient.VacUli$param <- as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.VacUli),"[[]",fixed=FALSE), "[", 1))
-(coeff.shrub_gradient.VacUli)
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.VacUli),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.VacUli <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.VacUli$BUGSoutput$sims.list)-4)){
+  ci_90.VacUli[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.VacUli$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.VacUli[param, 3] <- names(data.frame(model_out.shrub_gradient.VacUli$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>% 
+  left_join(ci_90.VacUli, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
 
 # effect size plot
-model_plot_function(coeff.shrub_gradient.VacUli)
+(effect_size_plot.VacUli <- model_plot_function(coeff.shrub_gradient.VacUli))
 
 ```
 
