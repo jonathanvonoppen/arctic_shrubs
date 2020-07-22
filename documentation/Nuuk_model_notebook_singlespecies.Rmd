@@ -47,7 +47,8 @@ Functions used:
 
 * effect size plot function
 ```{r}
-model_plot_function <- function(model_coeff_output) {
+# for cases with only 'significant' effects
+model_plot_sig_function <- function(model_coeff_output, title_string) {
   target_vars <- c("b.tempjja.x", "b.tempjja.x2",
                    "b.tempcont.x", "b.tempcont.x2",
                    "b.precipjja.x", "b.precipjja.x2",
@@ -77,14 +78,15 @@ model_plot_function <- function(model_coeff_output) {
   label_face <- rep("plain", nrow(solutions))
   label_face[solutions$sig == "sig"] <- "bold"
   # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
-  title_colour <- "black"
+  title_string <- title_string
+  title_colour <- "grey10"
   # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
   # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
   # if(response == "T1_mean") response <- "Soil"
   # if(response == "T2_mean") response <- "Ground"
   
   
-  model_plot <- ggplot(solutions, aes(x = variable, y = post.mean,
+  model_plot_sig <- ggplot(solutions, aes(x = variable, y = post.mean,
                                       ymin = l95, ymax = u95,
                                       colour = sig)) +
     geom_point() +
@@ -92,7 +94,7 @@ model_plot_function <- function(model_coeff_output) {
     theme_cowplot(18) +
     ylab("Effect Size (scaled)") +
     xlab("") +
-    #ggtitle("Betula nana") + # (paste0(response))
+    ggtitle(paste0(title_string)) +
     scale_colour_manual(values = c("black", theme_darkgreen)) +
     scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
     # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
@@ -113,8 +115,83 @@ model_plot_function <- function(model_coeff_output) {
     theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
           plot.title = element_text(colour = title_colour, face = "italic"),
           legend.position = "none")
-  return(model_plot)
+  return(model_plot_sig)
 }
+
+# for cases with marginal 'significance'
+model_plot_marg_function <- function(model_coeff_output, title_string) {
+  target_vars <- c("b.tempjja.x", "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
+                   "b.precipjja.x", "b.precipjja.x2",
+                   "b.sri",
+                   "b.tri",
+                   "b.twi_90m", 
+                   "b.compet")
+  solutions <- model_coeff_output
+  names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
+  solutions <- solutions %>% 
+    filter(variable %in% target_vars)
+  # solutions$variable <- factor(solutions$variable,
+  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
+  #                                          "b.tempcont.x", "b.tempcont.x2",
+  #                                          "b.precipjja.x", "b.precipjja.x2",
+  #                                          "b.sri",
+  #                                          "b.tri",
+  #                                          "b.twi_90m",
+  #                                          "b.compet"))
+  min_value <- floor(min(solutions$l95))
+  max_value <- ceiling(max(solutions$u95))
+  solutions$sig <- "ns"
+  solutions$sig[solutions$l95 < 0 & solutions$u95 < 0] <- "sig"
+  solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
+  solutions$sig[solutions$l90 < 0 & solutions$u90 < 0 & solutions$l95 < 0 & solutions$u95 > 0] <- "marg"
+  solutions$sig[solutions$l90 > 0 & solutions$u90 > 0 & solutions$l95 < 0 & solutions$u95 > 0] <- "marg"
+  label_colour <- rep("black", nrow(solutions))
+  label_colour[solutions$sig == "sig"] <- theme_darkgreen
+  label_colour[solutions$sig == "marg"] <- theme_purple
+  label_face <- rep("plain", nrow(solutions))
+  label_face[solutions$sig == "sig"] <- "bold"
+  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
+  title_string <- title_string
+  title_colour <- "grey10"
+  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
+  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
+  # if(response == "T1_mean") response <- "Soil"
+  # if(response == "T2_mean") response <- "Ground"
+  
+  
+  model_plot_marg <- ggplot(solutions, aes(x = variable, y = post.mean,
+                                      ymin = l95, ymax = u95,
+                                      colour = sig)) +
+    geom_point() +
+    geom_errorbar(width = .8) +
+    theme_cowplot(18) +
+    ylab("Effect Size (scaled)") +
+    xlab("") +
+    ggtitle(paste0(title_string)) + 
+    scale_colour_manual(values = c(theme_purple, "black", theme_darkgreen)) +
+    scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
+    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
+    #         "b.tempcont.x", "b.tempcont.x2",
+    #         "b.precipjja.x", "b.precipjja.x2",
+    #         "b.sri",
+    #         "b.tri",
+    #         "b.twi_90m",
+    #         "b.compet"),
+    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
+    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
+    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+    #                             "solar radiation",
+  #                             "terrain ruggedness",
+  #                             "moisture availability",
+  #                             "competition")) +
+  annotate("segment", x = 0, xend = 11, y = 0, yend = 0) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
+          plot.title = element_text(colour = title_colour, face = "italic"),
+          legend.position = "none")
+  return(model_plot_marg)
+}
+
 ```
 
 Colour scheme:
@@ -1118,7 +1195,7 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-(effect_size_plot.BetNan <- model_plot_function(coeff.shrub_gradient.BetNan))
+(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana"))
 ```
 
 * **negative response to temperature variability (sig)**
@@ -1221,12 +1298,12 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.EmpNig <- model_plot_function(coeff.shrub_gradient.EmpNig))
+(effect_size_plot.EmpNig <- model_plot_marg_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum"))
 
 ```
 
 * **positive response to precipitation (linear, sig.)**
-* negative response to temperature (quadratic, n.s.)
+* *negative response to temperature (quadratic, m.s.)*
 * slightly positive response to competition, SRI and TWI (n.s.)
 <br>
 
@@ -1324,14 +1401,14 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.RhoGro <- model_plot_function(coeff.shrub_gradient.RhoGro))
+(effect_size_plot.RhoGro <- model_plot_marg_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum"))
 
 ```
 
-* **negative response to precipitation (linear, sig.) & temperature (quadratic, strongly sig.)**
+* **negative response to temperature (quadratic, strongly sig.)** & *precipitation (linear, m.s.)* 
 * slightly positive response to SRI, temp. variation (n.s.)
 * slightly negative responst to TWI (n.s.)
-* large variation in competiton response as no taller-growing species in the system
+* large variation in competiton response as there were no taller-growing species in the system
 <br>
 
 ### *Rhododendron tomentosum*
@@ -1380,7 +1457,7 @@ coeff.shrub_gradient.RhoTom <- coeff.shrub_gradient.RhoTom %>%
 
 ```
 
-* **not converging well**: relatively large R-hat values, large variation in parameter estimates (only 13 non-zero values)
+* **not converging**: relatively large R-hat values, large variation in parameter estimates (only 13 non-zero values)
 <br>
 
 ### *Salix arctophila*
@@ -1477,7 +1554,7 @@ coeff.shrub_gradient.SalGla <- coeff.shrub_gradient.SalGla %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.SalGla <- model_plot_function(coeff.shrub_gradient.SalGla))
+(effect_size_plot.SalGla <- model_plot_sig_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca"))
 
 ```
 
@@ -1530,9 +1607,43 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.VacUli <- model_plot_function(coeff.shrub_gradient.VacUli))
+(effect_size_plot.VacUli <- model_plot_marg_function(coeff.shrub_gradient.VacUli, title_string = "Vaccinium uliginosum"))
 
 ```
 
-* **negative response to temperature (quadratic, sig.)**, competition, & TWI (n.s.)
+* **negative response to temperature (quadratic, sig.)**, *TWI (m.s.)*, competition (n.s.)
 * positive response to SRI (n.s.)
+
+<br>
+
+### > combine all plots 
+```{r, eval = FALSE}
+# 2x3 grid
+(nuuk_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan, 
+                                            effect_size_plot.EmpNig, 
+                                            effect_size_plot.RhoGro, 
+                                            effect_size_plot.SalGla, 
+                                            effect_size_plot.VacUli,
+                                            labels = c("a)", "b)", "c)", "d)", "e)"),
+                                            label_size = 20,
+                                            label_fontface = "plain",
+                                            hjust = -2,
+                                            ncol = 2))
+save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
+          nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
+
+# 2x3 grid
+(nuuk_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan, 
+                                            effect_size_plot.EmpNig, 
+                                            effect_size_plot.RhoGro, 
+                                            effect_size_plot.SalGla, 
+                                            effect_size_plot.VacUli,
+                                            labels = c("a)", "b)", "c)", "d)", "e)"),
+                                            label_size = 20,
+                                            label_fontface = "plain",
+                                            hjust = -2,
+                                            ncol = 2))
+save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
+          nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1)
+```
+
