@@ -45,8 +45,34 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
 
 Functions used: 
 
+* predictor x species cover plot grid function
 * effect size plot function
 ```{r}
+# cover plot grids ----
+pred.plot.grid <- function(df){
+  
+  taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
+  
+  for(taxon_nr in 1:length(taxa)){
+    plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
+                   aes(y = cover, group = taxon)) +
+      geom_point(aes(x = pred_value), colour = "darkgrey") +
+      geom_smooth(aes(x = pred_value), method = "lm", colour = "darkgreen", se = TRUE, na.rm = TRUE) +
+      geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), colour = "darkorange", se = TRUE, na.rm = TRUE) +
+      facet_wrap(~predictor, scales = "free", ncol = 4) +
+      scale_y_continuous("relative no. pin hits per plot group",
+                         limits = c(0, max(df %>% 
+                                             filter(taxon == taxa[taxon_nr]) %>% 
+                                             pull(cover)))) +
+      labs(x = "predictor value") +
+      ggtitle(paste0(taxa[taxon_nr], " cover ~ predictors")) +
+      theme_bw() +
+      theme(legend.position = "none")
+    print(plot)
+  }
+}
+
+# effect size plots ----
 # for cases with only 'significant' effects
 model_plot_sig_function <- function(model_coeff_output, title_string) {
   target_vars <- c("b.tempjja.x", "b.tempjja.x2",
@@ -341,6 +367,34 @@ env_cov_bio_sub <- env_cov_bio_sub %>%
                 -tempmin_ts_30,
                 -inclin_down,
                 -contains("mam"))
+```
+
+How do the trends in cover response look for each of the predictors? Plot panels:
+```{r}
+# Prepare data for panel plots for cover against predictors for each species
+env_cov_bio.long <- env_cov_bio %>% 
+  select(taxon,
+         tempjja_ts_30,
+         tempcont_ts_30,
+         precipjja_ts_30,
+         sri,
+         tri,
+         twi_90m,
+         compet,
+         cover) %>% 
+  # pivot to long format
+  pivot_longer(cols = c(tempjja_ts_30,
+                        tempcont_ts_30,
+                        precipjja_ts_30,
+                        sri,
+                        tri,
+                        twi_90m,
+                        compet),
+               names_to = "predictor",
+               values_to = "pred_value")
+
+# run
+pred.plot.grid(env_cov_bio.long)
 ```
 
 
