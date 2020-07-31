@@ -122,64 +122,18 @@ model_plot_function <- function(model_coeff_output) {
 # >> on plot level ---
 # subset of species with competition data:
 env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
-
-# Make plots for cover against predictors for each species
-env_cov_bio.long <- env_cov_bio %>% 
-  select(taxon,
-         tempjja_ts_30,
-         tempcont_ts_30,
-         precipjja_ts_30,
-         sri,
-         tri,
-         twi_90m,
-         compet,
-         cover) %>% 
-  # pivot to long format
-  pivot_longer(cols = c(tempjja_ts_30,
-                        tempcont_ts_30,
-                        precipjja_ts_30,
-                        sri,
-                        tri,
-                        twi_90m,
-                        compet),
-               names_to = "predictor",
-               values_to = "pred_value")
-
-# build function
-pred.plot.grid <- function(df){
-  
-  taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
-  
-  for(taxon_nr in 1:length(taxa)){
-    plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
-                   aes(y = cover, group = taxon)) +
-      geom_point(aes(x = pred_value), colour = "darkgrey") +
-      geom_smooth(aes(x = pred_value), method = "lm", colour = "darkgreen", se = TRUE, na.rm = TRUE) +
-      geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), colour = "darkorange", se = TRUE, na.rm = TRUE) +
-      facet_wrap(~predictor, scales = "free", ncol = 4) +
-      scale_y_continuous("relative no. pin hits per plot group",
-                         limits = c(0, max(df %>% 
-                                             filter(taxon == taxa[taxon_nr]) %>% 
-                                             pull(cover)))) +
-      labs(x = "predictor value") +
-      ggtitle(paste0(taxa[taxon_nr], " cover ~ predictors")) +
-      theme_bw() +
-      theme(legend.position = "none")
-    print(plot)
-  }
-}
-
-# run
-pred.plot.grid(env_cov_bio.long)
   
 # Prepare data ####
 # Select relevant variables: plot info, WorldClim predictors, SRI, yos & long-term mean NDVI, distance to coast, cover, competitive pressure
 env_cov_bio_sub <- env_cov_bio %>% 
   select(site_alt_plotgroup_id, site, alt, site_alt_id, year, long, lat,  # plot info / metadata
-  ends_with("_ts_30"),   # CHELSA predictors averaged over 30-year period prior to study year
-  inclin_down, twi_90m, tri, sri, 
-  #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
-  taxon, cover, compet)   # taxon, cover response, competition pressure
+         ends_with("_ts_30"),   # CHELSA predictors averaged over 30-year period prior to study year
+         inclin_down, twi_90m, tri, sri, 
+         #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
+         taxon, cover, compet) %>% # taxon, cover response, competition pressure
+  
+  mutate(taxon = as.factor(taxon))
+  
 
 # REMOVE Cassiope tetragona & others because it is so low abundance it doesn't converge. Summary of zeros:
 # env_cov_bio %>% group_by(taxon) %>% summarise_at(vars(cover), list(~sum(. == 0))) %>% rename(zeros = cover) %>% mutate(zeros_perc = zeros/69)
@@ -199,8 +153,8 @@ env_cov_bio_sub$site.NUM <- as.numeric(factor(env_cov_bio_sub$site,
                                               levels = unique(env_cov_bio_sub$site)))
 env_cov_bio_sub$taxon.NUM <- as.numeric(factor(env_cov_bio_sub$taxon, 
                                                levels = unique(env_cov_bio_sub$taxon)))
-taxa.num <- data.frame(taxon = levels(env_cov_bio_sub$taxon), 
-                       num = env_cov_bio_sub$taxon.NUM[1:nlevels(env_cov_bio_sub$taxon)]) #%>% print()
+# taxa.num <- data.frame(taxon = levels(env_cov_bio_sub$taxon), 
+#                        num = env_cov_bio_sub$taxon.NUM[1:nlevels(env_cov_bio_sub$taxon)]) #%>% print()
 
 # # Create unique taxon-plotgroup combination variable
 # env_cov_bio_sub$taxon_plotgroup <- paste(env_cov_bio_sub$site_alt_plotgroup_id, env_cov_bio_sub$taxon, sep="_")
