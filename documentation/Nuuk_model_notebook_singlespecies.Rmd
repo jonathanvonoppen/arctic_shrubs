@@ -1455,11 +1455,11 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.RhoGro <- model_plot_marg_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum"))
+(effect_size_plot.RhoGro <- model_plot_sig_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum"))
 
 ```
 
-* **negative response to temperature (quadratic, strongly sig.)** & *precipitation (linear, m.s.)* 
+* **negative response to temperature (quadratic, strongly sig.) & precipitation (linear, sig.)** 
 * slightly positive response to SRI, temp. variation (n.s.)
 * slightly negative responst to TWI (n.s.)
 * large variation in competiton response as there were no taller-growing species in the system
@@ -1665,14 +1665,14 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
 
 ```
 
-* **negative response to temperature (quadratic, sig.)**, *TWI (m.s.)*, competition (n.s.)
+* **negative response to temperature (quadratic, sig.)**, *TWI, competition (m.s.)*
 * positive response to SRI (n.s.)
 
 <br>
 
 ### > combine all plots 
 ```{r, eval = FALSE}
-# 2x3 grid
+# 3x2 grid (vertical layout)
 (nuuk_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan, 
                                             effect_size_plot.EmpNig, 
                                             effect_size_plot.RhoGro, 
@@ -1686,7 +1686,7 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
 save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
           nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
 
-# 2x3 grid
+# 2x3 grid (horizontal layout)
 (nuuk_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan, 
                                             effect_size_plot.EmpNig, 
                                             effect_size_plot.RhoGro, 
@@ -1696,8 +1696,16 @@ save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_p
                                             label_size = 20,
                                             label_fontface = "plain",
                                             hjust = -2,
-                                            ncol = 2))
+                                            ncol = 3))
 save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
           nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1)
+```
+
+## Save workspace image
+```{r}
+save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output.RData"))
+
+# load ws for further analyses/plotting etc)
+# load(file.path("..", "data", "processed", "nuuk_shrub_drivers_output.RData"))
 ```
 
