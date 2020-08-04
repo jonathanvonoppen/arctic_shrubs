@@ -305,8 +305,8 @@ Check for correlation between predictors:
 ```{r}
 predictors_set <- env_cov_bio_sub %>% 
   select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
-         inclin_down, twi_90m, tri, sri,    # environmental data
-         compet, alt) %>% 
+         inclin_down, sri, tri, twi_90m,      # environmental data
+         compet) %>% 
   names()
 # create basic correlation matrix
 (cor_mat <- env_cov_bio_sub %>% 
@@ -317,7 +317,7 @@ predictors_set <- env_cov_bio_sub %>%
 ```
 
 $\Rightarrow$ Maximum temperature is highly correlated with JJA temperature, minimum temperature with continentality, slope (inclin_down) with solar radiation, and spring precipitation variables with JJA precipitation.
-Let's exclude them step by step and check the variance inflation factors (VIF) along the way. VIF values > 10 indicate collinearity issues.
+Let's exclude them step by step and check the variance inflation factors (VIF) along the way. VIF values > 5 indicate collinearity issues.
 
 ```{r}
 # for the whole set of predictors
@@ -1249,7 +1249,7 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-(effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 11))
+(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 11))
 ```
 
 * **negative response to temperature variability (sig)**
@@ -1531,7 +1531,7 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
 ```
 
 * **positive response to precipitation (linear, sig.)**
-* *negative response to temperature (quadratic, m.s.)*
+* *unimodal response to temperature (m.s.)*
 * slightly positive response to competition, SRI and TWI (n.s.)
 <br>
 
@@ -1940,7 +1940,7 @@ model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # i
                                         working.directory = NULL, 
                                         progress.bar = "text")
 
-# plot(model_out.shrub_gradient.RhoGro) #check convergence, etc.
+# plot(model_out.shrub_gradient.RhoGro2) #check convergence, etc.
 ```
 
 Extract coefficients and plot effect sizes:
@@ -2549,7 +2549,7 @@ save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_p
 
 ## Save workspace image
 ```{r}
-save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output.RData"))
+save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
 
 # load ws for further analyses/plotting etc)
 # load(file.path("..", "data", "processed", "nuuk_shrub_drivers_output.RData"))
