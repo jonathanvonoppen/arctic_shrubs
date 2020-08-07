@@ -60,7 +60,7 @@ pred.plot.grid <- function(df){
       geom_smooth(aes(x = pred_value), method = "lm", colour = "darkgreen", se = TRUE, na.rm = TRUE) +
       geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), colour = "darkorange", se = TRUE, na.rm = TRUE) +
       facet_wrap(~predictor, scales = "free", ncol = 4) +
-      scale_y_continuous("relative no. pin hits per plot group",
+      scale_y_continuous("relative no. pin hits per plot",
                          limits = c(0, max(df %>% 
                                              filter(taxon == taxa[taxon_nr]) %>% 
                                              pull(cover)))) +
@@ -251,6 +251,7 @@ env_cov_bio <- read.csv("../data/nuuk_env_cover_plots.csv", header = T)
 <!-- skim(env_cov_bio) -->
 <!-- ``` -->
 
+
 ### Prepare data for JAGS model 
 ### a) selection of variables relevant for analysis
 including predictors
@@ -369,7 +370,202 @@ env_cov_bio_sub <- env_cov_bio_sub %>%
                 -contains("mam"))
 ```
 
-How do the trends in cover response look for each of the predictors? Plot panels:
+### b) raw data plots
+
+### > species abundance along the gradient
+```{r}
+(nuuk_spec_abundance_plot <- ggplot(env_cov_bio %>% 
+         
+         # make site a factor
+         mutate(site = as.factor(site)) %>% 
+         mutate(site_alt_id = factor(site_alt_id, levels = c(paste(rep(1, 3), c("20", "100", "200"), sep = "_"),
+                                                             paste(rep(2, 3), c("20", "100", "200"), sep = "_"),
+                                                             paste(rep(3, 5), c("20", "100", "200", "300", "400"), sep = "_"),
+                                                             paste(rep(4, 6), c("20", "100", "200", "300", "400", "500"), sep = "_"),
+                                                             paste(rep(5, 6), c("20", "100", "200", "300", "400", "500"), sep = "_")))) %>% 
+         # group by site and isocline
+         group_by(site, site_alt_id), 
+       
+       aes(x = site_alt_id, 
+           y = cover, 
+           fill = site)) + 
+  
+  # draw boxplots of cover
+  geom_boxplot() + 
+  
+  # split by taxon
+  facet_grid(rows = vars(taxon)) +
+  
+  # scale_fill_manual() +
+  theme_bw() +
+  xlab("site / isocline") +
+  theme(strip.text.y = element_text(face = "italic"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+        axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_species_abundance_gradient.eps"),
+#           nuuk_spec_abundance_plot, base_height = 18, base_aspect_ratio = 0.8)
+```
+
+### > predictor patterns along the gradient
+```{r}
+# data compilation ----
+preds_plot_data <- env_cov_bio %>% 
+         
+         # convert site, isocline & plotgroup to factors
+         mutate(site = as.factor(site)) %>% 
+         mutate(site_alt_id = factor(site_alt_id, levels = c(paste(rep(1, 3), c("20", "100", "200"), sep = "_"),
+                                                             paste(rep(2, 3), c("20", "100", "200"), sep = "_"),
+                                                             paste(rep(3, 5), c("20", "100", "200", "300", "400"), sep = "_"),
+                                                             paste(rep(4, 6), c("20", "100", "200", "300", "400", "500"), sep = "_"),
+                                                             paste(rep(5, 6), c("20", "100", "200", "300", "400", "500"), sep = "_")))) %>% 
+         mutate(plotgroup = as.factor(plotgroup)) %>% 
+           
+         select(site, site_alt_id, predictors_set) %>% 
+         
+         # pivot to long format
+         pivot_longer(cols = predictors_set,
+                      names_to = "predictor",
+                      values_to = "value") %>% 
+           
+         # convert predictor col to factor
+         mutate(predictor = as.factor(predictor)) %>% 
+        
+         # rename predictors
+         mutate(predictor = fct_recode(predictor,
+                                       "summer \n temperature [°C]" = "tempjja_ts_30",
+                                       "yearly maximum \n temperature [°C]" = "tempmax_ts_30",
+                                       "yearly minimum \n temperature [°C]" = "tempmin_ts_30",
+                                       "annual temperature \n variability [°C]" = "tempcont_ts_30",
+                                       "cumulative summer \n precipitation [mm]" = "precipjja_ts_30",
+                                       "cumulative winter-spring \n precipitation [mm]" = "precipjfmam_ts_30",
+                                       "cumulative spring \n precipitation [mm]" = "precipmam_ts_30",
+                                       "slope angle [°]" = "inclin_down",
+                                       "Solar Radiation \n Index" = "sri",
+                                       "Terrain Ruggedness \n Index" = "tri",
+                                       "Topographic Wetness \n Index" = "twi_90m",
+                                       "overgrowing \n competition" = "compet"),
+                predictor = fct_relevel(predictor,
+                                        "summer \n temperature [°C]",
+                                        "yearly maximum \n temperature [°C]",
+                                        "yearly minimum \n temperature [°C]",
+                                        "annual temperature \n variability [°C]",
+                                        "cumulative summer \n precipitation [mm]",
+                                        "cumulative winter-spring \n precipitation [mm]",
+                                        "cumulative spring \n precipitation [mm]",
+                                        "slope angle [°]",
+                                        "Solar Radiation \n Index",
+                                        "Terrain Ruggedness \n Index",
+                                        "Topographic Wetness \n Index",
+                                        "overgrowing \n competition")) %>% 
+           
+         # group by site & isocline 
+         group_by(site, site_alt_id)
+
+# climatic predictors ----
+predictors_set_clim_long <- c("summer \n temperature [°C]",
+                           "yearly maximum \n temperature [°C]",
+                           "yearly minimum \n temperature [°C]",
+                           "annual temperature \n variability [°C]",
+                           "cumulative summer \n precipitation [mm]",
+                           "cumulative winter-spring \n precipitation [mm]",
+                           "cumulative spring \n precipitation [mm]")
+
+(nuuk_preds_clim_gradient_plot <- ggplot(preds_plot_data %>% 
+                                           filter(predictor %in% predictors_set_clim_long),
+       
+       aes(x = site_alt_id, 
+           y = value, 
+           fill = site)) + 
+  
+  # draw boxplots of values
+  geom_boxplot() + 
+  
+  # split by taxon
+  facet_grid(rows = vars(predictor), scales = "free_y") +
+
+  # scale_fill_manual() +
+  theme_bw() +
+  xlab("site / isocline") +
+  theme(strip.text.y = element_text(face = "italic"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+        axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_preds_clim_gradient.eps"),
+#           nuuk_preds_clim_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+
+# environmental predictors ----
+predictors_set_env_long <- c("slope angle [°]",
+                           "Solar Radiation \n Index",
+                           "Terrain Ruggedness \n Index",
+                           "Topographic Wetness \n Index",
+                           "overgrowing \n competition")
+
+(nuuk_preds_env_gradient_plot <- ggplot(preds_plot_data %>% 
+                                           filter(predictor %in% predictors_set_env_long),
+       
+       aes(x = site_alt_id, 
+           y = value, 
+           fill = site)) + 
+  
+  # draw boxplots of values
+  geom_boxplot() + 
+  
+  # split by taxon
+  facet_grid(rows = vars(predictor), scales = "free_y") +
+
+  # scale_fill_manual() +
+  theme_bw() +
+  xlab("site / isocline") +
+  theme(strip.text.y = element_text(face = "italic"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+        axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_preds_env_gradient.eps"),
+#           nuuk_preds_env_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+
+# final set of predictors ----
+predictors_set_final_long <- c("summer \n temperature [°C]",
+                               "annual temperature \n variability [°C]",
+                               "cumulative summer \n precipitation [mm]",
+                               "Solar Radiation \n Index",
+                               "Terrain Ruggedness \n Index",
+                               "Topographic Wetness \n Index",
+                               "overgrowing \n competition")
+
+(nuuk_preds_final_gradient_plot <- ggplot(preds_plot_data %>% 
+                                           filter(predictor %in% predictors_set_final_long),
+       
+       aes(x = site_alt_id, 
+           y = value, 
+           fill = site)) + 
+  
+  # draw boxplots of values
+  geom_boxplot() + 
+  
+  # split by taxon
+  facet_grid(rows = vars(predictor), scales = "free_y") +
+
+  # scale_fill_manual() +
+  theme_bw() +
+  xlab("site / isocline") +
+  theme(strip.text.y = element_text(face = "italic"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+        axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_preds_final_gradient.eps"),
+#           nuuk_preds_final_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+```
+
+<br>
+
+### > cover vs. predictors per species
+
+How do the trends in cover response look for each of the predictors? Plot panels below show linear (green) and quadratic (orange) trendlines derived from linear models (different than the Bayesian approach used for analysis! but anyway useful to catch trends):
 ```{r}
 # Prepare data for panel plots for cover against predictors for each species
 env_cov_bio.long <- env_cov_bio %>% 
@@ -398,7 +594,7 @@ pred.plot.grid(env_cov_bio.long)
 ```
 
 
-### b) adjustion of data structure
+### c) adjustion of data structure
 
 Data was ordered by site/altitude/plotgroup and taxon
 ```{r}
@@ -1252,7 +1448,7 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
 (effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 11))
 ```
 
-* **negative response to temperature variability (sig)**
+* **unimodal response to temperature variability (sig)**
 * slightly negative response to competition & precipitation (linear) (n.s.)
 
 <br>
@@ -1702,6 +1898,12 @@ coeff.shrub_gradient.EmpNig2 <- coeff.shrub_gradient.EmpNig2 %>%
 (effect_size_plot.EmpNig2 <- model_plot_marg_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 8.5))
 
 ```
+
+* **unimodal response to temperature, positive response to precipitation (linear) (sig.)**, *negative response to temp. variability (m.s.)*
+* positive response to competition, TWI (n.s.)
+
+<br>
+
 ### *Phyllodoce caerulea*
 ```{r}
 model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.PhyCae.data,    # input data
@@ -1800,10 +2002,10 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
 
 ```
 
-* **negative response to temperature (quadratic, strongly sig.) & precipitation (linear, sig.)** 
+* **unimodal response to temperature & precipitation (linear, sig.)** 
 * slightly positive response to SRI, temp. variation (n.s.)
 * slightly negative responst to TWI (n.s.)
-* large variation in competiton response as there were no taller-growing species in the system
+* large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
 
 <br>
 
@@ -1975,6 +2177,13 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
 (effect_size_plot.RhoGro2 <- model_plot_sig_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 8.5))
 
 ```
+
+* **unimodal response to temperature and negative response to precipitation (linear), positive response to temperature variability (sig.)**
+* positive response to SRI (n.s.)
+* large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
+
+<br>
+
 ### *Rhododendron tomentosum*
 ```{r}
 model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.RhoTom.data,    # input data
@@ -2291,9 +2500,15 @@ coeff.shrub_gradient.SalGla2 <- coeff.shrub_gradient.SalGla2 %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 8))
+(effect_size_plot.SalGla2 <- model_plot_sig_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 8))
 
 ```
+
+* **positive response to temperature variability (linear) and competition (sig.)**
+* positive response to TRI, negative response to SRI (n.s.)
+
+<br>
+
 
 ### *Vaccinium uliginosum*
 ```{r}
@@ -2344,7 +2559,7 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
 
 ```
 
-* **negative response to temperature (quadratic, sig.)**, *TWI, competition (m.s.)*
+* **unimodal response to temperature (sig.)**, *TWI, competition (m.s.)*
 * positive response to SRI (n.s.)
 
 <br>
@@ -2516,6 +2731,12 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
 (effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 8.5))
 
 ```
+
+* **unimodal response to temperature (sig.)**, *TWI (m.s.)*
+* negative response to competition, positive response to SRI (n.s.)
+
+<br>
+
 ### > combine all plots 
 ```{r, eval = FALSE}
 # 3x2 grid (vertical layout)
@@ -2529,8 +2750,26 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
                                             label_fontface = "plain",
                                             hjust = -2,
                                             ncol = 2))
-save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
-          nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
+#           nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
+
+# reduced predictor terms
+(nuuk_reduced_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan2, 
+                                            effect_size_plot.EmpNig2, 
+                                            effect_size_plot.RhoGro2, 
+                                            effect_size_plot.SalGla2, 
+                                            effect_size_plot.VacUli2,
+                                            labels = c("a)", "b)", "c)", "d)", "e)"),
+                                            label_size = 20,
+                                            label_fontface = "plain",
+                                            hjust = -2,
+                                            ncol = 2))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_vert.eps"),
+#           nuuk_reduced_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
 
 # 2x3 grid (horizontal layout)
 (nuuk_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan, 
@@ -2543,9 +2782,465 @@ save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_p
                                             label_fontface = "plain",
                                             hjust = -2,
                                             ncol = 3))
-save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
-          nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1)
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
+#           nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
+
+# 2x3 grid (horizontal layout)
+(nuuk_reduced_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan2, 
+                                            effect_size_plot.EmpNig2, 
+                                            effect_size_plot.RhoGro2, 
+                                            effect_size_plot.SalGla2, 
+                                            effect_size_plot.VacUli2,
+                                            labels = c("a)", "b)", "c)", "d)", "e)"),
+                                            label_size = 20,
+                                            label_fontface = "plain",
+                                            hjust = -2,
+                                            ncol = 3))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_hor.eps"),
+#           nuuk_reduced_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
 ```
+
+## Graphs
+### *Betula nana* - temperature variability
+```{r}
+
+unique.tempcont <- seq(min(BetNan.tot$tempcont_ts_30C), max(BetNan.tot$tempcont_ts_30C), by=0.02) 
+
+preds.tempcont.BetNan <- array(dim=c(length(unique.tempcont), 
+                                     nrow(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$b_plotgroup)))
+
+for (i in 1:length(unique.tempcont)){
+  preds.tempcont.BetNan[i,] <- plogis(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$b.tempcont.x[,1]*unique.tempcont[i] +
+                                        model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$b.tempcont.x2[,1]*(unique.tempcont[i]^2))
+}
+
+# # preds.continent1biome2 <- array(dim=c(length(unique.tempcont),
+# #                                       length(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$b1meanForest[,1])))
+# # 
+# # for (i in 1:length(unique.tempcont)){
+# #   preds.continent1biome2[i,] <- plogis(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$b1meanSavanna + model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$brain.x[,2]*unique.tempcont[i] + model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$brain.x2[,2]*(unique.tempcont[i]^2))}
+
+
+# # continentpreds <- array(c(preds.continent1biome1,preds.continent1biome2), dim=c(length(unique.tempcont), ncol(preds.continent1biome1),2))
+
+preds.tempcont.BetNan[1:10,1:10] # [tempcont,sims]
+
+quantiles.tempcont.BetNan <- array(NA, dim=c(length(unique.tempcont),5))
+
+
+for (i in 1:length(unique.tempcont)){#tempcont
+  #i<-1
+    quantiles.tempcont.BetNan[i,]<-quantile(preds.tempcont.BetNan[i,], c(0.025, 0.25, 0.5, 0.95, 0.975))
+}
+
+quantiles.tempcont.BetNan[1:5,1:5]
+
+predsmatrix.tempcont.BetNan <- data.frame(expand.grid(tempcont_ts_30C=c(unique.tempcont)))
+predsmatrix.tempcont.BetNan$l95CI<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
+predsmatrix.tempcont.BetNan$l90CI<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
+predsmatrix.tempcont.BetNan$med<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
+predsmatrix.tempcont.BetNan$u90CI<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
+predsmatrix.tempcont.BetNan$u95CI<-rep(NA, nrow(predsmatrix.tempcont.BetNan)) 
+
+head(predsmatrix.tempcont.BetNan)
+
+# # rainfallseq<-rep(1:length(unique.tempcont),each=2)
+
+for (i in 1:nrow(predsmatrix.tempcont.BetNan)){
+  predsmatrix.tempcont.BetNan[i,c(2:6)] <- quantiles.tempcont.BetNan[i,]
+}
+
+predsmatrix.tempcont.BetNan$tempcont <- predsmatrix.tempcont.BetNan$tempcont_ts_30C + attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:center')
+
+ggplot() +
+  # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
+  geom_point(data = BetNan.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont_ts_30), cover = mean(cover)), 
+             aes(x = tempcont, 
+                 y = cover), 
+             size = 2,
+             position = position_jitter(width=0, height=.01),
+             alpha=0.5) +
+  
+  # draw line of predicted values
+  geom_line(data = predsmatrix.tempcont.BetNan, 
+            aes(x = tempcont, 
+                y = med), 
+            colour = "orange",
+            alpha = 1,
+            size = 3) + 
+  # scale_colour_manual(values=c("darkgreen","orange","darkgreen","orange"),name="Biome") +
+  
+  # draw predicted 95% CI
+  geom_ribbon(data = predsmatrix.tempcont.BetNan,
+                aes(x = tempcont, 
+                  ymin = l95CI, 
+                  ymax = u95CI),
+              fill = "orange",
+              alpha = 0.2) +
+  
+  # draw predicted 90% CI
+  geom_ribbon(data = predsmatrix.tempcont.BetNan,
+                aes(x = tempcont, 
+                  ymin = l90CI, 
+                  ymax = u90CI),
+              fill = "orange",
+              alpha = 0.4) +
+  # scale_fill_manual(values=c("darkgreen","orange"),name="Biome") +
+  labs(x = "annual temperature variability [°C]",
+       y = "rel. no. hits per plot") + 
+  theme_bw()
+```
+
+### *Salix glauca* - competition
+```{r}
+
+unique.compet <- seq(min(SalGla.tot$competC), max(SalGla.tot$competC), by = 0.02) 
+
+preds.compet.SalGla <- array(dim=c(length(unique.compet), 
+                                     nrow(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list$b_plotgroup)))
+
+for (i in 1:length(unique.compet)){
+  preds.compet.SalGla[i,] <- plogis(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list$b.compet[,1]*unique.compet[i])
+}
+
+# # preds.continent1biome2 <- array(dim=c(length(unique.compet), 
+# #                                       length(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list$b1meanForest[,1])))
+# # 
+# # for (i in 1:length(unique.compet)){
+# #   preds.continent1biome2[i,] <- plogis(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list$b1meanSavanna + model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list$brain.x[,2]*unique.compet[i] + model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list$brain.x2[,2]*(unique.compet[i]^2))}
+
+
+# # continentpreds <- array(c(preds.continent1biome1,preds.continent1biome2), dim=c(length(unique.compet), ncol(preds.continent1biome1),2))
+
+preds.compet.SalGla[1:10,1:10] # [compet,sims]
+
+quantiles.compet.SalGla <- array(NA, dim=c(length(unique.compet),5))
+
+
+for (i in 1:length(unique.compet)){#compet
+  #i<-1
+    quantiles.compet.SalGla[i,]<-quantile(preds.compet.SalGla[i,], c(0.025, 0.25, 0.5, 0.95, 0.975))
+}
+
+quantiles.compet.SalGla[1:5,1:5]
+
+predsmatrix.compet.SalGla <- data.frame(expand.grid(competC=c(unique.compet)))
+predsmatrix.compet.SalGla$l95CI<-rep(NA, nrow(predsmatrix.compet.SalGla))
+predsmatrix.compet.SalGla$l90CI<-rep(NA, nrow(predsmatrix.compet.SalGla))
+predsmatrix.compet.SalGla$med<-rep(NA, nrow(predsmatrix.compet.SalGla))
+predsmatrix.compet.SalGla$u90CI<-rep(NA, nrow(predsmatrix.compet.SalGla))
+predsmatrix.compet.SalGla$u95CI<-rep(NA, nrow(predsmatrix.compet.SalGla)) 
+
+head(predsmatrix.compet.SalGla)
+
+# # rainfallseq<-rep(1:length(unique.compet),each=2)
+
+for (i in 1:nrow(predsmatrix.compet.SalGla)){
+  predsmatrix.compet.SalGla[i,c(2:6)] <- quantiles.compet.SalGla[i,]
+}
+
+predsmatrix.compet.SalGla$compet <- predsmatrix.compet.SalGla$competC + attr(scale(SalGla.tot$compet), 'scaled:center')
+
+(pred_plot.compet.SalGla <- ggplot() +
+  # competition is modeled on plot level, so use input data as is
+  geom_point(data = SalGla.tot, 
+             aes(x = compet, 
+                 y = cover), 
+             size = 2,
+             position = position_jitter(width=0, height=.01),
+             alpha = 0.5) +
+  
+  # plot line of predicted median values
+  geom_line(data = predsmatrix.compet.SalGla, 
+            aes(x = compet, 
+                y = med), 
+            colour = "orange",
+            alpha = 1,
+            size = 3) + 
+  # scale_colour_manual(values=c("darkgreen","orange","darkgreen","orange"),name="Biome") +
+  
+  # plot predicted 95% CI
+  geom_ribbon(data = predsmatrix.compet.SalGla,
+                aes(x = compet, 
+                  ymin = l95CI, 
+                  ymax = u95CI),
+              fill = "orange",
+              alpha = 0.2) +
+  # plot predicted 90% CI
+  geom_ribbon(data = predsmatrix.compet.SalGla,
+                aes(x = compet, 
+                  ymin = l90CI, 
+                  ymax = u90CI),
+              fill = "orange",
+              alpha = 0.4) +
+  # scale_fill_manual(values=c("darkgreen","orange"),name="Biome") +
+  labs(x = "summed abundance of taller-growing species per plot",
+       y = "rel. no. hits per plot") + 
+  theme_bw())
+```
+looks weird; prediction does not relate to data points in x or y range. 
+
+
+## Check predicted values
+
+Let's run another model with some derived values to see if we get the same numbers out as the way we have extracted them above (i.e., by scaling back). That will tell us whether it's a problem with the back-scaling or a more fundamental issue.
+
+```{r}
+# assemble data: SalGla as example ----
+shrub_gradient_jags.SalGla.xhat.data <- list(
+  
+  # plot level predictors, for discrete...
+  cov.dis = SalGla.dis$cover,
+  plotgroup.dis = SalGla.dis$plotgroup.NUM, #AB added this
+  # isocline.dis = SalGla.dis$site_alt.NUM,
+  # inclin_down.dis = SalGla.dis$inclin_downC,
+  sri.dis = SalGla.dis$sriC,
+  tri.dis = SalGla.dis$triC,
+  twi_90m.dis = SalGla.dis$twi_90mC,
+  compet.dis = SalGla.dis$competC,
+  N_discrete = nrow(SalGla.dis),
+  
+  # ...and continuous part of the data
+  cov.cont = SalGla.cont$cover,
+  plotgroup.cont = SalGla.cont$plotgroup.NUM, #AB added this
+  # isocline.cont = SalGla.cont$site_alt.NUM,
+  # inclin_down.cont = SalGla.cont$inclin_downC,
+  sri.cont = SalGla.cont$sriC,
+  tri.cont = SalGla.cont$triC,
+  twi_90m.cont = SalGla.cont$twi_90mC,
+  compet.cont = SalGla.cont$competC,
+  N_cont = nrow(SalGla.cont),
+  
+  # plot group level predictors
+  tempjja.tot = SalGla.tot$tempjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)], # one value per tXpg
+  # tempmax.tot = SalGla.tot$tempmax_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
+  # tempmin.tot = SalGla.tot$tempmin_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
+  tempcont.tot = SalGla.tot$tempcont_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
+  precipjja.tot = SalGla.tot$precipjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
+  # precipjfmam.tot = SalGla.tot$precipjfmam_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)]
+  N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
+  
+  xhat = seq(from = min(SalGla.tot$compet), to = max(SalGla.tot$compet), length.out = 100),
+  Nxhat = 100
+  # # site/alt level predictors
+  # alt.tot = SalGla.tot$altC[!duplicated(SalGla.tot$site_alt.NUM)],
+  # N_isoclines = length(unique(SalGla.tot$site_alt_id))
+)
+str(shrub_gradient_jags.SalGla.xhat.data)
+```
+
+We'll add some predicted values (phat) to the model:
+
+```{r}
+write("
+  
+  model{
+    
+    # priors
+      
+      intercept ~ dnorm(0, 0.0001)
+      
+      b.compet ~ dnorm(0, 0.0001)
+      b.sri ~ dnorm(0, 0.0001)
+      # b.inclin_down ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
+      b.twi_90m ~ dnorm(0, 0.0001)
+
+      sigma.plotgroup ~ dunif(0,100)
+      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
+      
+      # sigma.isocline ~ dunif(0,100)
+      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
+      # 
+      # b.alt.x ~ dnorm(0, 0.001)
+      # b.alt.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempmax.x ~ dnorm(0, 0.001)
+      # b.tempmax.x2 ~ dnorm(0, 0.001)
+      # b.tempmin.x ~ dnorm(0, 0.001)
+      # b.tempmin.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x ~ dnorm(0, 0.001)
+      # b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.precipjja.x ~ dnorm(0, 0.001)
+      # b.precipjja.x2 ~ dnorm(0, 0.001)
+      # b.precipjfmam.x ~ dnorm(0, 0.001)
+      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
+      
+      phi ~ dgamma(0.1, 0.1)
+      
+      
+    # LIKELIHOOD for discrete part
+
+      for (i in 1:N_discrete){ 
+        cov.dis[i] ~ dbern(mu[i])
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+                        # b_isocline[isocline.dis[i]] +
+                        b.compet * compet.dis[i] + 
+                        # b.inclin_down * inclin_down.dis[i] +
+                        b.twi_90m * twi_90m.dis[i] + 
+                        b.sri * sri.dis[i] +
+                        b.tri * tri.dis[i]
+      }
+      
+      
+    # LIKELIHOOD for continuous part
+
+      for (j in 1:N_cont){
+        cov.cont[j] ~ dbeta(p[j], q[j])
+        p[j] <- mu2[j] * phi
+        q[j] <- (1 - mu2[j]) * phi
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
+                        # b_isocline[isocline.cont[j]] +
+                        b.compet * compet.cont[j] +
+                        # b.inclin_down * inclin_down.cont[j] +
+                        b.twi_90m * twi_90m.cont[j] + 
+                        b.sri * sri.cont[j] +
+                        b.tri * tri.cont[j]
+      }
+
+
+      for (k in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
+        mu.plotgroup[k] <- intercept + 
+                    
+                    # plot group level predictors, linear and quadratic term
+                    b.tempjja.x * tempjja.tot[k] + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempmax.x * tempmax.tot[k] + 
+                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
+                    # b.tempmin.x * tempmin.tot[k] + 
+                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
+                    b.tempcont.x * tempcont.tot[k] + 
+                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] # + 
+                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
+                    # b.precipjfmam.x * precipjfmam.tot[k] + 
+                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+      }
+      
+      
+      # for (l in 1:N_isoclines){ #length of total isoclines
+      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
+      #   mu.isocline[l] <- intercept + 
+      #   
+      #               # isocline-level predictor
+      #               b.alt.x * alt.tot[l]
+      # }
+
+      
+      # add predicted values (derived quantities)
+      for (m in 1:Nxhat){
+        phat[m] <- intercept + b.compet * xhat[m]
+      }
+    
+      }
+  ", file.path("..", "models", "shrub_gradient.SalGla2.xhat.jags"))
+```
+
+Specify the parameters to be monitored:
+```{r}
+params_SalGla2.xhat <- c("intercept",
+                    # "b.alt.x",
+                    "b.tempjja.x", # "b.tempjja.x2",
+                    # "b.tempmax.x", "b.tempmax.x2",
+                    # "b.tempmin.x", "b.tempmin.x2",
+                    "b.tempcont.x", # "b.tempcont.x2",
+                    "b.precipjja.x", # "b.precipjja.x2",
+                    # "b.precipjfmam.x", "b.precipjfmam.x2",
+                    "b.compet", 
+                    # "b.inclin_down",
+                    "b.sri",
+                    "b.tri",
+                    "b.twi_90m",
+                    "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
+                    # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
+                    "sigma.plotgroup",
+                    "phi",
+                    "phat")
+```
+
+Run model:
+```{r}
+model_out.shrub_gradient.SalGla2.xhat <- jags(shrub_gradient_jags.SalGla.xhat.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params_SalGla2.xhat,                             # parameters to be saved
+                                        model.file = file.path("..", "models", "shrub_gradient.SalGla2.xhat.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 10000, n.burnin = 7000,  # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text")
+
+# plot(model_out.shrub_gradient.SalGla2.xhat) #check convergence, etc.
+```
+
+Extract coefficients and plot effect sizes:
+```{r, warning = FALSE}
+# extract coefficients 
+coeff.shrub_gradient.SalGla2.xhat <- model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
+# add identifying info to data frame
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.SalGla),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# add 90% CIs
+ci_90.SalGla2.xhat <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$sims.list)-4)){
+  ci_90.SalGla2.xhat[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.SalGla2.xhat[param, 3] <- names(data.frame(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.SalGla2.xhat <- coeff.shrub_gradient.SalGla2.xhat %>% 
+  left_join(ci_90.SalGla2.xhat, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat) %>% print
+
+# effect size plot
+(effect_size_plot.SalGla2.xhat <- model_plot_sig_function(coeff.shrub_gradient.SalGla2.xhat, title_string = "Salix glauca", plot_width = 11))
+
+```
+
+extract predicted values:
+```{r}
+# get statistical summary
+model_xhat.out.df <- as.data.frame(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$summary[,c('mean','sd','2.5%','97.5%','n.eff','Rhat')])
+
+model_xhat.out.df$Param <- sapply(strsplit(rownames(model_xhat.out.df), "[[]", fixed=F),"[",1)
+
+p.out <- model_xhat.out.df[model_xhat.out.df$Param=="phat",]
+p.out$xhat <- shrub_gradient_jags.SalGla.xhat.data$xhat #add the "x" values you used to predict phats
+```
+
+plot along with back-scaled values:
+```{r}
+pred_plot.compet.SalGla +
+   geom_line(data = p.out, 
+            aes(x = xhat, 
+                y = mean), 
+            colour = "darkgreen",
+            alpha = 1,
+            size = 2) +
+  geom_ribbon(data = p.out,
+              aes(x = xhat,
+                  ymin = `2.5%`, 
+                  ymax = `97.5%`), 
+              alpha = 0.3, 
+              fill = "green")
+```
+
 
 ## Save workspace image
 ```{r}
