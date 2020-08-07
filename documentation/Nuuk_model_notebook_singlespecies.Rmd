@@ -3035,7 +3035,7 @@ str(shrub_gradient_jags.SalGla.xhat.data)
 
 We'll add some predicted values (phat) to the model:
 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 write("
   
   model{
@@ -3143,7 +3143,7 @@ write("
 ```
 
 Specify the parameters to be monitored:
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 params_SalGla2.xhat <- c("intercept",
                     # "b.alt.x",
                     "b.tempjja.x", # "b.tempjja.x2",
@@ -3165,7 +3165,7 @@ params_SalGla2.xhat <- c("intercept",
 ```
 
 Run model:
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 model_out.shrub_gradient.SalGla2.xhat <- jags(shrub_gradient_jags.SalGla.xhat.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_SalGla2.xhat,                             # parameters to be saved
@@ -3178,10 +3178,14 @@ model_out.shrub_gradient.SalGla2.xhat <- jags(shrub_gradient_jags.SalGla.xhat.da
                                         progress.bar = "text")
 
 # plot(model_out.shrub_gradient.SalGla2.xhat) #check convergence, etc.
+
+# save(model_out.shrub_gradient.SalGla2.xhat, file = file.path("..", "data", "processed", "model_output_SalGla2_with_derived_values.RData"))
 ```
 
 Extract coefficients and plot effect sizes:
 ```{r, warning = FALSE}
+# load model object
+load(file = file.path("..", "data", "processed", "model_output_SalGla2_with_derived_values.RData"))
 # extract coefficients 
 coeff.shrub_gradient.SalGla2.xhat <- model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$summary %>% 
   as.data.frame %>% 
