@@ -2755,7 +2755,7 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
 # save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
 #           nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
 
-# reduced predictor terms
+# 3x2 grid reduced predictor terms
 (nuuk_reduced_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan2, 
                                             effect_size_plot.EmpNig2, 
                                             effect_size_plot.RhoGro2, 
@@ -2787,7 +2787,7 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
 # save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
 #           nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
 
-# 2x3 grid (horizontal layout)
+# 2x3 grid reduced predictor terms
 (nuuk_reduced_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan2, 
                                             effect_size_plot.EmpNig2, 
                                             effect_size_plot.RhoGro2, 
@@ -3244,12 +3244,12 @@ pred_plot.compet.SalGla +
               alpha = 0.3, 
               fill = "green")
 ```
+## ----------
 
-
-## Save workspace image
+## Save / load workspace image
 ```{r}
-save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
+# save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
 
 # load ws for further analyses/plotting etc)
-# load(file.path("..", "data", "processed", "nuuk_shrub_drivers_output.RData"))
+# load(file.path("data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
 ```
