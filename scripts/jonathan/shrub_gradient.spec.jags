@@ -8,7 +8,7 @@
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      b.inclin_down ~ dnorm(0, 0.0001)
+      # b.inclin_down ~ dnorm(0, 0.0001)
       b.twi_90m ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
@@ -16,16 +16,16 @@
       
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      b.tempmax.x ~ dnorm(0, 0.001)
-      b.tempmax.x2 ~ dnorm(0, 0.001)
-      b.tempmin.x ~ dnorm(0, 0.001)
-      b.tempmin.x2 ~ dnorm(0, 0.001)
+      # b.tempmax.x ~ dnorm(0, 0.001)
+      # b.tempmax.x2 ~ dnorm(0, 0.001)
+      # b.tempmin.x ~ dnorm(0, 0.001)
+      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       b.precipjja.x2 ~ dnorm(0, 0.001)
-      b.precipjfmam.x ~ dnorm(0, 0.001)
-      b.precipjfmam.x2 ~ dnorm(0, 0.001)
+      # b.precipjfmam.x ~ dnorm(0, 0.001)
+      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -36,7 +36,7 @@
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        b.inclin_down * inclin_down.dis[i] +
+                        # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
                         b.sri * sri.dis[i] 
       }
@@ -49,8 +49,8 @@
         p[i] <- mu2[i] * phi
         q[i] <- (1 - mu2[i]) * phi
         logit(mu2[i]) <- b_plotgroup[plotgroup.cont[i]] + #AB added this, ~= random effect of plot group
-                        b.compet * compet.cont[i] + 
-                        b.inclin_down * inclin_down.cont[i] +
+                        b.compet * compet.cont[i] +
+                        # b.inclin_down * inclin_down.cont[i] +
                         b.twi_90m * twi_90m.cont[i] + 
                         b.sri * sri.cont[i] 
       }
@@ -63,16 +63,16 @@
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[j] + 
                     b.tempjja.x2 * (tempjja.tot[j]^2) + 
-                    b.tempmax.x * tempmax.tot[j] + 
-                    b.tempmax.x2 * (tempmax.tot[j]^2) +
-                    b.tempmin.x * tempmin.tot[j] + 
-                    b.tempmin.x2 * (tempmin.tot[j]^2) +
+                    # b.tempmax.x * tempmax.tot[j] + 
+                    # b.tempmax.x2 * (tempmax.tot[j]^2) +
+                    # b.tempmin.x * tempmin.tot[j] + 
+                    # b.tempmin.x2 * (tempmin.tot[j]^2) +
                     b.tempcont.x * tempcont.tot[j] + 
                     b.tempcont.x2 * (tempcont.tot[j]^2) +
                     b.precipjja.x * precipjja.tot[j] + 
-                    b.precipjja.x2 * (precipjja.tot[j]^2) +
-                    b.precipjfmam.x * precipjfmam.tot[j] + 
-                    b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
+                    b.precipjja.x2 * (precipjja.tot[j]^2) # +
+                    # b.precipjfmam.x * precipjfmam.tot[j] + 
+                    # b.precipjfmam.x2 * (precipjfmam.tot[j]^2)
       }
 
     
