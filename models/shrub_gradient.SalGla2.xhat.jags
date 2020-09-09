@@ -97,7 +97,7 @@
       
       # add predicted values (derived quantities)
       for (m in 1:Nxhat){
-        phat[m] <- intercept + b.compet * xhat[m]
+        phat[m] <- intercept + b.tempcont.x * xhat[m]
       }
     
       }

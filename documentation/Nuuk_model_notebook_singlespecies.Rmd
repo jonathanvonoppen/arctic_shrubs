@@ -620,7 +620,7 @@ data.frame(taxon = levels(env_cov_bio_sub$taxon),
            num = unique(env_cov_bio_sub$taxon.NUM))
 ```
 
-Numeric predictors were scaled: 
+Numeric predictors were scaled and centered: 
 ```{r}
 num_pred <- env_cov_bio_sub %>% select(alt,
                                        ends_with("_ts_30"), 
@@ -2854,7 +2854,7 @@ for (i in 1:nrow(predsmatrix.tempcont.BetNan)){
   predsmatrix.tempcont.BetNan[i,c(2:6)] <- quantiles.tempcont.BetNan[i,]
 }
 
-predsmatrix.tempcont.BetNan$tempcont <- predsmatrix.tempcont.BetNan$tempcont_ts_30C + attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:center')
+predsmatrix.tempcont.BetNan$tempcont <- attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:scale') + attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:center')
 
 ggplot() +
   # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
@@ -3024,7 +3024,7 @@ shrub_gradient_jags.SalGla.xhat.data <- list(
   # precipjfmam.tot = SalGla.tot$precipjfmam_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)]
   N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
   
-  xhat = seq(from = min(SalGla.tot$compet), to = max(SalGla.tot$compet), length.out = 100),
+  xhat = seq(from = min(SalGla.tot$tempcont_ts_30C), to = max(SalGla.tot$tempcont_ts_30C), length.out = 100),
   Nxhat = 100
   # # site/alt level predictors
   # alt.tot = SalGla.tot$altC[!duplicated(SalGla.tot$site_alt.NUM)],
@@ -3135,7 +3135,7 @@ write("
       
       # add predicted values (derived quantities)
       for (m in 1:Nxhat){
-        phat[m] <- intercept + b.compet * xhat[m]
+        phat[m] <- intercept + b.tempcont.x * xhat[m]
       }
     
       }
@@ -3180,6 +3180,90 @@ model_out.shrub_gradient.SalGla2.xhat <- jags(shrub_gradient_jags.SalGla.xhat.da
 # plot(model_out.shrub_gradient.SalGla2.xhat) #check convergence, etc.
 
 # save(model_out.shrub_gradient.SalGla2.xhat, file = file.path("..", "data", "processed", "model_output_SalGla2_with_derived_values.RData"))
+```
+Extract coefficients and make graph of data and prediction curve:
+```{r}
+# extract coefficients 
+coeff.shrub_gradient.SalGla2.xhat <- model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
+# add identifying info to data frame
+  rownames_to_column(var = "param")
+  # mutate(param = as.vector(sapply(strsplit(rownames(coeff.shrub_gradient.SalGla2.xhat),"[[]",fixed=FALSE), "[", 1))) #%>% print
+
+# # add 90% CIs
+# ci_90.SalGla2.xhat <- data.frame(q5 = NA, 
+#                                  q95 = NA, 
+#                                  param = NA)
+# for (param in 1:(length(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$sims.list))){
+#   ci_90.SalGla2.xhat[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$sims.list[param])[,1], 
+#                                             probs = c(0.05, 0.95))
+#   ci_90.SalGla2.xhat[param, 3] <- names(data.frame(model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$sims.list))[param]
+# }
+
+# join to coefficients table
+coeff.shrub_gradient.SalGla2.xhat <- coeff.shrub_gradient.SalGla2.xhat %>% 
+  # left_join(ci_90.SalGla2.xhat, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         # l90 = q5,
+         # u90 = q95,
+         u95 = "97.5%",
+         Rhat) # %>% print
+
+# assemble predicted and predictor values
+phats <- coeff.shrub_gradient.SalGla2.xhat %>% 
+  
+  # filter for predicted values
+  filter(param %in% c(paste0("phat[", seq(from = 1, to = 100), "]"))) %>% 
+  
+  # add xhats column
+  mutate(xhats = seq(from = min(SalGla.tot$tempcont_ts_30C),
+                     to = max(SalGla.tot$tempcont_ts_30C),
+                     length.out = 100))
+  
+# back-center and back-scale predictor values (xhats)
+
+phats$tempcont <- phats$xhats*attr(scale(SalGla.tot$tempcont_ts_30), 'scaled:scale') + attr(scale(SalGla.tot$tempcont_ts_30), 'scaled:center') 
+
+ggplot() +
+  # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
+  geom_point(data = SalGla.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont_ts_30), cover = mean(cover)), 
+             aes(x = tempcont, 
+                 y = cover), 
+             size = 2,
+             position = position_jitter(width=0, height=.01),
+             alpha=0.5) +
+  
+  # draw line of predicted values
+  geom_line(data = phats, 
+            aes(x = tempcont, 
+                y = plogis(mean)), 
+            colour = "orange",
+            alpha = 1,
+            size = 3) + 
+  # scale_colour_manual(values=c("darkgreen","orange","darkgreen","orange"),name="Biome") +
+  
+  # draw predicted 95% CI
+  geom_ribbon(data = phats,
+              aes(x = tempcont, 
+                  ymin = plogis(l95), 
+                  ymax = plogis(u95)),
+              fill = "orange",
+              alpha = 0.2) +
+  
+  # draw predicted 90% CI
+  # geom_ribbon(data = phats,
+  #               aes(x = tempcont,
+  #                 ymin = plogis(l90),
+  #                 ymax = plogis(u90)),
+  #             fill = "orange",
+  #             alpha = 0.4) +
+  # scale_fill_manual(values=c("darkgreen","orange"),name="Biome") +
+  labs(x = "annual temperature variability [°C]",
+       y = "rel. no. hits per plot") + 
+  theme_bw()
 ```
 
 Extract coefficients and plot effect sizes:
