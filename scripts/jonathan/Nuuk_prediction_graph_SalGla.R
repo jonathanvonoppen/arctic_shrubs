@@ -19,7 +19,7 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
 # Data preparation ----
 
 # Load data
-env_cov_bio <- read.csv(file.path("data", "nuuk_env_cover_plots.csv", header = T))
+env_cov_bio <- read.csv(file.path("data", "nuuk_env_cover_plots.csv"), header = T)
   
 # Filter data for relevant variables
 env_cov_bio_sub <- env_cov_bio %>% 
@@ -225,7 +225,7 @@ params_SalGla2.xhat <- c("intercept",
 model_out.shrub_gradient.SalGla2.xhat <- jags(shrub_gradient_jags.SalGla.xhat.data,    # input data
                                               inits = NULL,                            # JAGS to create initial values
                                               params_SalGla2.xhat,                     # parameters to be saved
-                                              model.file = file.path("..", "models", "shrub_gradient.SalGla2.xhat.jags"), 
+                                              model.file = file.path("models", "shrub_gradient.SalGla2.xhat.jags"), 
                                               n.chains = 3,                            # no. Markov chains
                                               n.iter = 10000, n.burnin = 7000,         # no. iterations & burn-in fraction per chain
                                               n.thin = 2,                              # thinning rate
