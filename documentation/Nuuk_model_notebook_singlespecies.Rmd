@@ -943,11 +943,25 @@ shrub_gradient_jags.BetNan.data <- list(
   tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = BetNan.tot$altC[!duplicated(BetNan.tot$site_alt.NUM)],
   # N_isoclines = length(unique(BetNan.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(BetNan.tot$competC), to = max(BetNan.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(BetNan.tot$sriC), to = max(BetNan.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(BetNan.tot$triC), to = max(BetNan.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(BetNan.tot$twi_90mC), to = max(BetNan.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(BetNan.tot$tempjja_ts_30C), to = max(BetNan.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(BetNan.tot$precipjja_ts_30C), to = max(BetNan.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(BetNan.tot$tempcont_ts_30C), to = max(BetNan.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(BetNan.tot$tempjja_ts_30C,0.05),quantile(BetNan.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.BetNan.data)
 
@@ -983,11 +997,25 @@ shrub_gradient_jags.CasTet.data <- list(
   tempcont.tot = CasTet.tot$tempcont_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)],
   precipjja.tot = CasTet.tot$precipjja_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)],
   # precipjfmam.tot = CasTet.tot$precipjfmam_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(CasTet.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(CasTet.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = CasTet.tot$altC[!duplicated(CasTet.tot$site_alt.NUM)],
   # N_isoclines = length(unique(CasTet.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(CasTet.tot$competC), to = max(CasTet.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(CasTet.tot$sriC), to = max(CasTet.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(CasTet.tot$triC), to = max(CasTet.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(CasTet.tot$twi_90mC), to = max(CasTet.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(CasTet.tot$tempjja_ts_30C), to = max(CasTet.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(CasTet.tot$precipjja_ts_30C), to = max(CasTet.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(CasTet.tot$tempcont_ts_30C), to = max(CasTet.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(CasTet.tot$tempjja_ts_30C,0.05),quantile(CasTet.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.CasTet.data)
 
@@ -1023,11 +1051,25 @@ shrub_gradient_jags.EmpNig.data <- list(
   tempcont.tot = EmpNig.tot$tempcont_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)],
   precipjja.tot = EmpNig.tot$precipjja_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)],
   # precipjfmam.tot = EmpNig.tot$precipjfmam_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(EmpNig.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(EmpNig.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = EmpNig.tot$altC[!duplicated(EmpNig.tot$site_alt.NUM)],
   # N_isoclines = length(unique(EmpNig.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(EmpNig.tot$competC), to = max(EmpNig.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(EmpNig.tot$sriC), to = max(EmpNig.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(EmpNig.tot$triC), to = max(EmpNig.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(EmpNig.tot$twi_90mC), to = max(EmpNig.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(EmpNig.tot$tempjja_ts_30C), to = max(EmpNig.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(EmpNig.tot$precipjja_ts_30C), to = max(EmpNig.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(EmpNig.tot$tempcont_ts_30C), to = max(EmpNig.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(EmpNig.tot$tempjja_ts_30C,0.05),quantile(EmpNig.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.EmpNig.data)
 
@@ -1063,11 +1105,25 @@ shrub_gradient_jags.PhyCae.data <- list(
   tempcont.tot = PhyCae.tot$tempcont_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)],
   precipjja.tot = PhyCae.tot$precipjja_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)],
   # precipjfmam.tot = PhyCae.tot$precipjfmam_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(PhyCae.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(PhyCae.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = PhyCae.tot$altC[!duplicated(PhyCae.tot$site_alt.NUM)],
   # N_isoclines = length(unique(PhyCae.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(PhyCae.tot$competC), to = max(PhyCae.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(PhyCae.tot$sriC), to = max(PhyCae.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(PhyCae.tot$triC), to = max(PhyCae.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(PhyCae.tot$twi_90mC), to = max(PhyCae.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(PhyCae.tot$tempjja_ts_30C), to = max(PhyCae.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(PhyCae.tot$precipjja_ts_30C), to = max(PhyCae.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(PhyCae.tot$tempcont_ts_30C), to = max(PhyCae.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(PhyCae.tot$tempjja_ts_30C,0.05),quantile(PhyCae.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.PhyCae.data)
 
@@ -1103,11 +1159,25 @@ shrub_gradient_jags.RhoGro.data <- list(
   tempcont.tot = RhoGro.tot$tempcont_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)],
   precipjja.tot = RhoGro.tot$precipjja_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)],
   # precipjfmam.tot = RhoGro.tot$precipjfmam_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(RhoGro.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(RhoGro.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = RhoGro.tot$altC[!duplicated(RhoGro.tot$site_alt.NUM)],
   # N_isoclines = length(unique(RhoGro.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(RhoGro.tot$competC), to = max(RhoGro.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(RhoGro.tot$sriC), to = max(RhoGro.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(RhoGro.tot$triC), to = max(RhoGro.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(RhoGro.tot$twi_90mC), to = max(RhoGro.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(RhoGro.tot$tempjja_ts_30C), to = max(RhoGro.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(RhoGro.tot$precipjja_ts_30C), to = max(RhoGro.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(RhoGro.tot$tempcont_ts_30C), to = max(RhoGro.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(RhoGro.tot$tempjja_ts_30C,0.05),quantile(RhoGro.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.RhoGro.data)
 
@@ -1143,11 +1213,25 @@ shrub_gradient_jags.RhoTom.data <- list(
   tempcont.tot = RhoTom.tot$tempcont_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)],
   precipjja.tot = RhoTom.tot$precipjja_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)],
   # precipjfmam.tot = RhoTom.tot$precipjfmam_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(RhoTom.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(RhoTom.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = RhoTom.tot$altC[!duplicated(RhoTom.tot$site_alt.NUM)],
   # N_isoclines = length(unique(RhoTom.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(RhoTom.tot$competC), to = max(RhoTom.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(RhoTom.tot$sriC), to = max(RhoTom.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(RhoTom.tot$triC), to = max(RhoTom.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(RhoTom.tot$twi_90mC), to = max(RhoTom.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(RhoTom.tot$tempjja_ts_30C), to = max(RhoTom.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(RhoTom.tot$precipjja_ts_30C), to = max(RhoTom.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(RhoTom.tot$tempcont_ts_30C), to = max(RhoTom.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(RhoTom.tot$tempjja_ts_30C,0.05),quantile(RhoTom.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.RhoTom.data)
 
@@ -1183,11 +1267,25 @@ shrub_gradient_jags.SalArc.data <- list(
   tempcont.tot = SalArc.tot$tempcont_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)],
   precipjja.tot = SalArc.tot$precipjja_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)],
   # precipjfmam.tot = SalArc.tot$precipjfmam_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(SalArc.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(SalArc.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = SalArc.tot$altC[!duplicated(SalArc.tot$site_alt.NUM)],
   # N_isoclines = length(unique(SalArc.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(SalArc.tot$competC), to = max(SalArc.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(SalArc.tot$sriC), to = max(SalArc.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(SalArc.tot$triC), to = max(SalArc.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(SalArc.tot$twi_90mC), to = max(SalArc.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(SalArc.tot$tempjja_ts_30C), to = max(SalArc.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(SalArc.tot$precipjja_ts_30C), to = max(SalArc.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(SalArc.tot$tempcont_ts_30C), to = max(SalArc.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(SalArc.tot$tempjja_ts_30C,0.05),quantile(SalArc.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.SalArc.data)
 
@@ -1223,11 +1321,25 @@ shrub_gradient_jags.SalGla.data <- list(
   tempcont.tot = SalGla.tot$tempcont_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
   precipjja.tot = SalGla.tot$precipjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
   # precipjfmam.tot = SalGla.tot$precipjfmam_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = SalGla.tot$altC[!duplicated(SalGla.tot$site_alt.NUM)],
   # N_isoclines = length(unique(SalGla.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(SalGla.tot$competC), to = max(SalGla.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(SalGla.tot$sriC), to = max(SalGla.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(SalGla.tot$triC), to = max(SalGla.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(SalGla.tot$twi_90mC), to = max(SalGla.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(SalGla.tot$tempjja_ts_30C), to = max(SalGla.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(SalGla.tot$precipjja_ts_30C), to = max(SalGla.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(SalGla.tot$tempcont_ts_30C), to = max(SalGla.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(SalGla.tot$tempjja_ts_30C,0.05),quantile(SalGla.tot$tempjja_ts_30C,0.95))), 
+  Nxhat_CI = 2
 )
 str(shrub_gradient_jags.SalGla.data)
 
@@ -1263,11 +1375,25 @@ shrub_gradient_jags.VacUli.data <- list(
   tempcont.tot = VacUli.tot$tempcont_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)],
   precipjja.tot = VacUli.tot$precipjja_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)],
   # precipjfmam.tot = VacUli.tot$precipjfmam_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(VacUli.tot$site_alt_plotgroup_id))
+  N_plotgroups = length(unique(VacUli.tot$site_alt_plotgroup_id)),
   
   # # site/alt level predictors
   # alt.tot = VacUli.tot$altC[!duplicated(VacUli.tot$site_alt.NUM)],
   # N_isoclines = length(unique(VacUli.tot$site_alt_id))
+  
+  # subset of values for prediction, for each predictor...
+  xhat_compet = seq(from = min(VacUli.tot$competC), to = max(VacUli.tot$competC), length.out = 100),
+  xhat_sri = seq(from = min(VacUli.tot$sriC), to = max(VacUli.tot$sriC), length.out = 100),
+  xhat_tri = seq(from = min(VacUli.tot$triC), to = max(VacUli.tot$triC), length.out = 100),
+  xhat_twi = seq(from = min(VacUli.tot$twi_90mC), to = max(VacUli.tot$twi_90mC), length.out = 100),
+  xhat_tempjja = seq(from = min(VacUli.tot$tempjja_ts_30C), to = max(VacUli.tot$tempjja_ts_30C), length.out = 100),
+  xhat_precipjja = seq(from = min(VacUli.tot$precipjja_ts_30C), to = max(VacUli.tot$precipjja_ts_30C), length.out = 100),
+  xhat_tempcont = seq(from = min(VacUli.tot$tempcont_ts_30C), to = max(VacUli.tot$tempcont_ts_30C), length.out = 100),
+  Nxhat = 100,
+  
+  # ... and for predicting at high/low temperature levels
+  xhat_tempjja2 = as.numeric(c(quantile(VacUli.tot$tempjja_ts_30C,0.05),quantile(VacUli.tot$tempjja_ts_30C,0.95))), 
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.VacUli.data)
 
@@ -1286,30 +1412,18 @@ write("
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
       b.twi_90m ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -1318,10 +1432,8 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -1334,10 +1446,8 @@ write("
         cov.cont[j] ~ dbeta(p[j], q[j])
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
                         b.twi_90m * twi_90m.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -1351,26 +1461,25 @@ write("
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
                     b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
                     b.tempcont.x * tempcont.tot[k] + 
                     b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] + 
-                    b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                    b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_sri[m] <- intercept + b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
+        
+        
+      }
 
     
       }
@@ -1380,21 +1489,17 @@ write("
 Specify the parameters to be monitored:
 ```{r}
 params <- c("intercept",
-            # "b.alt.x",
             "b.tempjja.x", "b.tempjja.x2",
-            # "b.tempmax.x", "b.tempmax.x2",
-            # "b.tempmin.x", "b.tempmin.x2",
             "b.tempcont.x", "b.tempcont.x2",
             "b.precipjja.x", "b.precipjja.x2",
-            # "b.precipjfmam.x", "b.precipjfmam.x2",
             "b.compet", 
-            # "b.inclin_down", 
             "b.sri",
             "b.tri",
             "b.twi_90m",
             "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-            # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
-            "sigma.plotgroup","phi")
+            "sigma.plotgroup",
+            "phi",
+            "phat_compet", "phat_sri", "phat_tri", "phat_twi", "phat_tempjja", "phat_tempcont", "phat_precipjja")
 ```
 
 ### > run & evaluate model
