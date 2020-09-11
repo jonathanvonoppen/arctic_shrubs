@@ -80,7 +80,7 @@ model_plot_sig_function <- function(model_coeff_output, title_string, plot_width
                    "b.precipjja.x", "b.precipjja.x2",
                    "b.sri",
                    "b.tri",
-                   "b.twi_90m", 
+                   "b.twi", 
                    "b.compet")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
@@ -92,7 +92,7 @@ model_plot_sig_function <- function(model_coeff_output, title_string, plot_width
   #                                          "b.precipjja.x", "b.precipjja.x2",
   #                                          "b.sri",
   #                                          "b.tri",
-  #                                          "b.twi_90m",
+  #                                          "b.twi",
   #                                          "b.compet"))
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
@@ -128,7 +128,7 @@ model_plot_sig_function <- function(model_coeff_output, title_string, plot_width
     #         "b.precipjja.x", "b.precipjja.x2",
     #         "b.sri",
     #         "b.tri",
-    #         "b.twi_90m",
+    #         "b.twi",
     #         "b.compet"),
     #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
     #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
@@ -151,7 +151,7 @@ model_plot_marg_function <- function(model_coeff_output, title_string, plot_widt
                    "b.precipjja.x", "b.precipjja.x2",
                    "b.sri",
                    "b.tri",
-                   "b.twi_90m", 
+                   "b.twi", 
                    "b.compet")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
@@ -163,7 +163,7 @@ model_plot_marg_function <- function(model_coeff_output, title_string, plot_widt
   #                                          "b.precipjja.x", "b.precipjja.x2",
   #                                          "b.sri",
   #                                          "b.tri",
-  #                                          "b.twi_90m",
+  #                                          "b.twi",
   #                                          "b.compet"))
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
@@ -202,7 +202,7 @@ model_plot_marg_function <- function(model_coeff_output, title_string, plot_widt
     #         "b.precipjja.x", "b.precipjja.x2",
     #         "b.sri",
     #         "b.tri",
-    #         "b.twi_90m",
+    #         "b.twi",
     #         "b.compet"),
     #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
     #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
@@ -243,7 +243,9 @@ This dataset is a new one containing predictors extracted from downscaled CHELSA
 Analyses conducted on fusion table at **plot $\times$ taxon level** (as we are explicitly interested in plot-level variation of predictors, esp. slope, solar radiation, terrain ruggedness, topographical wetness, and competition): 3726 observations for 38 variables
 
 ```{r}
-env_cov_bio <- read.csv("../data/nuuk_env_cover_plots.csv", header = T)
+env_cov_bio <- read.csv("../data/nuuk_env_cover_plots.csv", header = T) %>% 
+  # rename variable "twi_90m" to "twi"
+  rename(twi = twi_90m)
 ```
 <!-- <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show/Hide Data Summary </button> -->
 <!-- <div id="BlockName" class="collapse"> -->
@@ -269,7 +271,7 @@ and response variable
 env_cov_bio_sub <- env_cov_bio %>% 
   select(site_alt_plotgroup_id, plot, site, site_alt_id, year, long, lat, alt,  # plot info / metadata
   ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
-  inclin_down, twi_90m, tri, sri, 
+  inclin_down, twi, tri, sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
 head(env_cov_bio_sub)
@@ -279,7 +281,7 @@ Let's check for correlation between the different moisture predictors and terrai
 
 ```{r}
 (cor_moist <- env_cov_bio %>% 
-  select(twi_90m, ndwi, tcws, tri)) %>% 
+  select(twi, ndwi, tcws, tri)) %>% 
   correlate(diagonal = 1)
 ```
 $\Rightarrow$ NDWI and TCWS are highly correlated, but both are largely independent from TWI and TRI.
@@ -306,7 +308,7 @@ Check for correlation between predictors:
 ```{r}
 predictors_set <- env_cov_bio_sub %>% 
   select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
-         inclin_down, sri, tri, twi_90m,      # environmental data
+         inclin_down, sri, tri, twi,      # environmental data
          compet) %>% 
   names()
 # create basic correlation matrix
@@ -411,6 +413,12 @@ env_cov_bio_sub <- env_cov_bio_sub %>%
 ### > predictor patterns along the gradient
 ```{r}
 # data compilation ----
+predictors_set <- env_cov_bio %>% 
+  select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
+         inclin_down, sri, tri, twi,      # environmental data
+         compet) %>% 
+  names()
+
 preds_plot_data <- env_cov_bio %>% 
          
          # convert site, isocline & plotgroup to factors
@@ -444,7 +452,7 @@ preds_plot_data <- env_cov_bio %>%
                                        "slope angle [°]" = "inclin_down",
                                        "Solar Radiation \n Index" = "sri",
                                        "Terrain Ruggedness \n Index" = "tri",
-                                       "Topographic Wetness \n Index" = "twi_90m",
+                                       "Topographic Wetness \n Index" = "twi",
                                        "overgrowing \n competition" = "compet"),
                 predictor = fct_relevel(predictor,
                                         "summer \n temperature [°C]",
@@ -575,7 +583,7 @@ env_cov_bio.long <- env_cov_bio %>%
          precipjja_ts_30,
          sri,
          tri,
-         twi_90m,
+         twi,
          compet,
          cover) %>% 
   # pivot to long format
@@ -584,7 +592,7 @@ env_cov_bio.long <- env_cov_bio %>%
                         precipjja_ts_30,
                         sri,
                         tri,
-                        twi_90m,
+                        twi,
                         compet),
                names_to = "predictor",
                values_to = "pred_value")
@@ -664,7 +672,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # inclin_down.dis = BetNan.dis$inclin_downC,
   sri.dis = BetNan.dis$sriC,
   tri.dis = BetNan.dis$triC,
-  twi_90m.dis = BetNan.dis$twi_90mC,
+  twi.dis = BetNan.dis$twiC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
   
@@ -675,7 +683,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # inclin_down.cont = BetNan.cont$inclin_downC,
   sri.cont = BetNan.cont$sriC,
   tri.cont = BetNan.cont$triC,
-  twi_90m.cont = BetNan.cont$twi_90mC,
+  twi.cont = BetNan.cont$twiC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
   
@@ -709,7 +717,7 @@ write("
       b.sri ~ dnorm(0, 0.0001)
       # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
@@ -743,7 +751,7 @@ write("
                         # b_isocline[isocline.dis[i]] +
                         b.compet * compet.dis[i] + 
                         # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -759,7 +767,7 @@ write("
                         # b_isocline[isocline.cont[j]] +
                         b.compet * compet.cont[j] +
                         # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -812,7 +820,7 @@ params <- c("intercept",
             # "b.inclin_down", 
             "b.sri",
             "b.tri",
-            "b.twi_90m",
+            "b.twi",
             "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
             "b_isocline[1]","b_isocline[2]","b_isocline[21]",
             "sigma.plotgroup","phi")
@@ -921,7 +929,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # inclin_down.dis = BetNan.dis$inclin_downC,
   sri.dis = BetNan.dis$sriC,
   tri.dis = BetNan.dis$triC,
-  twi_90m.dis = BetNan.dis$twi_90mC,
+  twi.dis = BetNan.dis$twiC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
   
@@ -932,7 +940,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # inclin_down.cont = BetNan.cont$inclin_downC,
   sri.cont = BetNan.cont$sriC,
   tri.cont = BetNan.cont$triC,
-  twi_90m.cont = BetNan.cont$twi_90mC,
+  twi.cont = BetNan.cont$twiC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
   
@@ -953,7 +961,7 @@ shrub_gradient_jags.BetNan.data <- list(
   xhat_compet = seq(from = min(BetNan.tot$competC), to = max(BetNan.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(BetNan.tot$sriC), to = max(BetNan.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(BetNan.tot$triC), to = max(BetNan.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(BetNan.tot$twi_90mC), to = max(BetNan.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(BetNan.tot$twiC), to = max(BetNan.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(BetNan.tot$tempjja_ts_30C), to = max(BetNan.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(BetNan.tot$precipjja_ts_30C), to = max(BetNan.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(BetNan.tot$tempcont_ts_30C), to = max(BetNan.tot$tempcont_ts_30C), length.out = 100),
@@ -961,7 +969,7 @@ shrub_gradient_jags.BetNan.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(BetNan.tot$tempjja_ts_30C,0.05),quantile(BetNan.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.BetNan.data)
 
@@ -975,7 +983,7 @@ shrub_gradient_jags.CasTet.data <- list(
   # inclin_down.dis = CasTet.dis$inclin_downC,
   sri.dis = CasTet.dis$sriC,
   tri.dis = CasTet.dis$triC,
-  twi_90m.dis = CasTet.dis$twi_90mC,
+  twi.dis = CasTet.dis$twiC,
   compet.dis = CasTet.dis$competC,
   N_discrete = nrow(CasTet.dis),
   
@@ -986,7 +994,7 @@ shrub_gradient_jags.CasTet.data <- list(
   # inclin_down.cont = CasTet.cont$inclin_downC,
   sri.cont = CasTet.cont$sriC,
   tri.cont = CasTet.cont$triC,
-  twi_90m.cont = CasTet.cont$twi_90mC,
+  twi.cont = CasTet.cont$twiC,
   compet.cont = CasTet.cont$competC,
   N_cont = nrow(CasTet.cont),
   
@@ -1007,7 +1015,7 @@ shrub_gradient_jags.CasTet.data <- list(
   xhat_compet = seq(from = min(CasTet.tot$competC), to = max(CasTet.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(CasTet.tot$sriC), to = max(CasTet.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(CasTet.tot$triC), to = max(CasTet.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(CasTet.tot$twi_90mC), to = max(CasTet.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(CasTet.tot$twiC), to = max(CasTet.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(CasTet.tot$tempjja_ts_30C), to = max(CasTet.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(CasTet.tot$precipjja_ts_30C), to = max(CasTet.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(CasTet.tot$tempcont_ts_30C), to = max(CasTet.tot$tempcont_ts_30C), length.out = 100),
@@ -1015,7 +1023,7 @@ shrub_gradient_jags.CasTet.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(CasTet.tot$tempjja_ts_30C,0.05),quantile(CasTet.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.CasTet.data)
 
@@ -1029,7 +1037,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   # inclin_down.dis = EmpNig.dis$inclin_downC,
   sri.dis = EmpNig.dis$sriC,
   tri.dis = EmpNig.dis$triC,
-  twi_90m.dis = EmpNig.dis$twi_90mC,
+  twi.dis = EmpNig.dis$twiC,
   compet.dis = EmpNig.dis$competC,
   N_discrete = nrow(EmpNig.dis),
   
@@ -1040,7 +1048,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   # inclin_down.cont = EmpNig.cont$inclin_downC,
   sri.cont = EmpNig.cont$sriC,
   tri.cont = EmpNig.cont$triC,
-  twi_90m.cont = EmpNig.cont$twi_90mC,
+  twi.cont = EmpNig.cont$twiC,
   compet.cont = EmpNig.cont$competC,
   N_cont = nrow(EmpNig.cont),
   
@@ -1061,7 +1069,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   xhat_compet = seq(from = min(EmpNig.tot$competC), to = max(EmpNig.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(EmpNig.tot$sriC), to = max(EmpNig.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(EmpNig.tot$triC), to = max(EmpNig.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(EmpNig.tot$twi_90mC), to = max(EmpNig.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(EmpNig.tot$twiC), to = max(EmpNig.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(EmpNig.tot$tempjja_ts_30C), to = max(EmpNig.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(EmpNig.tot$precipjja_ts_30C), to = max(EmpNig.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(EmpNig.tot$tempcont_ts_30C), to = max(EmpNig.tot$tempcont_ts_30C), length.out = 100),
@@ -1069,7 +1077,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(EmpNig.tot$tempjja_ts_30C,0.05),quantile(EmpNig.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.EmpNig.data)
 
@@ -1083,7 +1091,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   # inclin_down.dis = PhyCae.dis$inclin_downC,
   sri.dis = PhyCae.dis$sriC,
   tri.dis = PhyCae.dis$triC,
-  twi_90m.dis = PhyCae.dis$twi_90mC,
+  twi.dis = PhyCae.dis$twiC,
   compet.dis = PhyCae.dis$competC,
   N_discrete = nrow(PhyCae.dis),
   
@@ -1094,7 +1102,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   # inclin_down.cont = PhyCae.cont$inclin_downC,
   sri.cont = PhyCae.cont$sriC,
   tri.cont = PhyCae.cont$triC,
-  twi_90m.cont = PhyCae.cont$twi_90mC,
+  twi.cont = PhyCae.cont$twiC,
   compet.cont = PhyCae.cont$competC,
   N_cont = nrow(PhyCae.cont),
   
@@ -1115,7 +1123,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   xhat_compet = seq(from = min(PhyCae.tot$competC), to = max(PhyCae.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(PhyCae.tot$sriC), to = max(PhyCae.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(PhyCae.tot$triC), to = max(PhyCae.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(PhyCae.tot$twi_90mC), to = max(PhyCae.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(PhyCae.tot$twiC), to = max(PhyCae.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(PhyCae.tot$tempjja_ts_30C), to = max(PhyCae.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(PhyCae.tot$precipjja_ts_30C), to = max(PhyCae.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(PhyCae.tot$tempcont_ts_30C), to = max(PhyCae.tot$tempcont_ts_30C), length.out = 100),
@@ -1123,7 +1131,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(PhyCae.tot$tempjja_ts_30C,0.05),quantile(PhyCae.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.PhyCae.data)
 
@@ -1137,7 +1145,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   # inclin_down.dis = RhoGro.dis$inclin_downC,
   sri.dis = RhoGro.dis$sriC,
   tri.dis = RhoGro.dis$triC,
-  twi_90m.dis = RhoGro.dis$twi_90mC,
+  twi.dis = RhoGro.dis$twiC,
   compet.dis = RhoGro.dis$competC,
   N_discrete = nrow(RhoGro.dis),
   
@@ -1148,7 +1156,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   # inclin_down.cont = RhoGro.cont$inclin_downC,
   sri.cont = RhoGro.cont$sriC,
   tri.cont = RhoGro.cont$triC,
-  twi_90m.cont = RhoGro.cont$twi_90mC,
+  twi.cont = RhoGro.cont$twiC,
   compet.cont = RhoGro.cont$competC,
   N_cont = nrow(RhoGro.cont),
   
@@ -1169,7 +1177,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   xhat_compet = seq(from = min(RhoGro.tot$competC), to = max(RhoGro.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(RhoGro.tot$sriC), to = max(RhoGro.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(RhoGro.tot$triC), to = max(RhoGro.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(RhoGro.tot$twi_90mC), to = max(RhoGro.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(RhoGro.tot$twiC), to = max(RhoGro.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(RhoGro.tot$tempjja_ts_30C), to = max(RhoGro.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(RhoGro.tot$precipjja_ts_30C), to = max(RhoGro.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(RhoGro.tot$tempcont_ts_30C), to = max(RhoGro.tot$tempcont_ts_30C), length.out = 100),
@@ -1177,7 +1185,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(RhoGro.tot$tempjja_ts_30C,0.05),quantile(RhoGro.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.RhoGro.data)
 
@@ -1191,7 +1199,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   # inclin_down.dis = RhoTom.dis$inclin_downC,
   sri.dis = RhoTom.dis$sriC,
   tri.dis = RhoTom.dis$triC,
-  twi_90m.dis = RhoTom.dis$twi_90mC,
+  twi.dis = RhoTom.dis$twiC,
   compet.dis = RhoTom.dis$competC,
   N_discrete = nrow(RhoTom.dis),
   
@@ -1202,7 +1210,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   # inclin_down.cont = RhoTom.cont$inclin_downC,
   sri.cont = RhoTom.cont$sriC,
   tri.cont = RhoTom.cont$triC,
-  twi_90m.cont = RhoTom.cont$twi_90mC,
+  twi.cont = RhoTom.cont$twiC,
   compet.cont = RhoTom.cont$competC,
   N_cont = nrow(RhoTom.cont),
   
@@ -1223,7 +1231,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   xhat_compet = seq(from = min(RhoTom.tot$competC), to = max(RhoTom.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(RhoTom.tot$sriC), to = max(RhoTom.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(RhoTom.tot$triC), to = max(RhoTom.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(RhoTom.tot$twi_90mC), to = max(RhoTom.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(RhoTom.tot$twiC), to = max(RhoTom.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(RhoTom.tot$tempjja_ts_30C), to = max(RhoTom.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(RhoTom.tot$precipjja_ts_30C), to = max(RhoTom.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(RhoTom.tot$tempcont_ts_30C), to = max(RhoTom.tot$tempcont_ts_30C), length.out = 100),
@@ -1231,7 +1239,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(RhoTom.tot$tempjja_ts_30C,0.05),quantile(RhoTom.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.RhoTom.data)
 
@@ -1245,7 +1253,7 @@ shrub_gradient_jags.SalArc.data <- list(
   # inclin_down.dis = SalArc.dis$inclin_downC,
   sri.dis = SalArc.dis$sriC,
   tri.dis = SalArc.dis$triC,
-  twi_90m.dis = SalArc.dis$twi_90mC,
+  twi.dis = SalArc.dis$twiC,
   compet.dis = SalArc.dis$competC,
   N_discrete = nrow(SalArc.dis),
   
@@ -1256,7 +1264,7 @@ shrub_gradient_jags.SalArc.data <- list(
   # inclin_down.cont = SalArc.cont$inclin_downC,
   sri.cont = SalArc.cont$sriC,
   tri.cont = SalArc.cont$triC,
-  twi_90m.cont = SalArc.cont$twi_90mC,
+  twi.cont = SalArc.cont$twiC,
   compet.cont = SalArc.cont$competC,
   N_cont = nrow(SalArc.cont),
   
@@ -1277,7 +1285,7 @@ shrub_gradient_jags.SalArc.data <- list(
   xhat_compet = seq(from = min(SalArc.tot$competC), to = max(SalArc.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(SalArc.tot$sriC), to = max(SalArc.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalArc.tot$triC), to = max(SalArc.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(SalArc.tot$twi_90mC), to = max(SalArc.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(SalArc.tot$twiC), to = max(SalArc.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(SalArc.tot$tempjja_ts_30C), to = max(SalArc.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(SalArc.tot$precipjja_ts_30C), to = max(SalArc.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(SalArc.tot$tempcont_ts_30C), to = max(SalArc.tot$tempcont_ts_30C), length.out = 100),
@@ -1285,7 +1293,7 @@ shrub_gradient_jags.SalArc.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(SalArc.tot$tempjja_ts_30C,0.05),quantile(SalArc.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.SalArc.data)
 
@@ -1299,7 +1307,7 @@ shrub_gradient_jags.SalGla.data <- list(
   # inclin_down.dis = SalGla.dis$inclin_downC,
   sri.dis = SalGla.dis$sriC,
   tri.dis = SalGla.dis$triC,
-  twi_90m.dis = SalGla.dis$twi_90mC,
+  twi.dis = SalGla.dis$twiC,
   compet.dis = SalGla.dis$competC,
   N_discrete = nrow(SalGla.dis),
   
@@ -1310,7 +1318,7 @@ shrub_gradient_jags.SalGla.data <- list(
   # inclin_down.cont = SalGla.cont$inclin_downC,
   sri.cont = SalGla.cont$sriC,
   tri.cont = SalGla.cont$triC,
-  twi_90m.cont = SalGla.cont$twi_90mC,
+  twi.cont = SalGla.cont$twiC,
   compet.cont = SalGla.cont$competC,
   N_cont = nrow(SalGla.cont),
   
@@ -1331,7 +1339,7 @@ shrub_gradient_jags.SalGla.data <- list(
   xhat_compet = seq(from = min(SalGla.tot$competC), to = max(SalGla.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(SalGla.tot$sriC), to = max(SalGla.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalGla.tot$triC), to = max(SalGla.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(SalGla.tot$twi_90mC), to = max(SalGla.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(SalGla.tot$twiC), to = max(SalGla.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(SalGla.tot$tempjja_ts_30C), to = max(SalGla.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(SalGla.tot$precipjja_ts_30C), to = max(SalGla.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(SalGla.tot$tempcont_ts_30C), to = max(SalGla.tot$tempcont_ts_30C), length.out = 100),
@@ -1339,7 +1347,7 @@ shrub_gradient_jags.SalGla.data <- list(
   
   # ... and for predicting at high/low temperature levels
   xhat_tempjja2 = as.numeric(c(quantile(SalGla.tot$tempjja_ts_30C,0.05),quantile(SalGla.tot$tempjja_ts_30C,0.95))), 
-  Nxhat_CI = 2
+  Nxhat2 = 2
 )
 str(shrub_gradient_jags.SalGla.data)
 
@@ -1353,7 +1361,7 @@ shrub_gradient_jags.VacUli.data <- list(
   # inclin_down.dis = VacUli.dis$inclin_downC,
   sri.dis = VacUli.dis$sriC,
   tri.dis = VacUli.dis$triC,
-  twi_90m.dis = VacUli.dis$twi_90mC,
+  twi.dis = VacUli.dis$twiC,
   compet.dis = VacUli.dis$competC,
   N_discrete = nrow(VacUli.dis),
   
@@ -1364,7 +1372,7 @@ shrub_gradient_jags.VacUli.data <- list(
   # inclin_down.cont = VacUli.cont$inclin_downC,
   sri.cont = VacUli.cont$sriC,
   tri.cont = VacUli.cont$triC,
-  twi_90m.cont = VacUli.cont$twi_90mC,
+  twi.cont = VacUli.cont$twiC,
   compet.cont = VacUli.cont$competC,
   N_cont = nrow(VacUli.cont),
   
@@ -1385,7 +1393,7 @@ shrub_gradient_jags.VacUli.data <- list(
   xhat_compet = seq(from = min(VacUli.tot$competC), to = max(VacUli.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(VacUli.tot$sriC), to = max(VacUli.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(VacUli.tot$triC), to = max(VacUli.tot$triC), length.out = 100),
-  xhat_twi = seq(from = min(VacUli.tot$twi_90mC), to = max(VacUli.tot$twi_90mC), length.out = 100),
+  xhat_twi = seq(from = min(VacUli.tot$twiC), to = max(VacUli.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(VacUli.tot$tempjja_ts_30C), to = max(VacUli.tot$tempjja_ts_30C), length.out = 100),
   xhat_precipjja = seq(from = min(VacUli.tot$precipjja_ts_30C), to = max(VacUli.tot$precipjja_ts_30C), length.out = 100),
   xhat_tempcont = seq(from = min(VacUli.tot$tempcont_ts_30C), to = max(VacUli.tot$tempcont_ts_30C), length.out = 100),
@@ -1413,7 +1421,7 @@ write("
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
@@ -1434,7 +1442,7 @@ write("
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -1448,7 +1456,7 @@ write("
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -1493,7 +1501,7 @@ params <- c("intercept",
             "b.compet", 
             "b.sri",
             "b.tri",
-            "b.twi_90m",
+            "b.twi",
             "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
             "sigma.plotgroup",
             "phi",
@@ -1570,7 +1578,7 @@ write("
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
@@ -1591,7 +1599,7 @@ write("
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -1605,7 +1613,7 @@ write("
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -1648,8 +1656,8 @@ write("
           phat_tempcontXtemp[m,p] <- intercept +
                                       b.tempcont.x * xhat_tempcont[m] +
                                       b.tempcont.x2 * (xhat_tempcont[m]^2) +
-                                      b.tempjja.x * xhat2[p] # +
-                                      # b.tempjja.x2 * (xhat2[p]^2)
+                                      b.tempjja.x * xhat_tempjja2[p] # +
+                                      # b.tempjja.x2 * (xhat_tempjja2[p]^2)
         }
       }
     
@@ -1664,7 +1672,7 @@ params_BetNan2 <- c("intercept",
                     "b.compet", 
                     "b.sri",
                     "b.tri",
-                    "b.twi_90m",
+                    "b.twi",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
                     "sigma.plotgroup",
                     "phi",
@@ -1695,7 +1703,7 @@ coeff.shrub_gradient.BetNan2 <- model_out.shrub_gradient.BetNan2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.BetNan2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.RhoGro$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list)-4)){
   ci_90.BetNan2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.BetNan2[param, 3] <- names(data.frame(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list))[param]
 }
@@ -1839,30 +1847,18 @@ write("
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -1872,10 +1868,8 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
                         b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -1888,10 +1882,8 @@ write("
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
                         b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -1904,26 +1896,40 @@ write("
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
                     b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2)
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_sri[m] <- intercept + 
+                        b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + 
+                        b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + 
+                        b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + 
+                            b.tempjja.x * xhat_tempjja[m] + 
+                            b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + 
+                            b.tempcont.x * xhat_tempcont[m] # + 
+                            # b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + 
+                              b.precipjja.x * xhat_precipjja[m] # + 
+                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
+        
+        for (p in 1:Nxhat2){
+          phat_tempcontXtemp[m,p] <- intercept +
+                                      b.tempcont.x * xhat_tempcont[m] +
+                                      # b.tempcont.x2 * (xhat_tempcont[m]^2) +
+                                      b.tempjja.x * xhat_tempjja2[p] +
+                                      b.tempjja.x2 * (xhat_tempjja2[p]^2)
+        }
+      }
 
     
       }
@@ -1931,22 +1937,17 @@ write("
 
 # specify new set of parameters to be monitored
 params_EmpNig2 <- c("intercept",
-                    # "b.alt.x",
                     "b.tempjja.x", "b.tempjja.x2",
-                    # "b.tempmax.x", "b.tempmax.x2",
-                    # "b.tempmin.x", "b.tempmin.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    # "b.precipjfmam.x", "b.precipjfmam.x2",
                     "b.compet", 
-                    # "b.inclin_down",
                     "b.sri",
                     "b.tri",
-                    "b.twi_90m",
+                    "b.twi",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-                    # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
                     "sigma.plotgroup",
-                    "phi")
+                    "phi",
+                    "phat_compet", "phat_sri", "phat_tri", "phat_twi", "phat_tempjja", "phat_tempcont", "phat_precipjja", "phat_tempcontXtemp")
 
 model_out.shrub_gradient.EmpNig2 <- jags(shrub_gradient_jags.EmpNig.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -2117,30 +2118,18 @@ write("
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -2149,11 +2138,9 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -2165,11 +2152,9 @@ write("
         cov.cont[j] ~ dbeta(p[j], q[j])
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -2182,26 +2167,40 @@ write("
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
                     b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2)
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_sri[m] <- intercept + 
+                        b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + 
+                        b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + 
+                        b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + 
+                            b.tempjja.x * xhat_tempjja[m] + 
+                            b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + 
+                            b.tempcont.x * xhat_tempcont[m] # + 
+                            # b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + 
+                              b.precipjja.x * xhat_precipjja[m] # + 
+                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
+        
+        for (p in 1:Nxhat2){
+          phat_tempcontXtemp[m,p] <- intercept +
+                                      b.tempcont.x * xhat_tempcont[m] +
+                                      # b.tempcont.x2 * (xhat_tempcont[m]^2) +
+                                      b.tempjja.x * xhat_tempjja2[p] +
+                                      b.tempjja.x2 * (xhat_tempjja2[p]^2)
+        }
+      }
 
     
       }
@@ -2209,22 +2208,17 @@ write("
 
 # specify new set of parameters to be monitored
 params_RhoGro2 <- c("intercept",
-                    # "b.alt.x",
                     "b.tempjja.x", "b.tempjja.x2",
-                    # "b.tempmax.x", "b.tempmax.x2",
-                    # "b.tempmin.x", "b.tempmin.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    # "b.precipjfmam.x", "b.precipjfmam.x2",
                     "b.compet", 
-                    # "b.inclin_down",
                     "b.sri",
                     "b.tri",
-                    "b.twi_90m",
+                    "b.twi",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-                    # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
                     "sigma.plotgroup",
-                    "phi")
+                    "phi",
+                    "phat_compet", "phat_sri", "phat_tri", "phat_twi", "phat_tempjja", "phat_tempcont", "phat_precipjja", "phat_tempcontXtemp")
 
 model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -2444,30 +2438,18 @@ write("
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -2476,11 +2458,9 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -2492,11 +2472,9 @@ write("
         cov.cont[j] ~ dbeta(p[j], q[j])
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -2509,26 +2487,40 @@ write("
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
                     # b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2)
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_sri[m] <- intercept + 
+                        b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + 
+                        b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + 
+                        b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + 
+                            b.tempjja.x * xhat_tempjja[m] # + 
+                            # b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + 
+                            b.tempcont.x * xhat_tempcont[m] # + 
+                            # b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + 
+                              b.precipjja.x * xhat_precipjja[m] # + 
+                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
+        
+        for (p in 1:Nxhat2){
+          phat_tempcontXtemp[m,p] <- intercept +
+                                      b.tempcont.x * xhat_tempcont[m] +
+                                      # b.tempcont.x2 * (xhat_tempcont[m]^2) +
+                                      b.tempjja.x * xhat_tempjja2[p] # +
+                                      # b.tempjja.x2 * (xhat_tempjja2[p]^2)
+        }
+      }
 
     
       }
@@ -2536,22 +2528,17 @@ write("
 
 # specify new set of parameters to be monitored
 params_SalGla2 <- c("intercept",
-                    # "b.alt.x",
                     "b.tempjja.x", # "b.tempjja.x2",
-                    # "b.tempmax.x", "b.tempmax.x2",
-                    # "b.tempmin.x", "b.tempmin.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    # "b.precipjfmam.x", "b.precipjfmam.x2",
                     "b.compet", 
-                    # "b.inclin_down",
                     "b.sri",
                     "b.tri",
-                    "b.twi_90m",
+                    "b.twi",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-                    # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
                     "sigma.plotgroup",
-                    "phi")
+                    "phi",
+                    "phat_compet", "phat_sri", "phat_tri", "phat_twi", "phat_tempjja", "phat_tempcont", "phat_precipjja", "phat_tempcontXtemp")
 
 model_out.shrub_gradient.SalGla2 <- jags(shrub_gradient_jags.SalGla.data,   # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -2672,30 +2659,18 @@ write("
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -2704,11 +2679,9 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -2720,11 +2693,9 @@ write("
         cov.cont[j] ~ dbeta(p[j], q[j])
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -2737,26 +2708,40 @@ write("
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
                     b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2)
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_sri[m] <- intercept + 
+                        b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + 
+                        b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + 
+                        b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + 
+                            b.tempjja.x * xhat_tempjja[m] + 
+                            b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + 
+                            b.tempcont.x * xhat_tempcont[m] # + 
+                            # b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + 
+                              b.precipjja.x * xhat_precipjja[m] # + 
+                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
+        
+        for (p in 1:Nxhat2){
+          phat_tempcontXtemp[m,p] <- intercept +
+                                      b.tempcont.x * xhat_tempcont[m] +
+                                      # b.tempcont.x2 * (xhat_tempcont[m]^2) +
+                                      b.tempjja.x * xhat_tempjja2[p] # +
+                                      b.tempjja.x2 * (xhat_tempjja2[p]^2)
+        }
+      }
 
     
       }
@@ -2764,22 +2749,17 @@ write("
 
 # specify new set of parameters to be monitored
 params_VacUli2 <- c("intercept",
-                    # "b.alt.x",
                     "b.tempjja.x", "b.tempjja.x2",
-                    # "b.tempmax.x", "b.tempmax.x2",
-                    # "b.tempmin.x", "b.tempmin.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    # "b.precipjfmam.x", "b.precipjfmam.x2",
                     "b.compet", 
-                    # "b.inclin_down",
                     "b.sri",
                     "b.tri",
-                    "b.twi_90m",
+                    "b.twi",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-                    # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
                     "sigma.plotgroup",
-                    "phi")
+                    "phi",
+                    "phat_compet", "phat_sri", "phat_tri", "phat_twi", "phat_tempjja", "phat_tempcont", "phat_precipjja", "phat_tempcontXtemp")
 
 model_out.shrub_gradient.VacUli2 <- jags(shrub_gradient_jags.VacUli.data,   # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -2903,6 +2883,69 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
 ### *Betula nana* - temperature variability
 ```{r}
 
+# Coefficients extraction ----
+coeff.shrub_gradient.SalGla2.xhat <- model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
+  # add identifying info to data frame
+  rownames_to_column(var = "param")
+
+
+# reorder and rename cols
+coeff.shrub_gradient.SalGla2.xhat <- coeff.shrub_gradient.SalGla2.xhat %>% 
+
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         u95 = "97.5%",
+         Rhat) %>% print
+
+# assemble predicted and predictor values
+phats <- coeff.shrub_gradient.BetNan2 %>% 
+  
+  # filter for predicted values
+  filter(param %in% c(paste0("phat_tempcont[", seq(from = 1, to = 100), "]"))) %>% 
+  
+  # add xhats column
+  mutate(xhats = seq(from = min(BetNan.tot$tempcont_ts_30C),
+                     to = max(BetNan.tot$tempcont_ts_30C),
+                     length.out = 100))
+
+# back-center and back-scale predictor values (xhats)
+phats$tempcont <- phats$xhats*attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:scale') + attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:center') 
+
+
+# GRAPH
+ggplot() +
+  # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
+  geom_point(data = BetNan.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont_ts_30), cover = mean(cover)), 
+             aes(x = tempcont, 
+                 y = cover), 
+             size = 2,
+             position = position_jitter(width=0, height=.01),
+             alpha=0.5) +
+  
+  # draw line of predicted values
+  geom_line(data = phats, 
+            aes(x = tempcont, 
+                y = plogis(mean)), 
+            colour = "orange",
+            alpha = 1,
+            size = 3) + 
+  
+  # draw predicted 95% CI
+  geom_ribbon(data = phats,
+              aes(x = tempcont, 
+                  ymin = plogis(l95), 
+                  ymax = plogis(u95)),
+              fill = "orange",
+              alpha = 0.2) +
+  
+  # define appearance
+  labs(x = "annual temperature variability [°C]",
+       y = "rel. no. hits per plot") + 
+  theme_bw()
+
+# old version ---
 unique.tempcont <- seq(min(BetNan.tot$tempcont_ts_30C), max(BetNan.tot$tempcont_ts_30C), by=0.02) 
 
 preds.tempcont.BetNan <- array(dim=c(length(unique.tempcont), 
@@ -3095,7 +3138,7 @@ shrub_gradient_jags.SalGla.xhat.data <- list(
   # inclin_down.dis = SalGla.dis$inclin_downC,
   sri.dis = SalGla.dis$sriC,
   tri.dis = SalGla.dis$triC,
-  twi_90m.dis = SalGla.dis$twi_90mC,
+  twi.dis = SalGla.dis$twiC,
   compet.dis = SalGla.dis$competC,
   N_discrete = nrow(SalGla.dis),
   
@@ -3106,7 +3149,7 @@ shrub_gradient_jags.SalGla.xhat.data <- list(
   # inclin_down.cont = SalGla.cont$inclin_downC,
   sri.cont = SalGla.cont$sriC,
   tri.cont = SalGla.cont$triC,
-  twi_90m.cont = SalGla.cont$twi_90mC,
+  twi.cont = SalGla.cont$twiC,
   compet.cont = SalGla.cont$competC,
   N_cont = nrow(SalGla.cont),
   
@@ -3143,7 +3186,7 @@ write("
       b.sri ~ dnorm(0, 0.0001)
       # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
@@ -3177,7 +3220,7 @@ write("
                         # b_isocline[isocline.dis[i]] +
                         b.compet * compet.dis[i] + 
                         # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -3193,7 +3236,7 @@ write("
                         # b_isocline[isocline.cont[j]] +
                         b.compet * compet.cont[j] +
                         # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -3251,7 +3294,7 @@ params_SalGla2.xhat <- c("intercept",
                     # "b.inclin_down",
                     "b.sri",
                     "b.tri",
-                    "b.twi_90m",
+                    "b.twi",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
                     # "b_isocline[1]","b_isocline[2]","b_isocline[21]",
                     "sigma.plotgroup",
