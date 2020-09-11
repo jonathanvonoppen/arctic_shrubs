@@ -1556,7 +1556,7 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 11))
+(effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 11))
 ```
 
 * **unimodal response to temperature variability (sig)**
@@ -1825,7 +1825,7 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.EmpNig <- model_plot_marg_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum", plot_width = 11))
+(effect_size_plot.EmpNig <- model_plot_sig_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum", plot_width = 11))
 
 ```
 
@@ -2098,7 +2098,7 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
 
 ```
 
-* **unimodal response to temperature & precipitation (linear, sig.)** 
+* **unimodal response to temperature & linear to precipitation (sig.)** 
 * slightly positive response to SRI, temp. variation (n.s.)
 * slightly negative responst to TWI (n.s.)
 * large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
@@ -2582,7 +2582,7 @@ coeff.shrub_gradient.SalGla2 <- coeff.shrub_gradient.SalGla2 %>%
          Rhat) %>% print
 
 # effect size plot
-(effect_size_plot.SalGla2 <- model_plot_sig_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 8))
+(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 8))
 
 ```
 
@@ -2738,7 +2738,7 @@ write("
           phat_tempcontXtemp[m,p] <- intercept +
                                       b.tempcont.x * xhat_tempcont[m] +
                                       # b.tempcont.x2 * (xhat_tempcont[m]^2) +
-                                      b.tempjja.x * xhat_tempjja2[p] # +
+                                      b.tempjja.x * xhat_tempjja2[p] +
                                       b.tempjja.x2 * (xhat_tempjja2[p]^2)
         }
       }
