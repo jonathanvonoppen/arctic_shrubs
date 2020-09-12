@@ -270,7 +270,7 @@ and response variable
 ```{r}
 env_cov_bio_sub <- env_cov_bio %>% 
   select(site_alt_plotgroup_id, plot, site, site_alt_id, year, long, lat, alt,  # plot info / metadata
-  ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
+  ends_with("_ts_30"),   # CHELSA predictors averaged over 30-year period prior to study year
   inclin_down, twi, tri, sri, 
   #mean_summ_ndvi_yos, cv_mean_summ_ndvi_2001_to_yos, Perc_dist_coast_lines,   # environmental data
   taxon, cover, compet)   # taxon, cover response, competition pressure
@@ -362,14 +362,18 @@ Let's exclude them step by step and check the variance inflation factors (VIF) a
   usdm::vif()) #%>% View()
 ```
 
-All VIF are now < 3.1 -> OK! We can now exclude the dropped variables to obtain the final dataset:
+All VIF are now < 3.1 -> OK! We can now exclude the dropped variables to obtain the final dataset. In addition, we rename the climate variables and delete the extension:
 
 ```{r}
 env_cov_bio_sub <- env_cov_bio_sub %>% 
   dplyr::select(-tempmax_ts_30,
                 -tempmin_ts_30,
                 -inclin_down,
-                -contains("mam"))
+                -contains("mam")) %>% 
+  
+  rename(tempjja = tempjja_ts_30,
+         tempcont = tempcont_ts_30,
+         precipjja = precipjja)
 ```
 
 ### b) raw data plots
@@ -446,7 +450,7 @@ preds_plot_data <- env_cov_bio %>%
                                        "yearly maximum \n temperature [°C]" = "tempmax_ts_30",
                                        "yearly minimum \n temperature [°C]" = "tempmin_ts_30",
                                        "annual temperature \n variability [°C]" = "tempcont_ts_30",
-                                       "cumulative summer \n precipitation [mm]" = "precipjja_ts_30",
+                                       "cumulative summer \n precipitation [mm]" = "precipjja",
                                        "cumulative winter-spring \n precipitation [mm]" = "precipjfmam_ts_30",
                                        "cumulative spring \n precipitation [mm]" = "precipmam_ts_30",
                                        "slope angle [°]" = "inclin_down",
@@ -580,7 +584,7 @@ env_cov_bio.long <- env_cov_bio %>%
   select(taxon,
          tempjja_ts_30,
          tempcont_ts_30,
-         precipjja_ts_30,
+         precipjja,
          sri,
          tri,
          twi,
@@ -589,7 +593,7 @@ env_cov_bio.long <- env_cov_bio %>%
   # pivot to long format
   pivot_longer(cols = c(tempjja_ts_30,
                         tempcont_ts_30,
-                        precipjja_ts_30,
+                        precipjja,
                         sri,
                         tri,
                         twi,
@@ -630,8 +634,9 @@ data.frame(taxon = levels(env_cov_bio_sub$taxon),
 
 Numeric predictors were scaled and centered: 
 ```{r}
-num_pred <- env_cov_bio_sub %>% select(alt,
-                                       ends_with("_ts_30"), 
+num_pred <- env_cov_bio_sub %>% select(tempjja,
+                                       tempcont,
+                                       precipjja,
                                        sri, 
                                        tri,
                                        starts_with("twi"), 
@@ -692,7 +697,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   # tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
   tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  precipjja.tot = BetNan.tot$precipjjaC[!duplicated(BetNan.tot$plotgroup.NUM)],
   # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
   N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id))
   
@@ -924,9 +929,7 @@ shrub_gradient_jags.BetNan.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = BetNan.dis$cover,
-  plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = BetNan.dis$site_alt.NUM,
-  # inclin_down.dis = BetNan.dis$inclin_downC,
+  plotgroup.dis = BetNan.dis$plotgroup.NUM,
   sri.dis = BetNan.dis$sriC,
   tri.dis = BetNan.dis$triC,
   twi.dis = BetNan.dis$twiC,
@@ -935,9 +938,7 @@ shrub_gradient_jags.BetNan.data <- list(
   
   # ...and continuous part of the data
   cov.cont = BetNan.cont$cover,
-  plotgroup.cont = BetNan.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = BetNan.cont$site_alt.NUM,
-  # inclin_down.cont = BetNan.cont$inclin_downC,
+  plotgroup.cont = BetNan.cont$plotgroup.NUM,
   sri.cont = BetNan.cont$sriC,
   tri.cont = BetNan.cont$triC,
   twi.cont = BetNan.cont$twiC,
@@ -945,30 +946,23 @@ shrub_gradient_jags.BetNan.data <- list(
   N_cont = nrow(BetNan.cont),
   
   # plot group level predictors
-  tempjja.tot = BetNan.tot$tempjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  # tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  precipjja.tot = BetNan.tot$precipjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
+  tempjja.tot = BetNan.tot$tempjjaC[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = BetNan.tot$tempcontC[!duplicated(BetNan.tot$plotgroup.NUM)],
+  precipjja.tot = BetNan.tot$precipjjaC[!duplicated(BetNan.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = BetNan.tot$altC[!duplicated(BetNan.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(BetNan.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(BetNan.tot$competC), to = max(BetNan.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(BetNan.tot$sriC), to = max(BetNan.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(BetNan.tot$triC), to = max(BetNan.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(BetNan.tot$twiC), to = max(BetNan.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(BetNan.tot$tempjja_ts_30C), to = max(BetNan.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(BetNan.tot$precipjja_ts_30C), to = max(BetNan.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(BetNan.tot$tempcont_ts_30C), to = max(BetNan.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(BetNan.tot$tempjjaC), to = max(BetNan.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(BetNan.tot$precipjjaC), to = max(BetNan.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(BetNan.tot$tempcontC), to = max(BetNan.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(BetNan.tot$tempjja_ts_30C,0.05),quantile(BetNan.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(BetNan.tot$tempjjaC,0.05),quantile(BetNan.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.BetNan.data)
@@ -978,9 +972,7 @@ shrub_gradient_jags.CasTet.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = CasTet.dis$cover,
-  plotgroup.dis = CasTet.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = CasTet.dis$site_alt.NUM,
-  # inclin_down.dis = CasTet.dis$inclin_downC,
+  plotgroup.dis = CasTet.dis$plotgroup.NUM,
   sri.dis = CasTet.dis$sriC,
   tri.dis = CasTet.dis$triC,
   twi.dis = CasTet.dis$twiC,
@@ -989,9 +981,7 @@ shrub_gradient_jags.CasTet.data <- list(
   
   # ...and continuous part of the data
   cov.cont = CasTet.cont$cover,
-  plotgroup.cont = CasTet.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = CasTet.cont$site_alt.NUM,
-  # inclin_down.cont = CasTet.cont$inclin_downC,
+  plotgroup.cont = CasTet.cont$plotgroup.NUM,
   sri.cont = CasTet.cont$sriC,
   tri.cont = CasTet.cont$triC,
   twi.cont = CasTet.cont$twiC,
@@ -999,30 +989,23 @@ shrub_gradient_jags.CasTet.data <- list(
   N_cont = nrow(CasTet.cont),
   
   # plot group level predictors
-  tempjja.tot = CasTet.tot$tempjja_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = CasTet.tot$tempmax_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)],
-  # tempmin.tot = CasTet.tot$tempmin_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)],
-  tempcont.tot = CasTet.tot$tempcont_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)],
-  precipjja.tot = CasTet.tot$precipjja_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)],
-  # precipjfmam.tot = CasTet.tot$precipjfmam_ts_30C[!duplicated(CasTet.tot$plotgroup.NUM)]
+  tempjja.tot = CasTet.tot$tempjjaC[!duplicated(CasTet.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = CasTet.tot$tempcontC[!duplicated(CasTet.tot$plotgroup.NUM)],
+  precipjja.tot = CasTet.tot$precipjjaC[!duplicated(CasTet.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(CasTet.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = CasTet.tot$altC[!duplicated(CasTet.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(CasTet.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(CasTet.tot$competC), to = max(CasTet.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(CasTet.tot$sriC), to = max(CasTet.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(CasTet.tot$triC), to = max(CasTet.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(CasTet.tot$twiC), to = max(CasTet.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(CasTet.tot$tempjja_ts_30C), to = max(CasTet.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(CasTet.tot$precipjja_ts_30C), to = max(CasTet.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(CasTet.tot$tempcont_ts_30C), to = max(CasTet.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(CasTet.tot$tempjjaC), to = max(CasTet.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(CasTet.tot$precipjjaC), to = max(CasTet.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(CasTet.tot$tempcontC), to = max(CasTet.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(CasTet.tot$tempjja_ts_30C,0.05),quantile(CasTet.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(CasTet.tot$tempjjaC,0.05),quantile(CasTet.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.CasTet.data)
@@ -1032,9 +1015,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = EmpNig.dis$cover,
-  plotgroup.dis = EmpNig.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = EmpNig.dis$site_alt.NUM,
-  # inclin_down.dis = EmpNig.dis$inclin_downC,
+  plotgroup.dis = EmpNig.dis$plotgroup.NUM,
   sri.dis = EmpNig.dis$sriC,
   tri.dis = EmpNig.dis$triC,
   twi.dis = EmpNig.dis$twiC,
@@ -1043,9 +1024,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   
   # ...and continuous part of the data
   cov.cont = EmpNig.cont$cover,
-  plotgroup.cont = EmpNig.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = EmpNig.cont$site_alt.NUM,
-  # inclin_down.cont = EmpNig.cont$inclin_downC,
+  plotgroup.cont = EmpNig.cont$plotgroup.NUM,
   sri.cont = EmpNig.cont$sriC,
   tri.cont = EmpNig.cont$triC,
   twi.cont = EmpNig.cont$twiC,
@@ -1053,30 +1032,23 @@ shrub_gradient_jags.EmpNig.data <- list(
   N_cont = nrow(EmpNig.cont),
   
   # plot group level predictors
-  tempjja.tot = EmpNig.tot$tempjja_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = EmpNig.tot$tempmax_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)],
-  # tempmin.tot = EmpNig.tot$tempmin_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)],
-  tempcont.tot = EmpNig.tot$tempcont_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)],
-  precipjja.tot = EmpNig.tot$precipjja_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)],
-  # precipjfmam.tot = EmpNig.tot$precipjfmam_ts_30C[!duplicated(EmpNig.tot$plotgroup.NUM)]
+  tempjja.tot = EmpNig.tot$tempjjaC[!duplicated(EmpNig.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = EmpNig.tot$tempcontC[!duplicated(EmpNig.tot$plotgroup.NUM)],
+  precipjja.tot = EmpNig.tot$precipjjaC[!duplicated(EmpNig.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(EmpNig.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = EmpNig.tot$altC[!duplicated(EmpNig.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(EmpNig.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(EmpNig.tot$competC), to = max(EmpNig.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(EmpNig.tot$sriC), to = max(EmpNig.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(EmpNig.tot$triC), to = max(EmpNig.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(EmpNig.tot$twiC), to = max(EmpNig.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(EmpNig.tot$tempjja_ts_30C), to = max(EmpNig.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(EmpNig.tot$precipjja_ts_30C), to = max(EmpNig.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(EmpNig.tot$tempcont_ts_30C), to = max(EmpNig.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(EmpNig.tot$tempjjaC), to = max(EmpNig.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(EmpNig.tot$precipjjaC), to = max(EmpNig.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(EmpNig.tot$tempcontC), to = max(EmpNig.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(EmpNig.tot$tempjja_ts_30C,0.05),quantile(EmpNig.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(EmpNig.tot$tempjjaC,0.05),quantile(EmpNig.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.EmpNig.data)
@@ -1086,9 +1058,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = PhyCae.dis$cover,
-  plotgroup.dis = PhyCae.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = PhyCae.dis$site_alt.NUM,
-  # inclin_down.dis = PhyCae.dis$inclin_downC,
+  plotgroup.dis = PhyCae.dis$plotgroup.NUM,
   sri.dis = PhyCae.dis$sriC,
   tri.dis = PhyCae.dis$triC,
   twi.dis = PhyCae.dis$twiC,
@@ -1097,9 +1067,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   
   # ...and continuous part of the data
   cov.cont = PhyCae.cont$cover,
-  plotgroup.cont = PhyCae.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = PhyCae.cont$site_alt.NUM,
-  # inclin_down.cont = PhyCae.cont$inclin_downC,
+  plotgroup.cont = PhyCae.cont$plotgroup.NUM,
   sri.cont = PhyCae.cont$sriC,
   tri.cont = PhyCae.cont$triC,
   twi.cont = PhyCae.cont$twiC,
@@ -1107,30 +1075,23 @@ shrub_gradient_jags.PhyCae.data <- list(
   N_cont = nrow(PhyCae.cont),
   
   # plot group level predictors
-  tempjja.tot = PhyCae.tot$tempjja_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = PhyCae.tot$tempmax_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)],
-  # tempmin.tot = PhyCae.tot$tempmin_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)],
-  tempcont.tot = PhyCae.tot$tempcont_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)],
-  precipjja.tot = PhyCae.tot$precipjja_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)],
-  # precipjfmam.tot = PhyCae.tot$precipjfmam_ts_30C[!duplicated(PhyCae.tot$plotgroup.NUM)]
+  tempjja.tot = PhyCae.tot$tempjjaC[!duplicated(PhyCae.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = PhyCae.tot$tempcontC[!duplicated(PhyCae.tot$plotgroup.NUM)],
+  precipjja.tot = PhyCae.tot$precipjjaC[!duplicated(PhyCae.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(PhyCae.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = PhyCae.tot$altC[!duplicated(PhyCae.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(PhyCae.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(PhyCae.tot$competC), to = max(PhyCae.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(PhyCae.tot$sriC), to = max(PhyCae.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(PhyCae.tot$triC), to = max(PhyCae.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(PhyCae.tot$twiC), to = max(PhyCae.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(PhyCae.tot$tempjja_ts_30C), to = max(PhyCae.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(PhyCae.tot$precipjja_ts_30C), to = max(PhyCae.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(PhyCae.tot$tempcont_ts_30C), to = max(PhyCae.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(PhyCae.tot$tempjjaC), to = max(PhyCae.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(PhyCae.tot$precipjjaC), to = max(PhyCae.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(PhyCae.tot$tempcontC), to = max(PhyCae.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(PhyCae.tot$tempjja_ts_30C,0.05),quantile(PhyCae.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(PhyCae.tot$tempjjaC,0.05),quantile(PhyCae.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.PhyCae.data)
@@ -1140,9 +1101,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = RhoGro.dis$cover,
-  plotgroup.dis = RhoGro.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = RhoGro.dis$site_alt.NUM,
-  # inclin_down.dis = RhoGro.dis$inclin_downC,
+  plotgroup.dis = RhoGro.dis$plotgroup.NUM,
   sri.dis = RhoGro.dis$sriC,
   tri.dis = RhoGro.dis$triC,
   twi.dis = RhoGro.dis$twiC,
@@ -1151,9 +1110,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   
   # ...and continuous part of the data
   cov.cont = RhoGro.cont$cover,
-  plotgroup.cont = RhoGro.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = RhoGro.cont$site_alt.NUM,
-  # inclin_down.cont = RhoGro.cont$inclin_downC,
+  plotgroup.cont = RhoGro.cont$plotgroup.NUM,
   sri.cont = RhoGro.cont$sriC,
   tri.cont = RhoGro.cont$triC,
   twi.cont = RhoGro.cont$twiC,
@@ -1161,30 +1118,23 @@ shrub_gradient_jags.RhoGro.data <- list(
   N_cont = nrow(RhoGro.cont),
   
   # plot group level predictors
-  tempjja.tot = RhoGro.tot$tempjja_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = RhoGro.tot$tempmax_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)],
-  # tempmin.tot = RhoGro.tot$tempmin_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)],
-  tempcont.tot = RhoGro.tot$tempcont_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)],
-  precipjja.tot = RhoGro.tot$precipjja_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)],
-  # precipjfmam.tot = RhoGro.tot$precipjfmam_ts_30C[!duplicated(RhoGro.tot$plotgroup.NUM)]
+  tempjja.tot = RhoGro.tot$tempjjaC[!duplicated(RhoGro.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = RhoGro.tot$tempcontC[!duplicated(RhoGro.tot$plotgroup.NUM)],
+  precipjja.tot = RhoGro.tot$precipjjaC[!duplicated(RhoGro.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(RhoGro.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = RhoGro.tot$altC[!duplicated(RhoGro.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(RhoGro.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(RhoGro.tot$competC), to = max(RhoGro.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(RhoGro.tot$sriC), to = max(RhoGro.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(RhoGro.tot$triC), to = max(RhoGro.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(RhoGro.tot$twiC), to = max(RhoGro.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(RhoGro.tot$tempjja_ts_30C), to = max(RhoGro.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(RhoGro.tot$precipjja_ts_30C), to = max(RhoGro.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(RhoGro.tot$tempcont_ts_30C), to = max(RhoGro.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(RhoGro.tot$tempjjaC), to = max(RhoGro.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(RhoGro.tot$precipjjaC), to = max(RhoGro.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(RhoGro.tot$tempcontC), to = max(RhoGro.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(RhoGro.tot$tempjja_ts_30C,0.05),quantile(RhoGro.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(RhoGro.tot$tempjjaC,0.05),quantile(RhoGro.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.RhoGro.data)
@@ -1194,9 +1144,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = RhoTom.dis$cover,
-  plotgroup.dis = RhoTom.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = RhoTom.dis$site_alt.NUM,
-  # inclin_down.dis = RhoTom.dis$inclin_downC,
+  plotgroup.dis = RhoTom.dis$plotgroup.NUM,
   sri.dis = RhoTom.dis$sriC,
   tri.dis = RhoTom.dis$triC,
   twi.dis = RhoTom.dis$twiC,
@@ -1205,9 +1153,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   
   # ...and continuous part of the data
   cov.cont = RhoTom.cont$cover,
-  plotgroup.cont = RhoTom.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = RhoTom.cont$site_alt.NUM,
-  # inclin_down.cont = RhoTom.cont$inclin_downC,
+  plotgroup.cont = RhoTom.cont$plotgroup.NUM,
   sri.cont = RhoTom.cont$sriC,
   tri.cont = RhoTom.cont$triC,
   twi.cont = RhoTom.cont$twiC,
@@ -1215,30 +1161,23 @@ shrub_gradient_jags.RhoTom.data <- list(
   N_cont = nrow(RhoTom.cont),
   
   # plot group level predictors
-  tempjja.tot = RhoTom.tot$tempjja_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = RhoTom.tot$tempmax_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)],
-  # tempmin.tot = RhoTom.tot$tempmin_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)],
-  tempcont.tot = RhoTom.tot$tempcont_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)],
-  precipjja.tot = RhoTom.tot$precipjja_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)],
-  # precipjfmam.tot = RhoTom.tot$precipjfmam_ts_30C[!duplicated(RhoTom.tot$plotgroup.NUM)]
+  tempjja.tot = RhoTom.tot$tempjjaC[!duplicated(RhoTom.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = RhoTom.tot$tempcontC[!duplicated(RhoTom.tot$plotgroup.NUM)],
+  precipjja.tot = RhoTom.tot$precipjjaC[!duplicated(RhoTom.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(RhoTom.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = RhoTom.tot$altC[!duplicated(RhoTom.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(RhoTom.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(RhoTom.tot$competC), to = max(RhoTom.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(RhoTom.tot$sriC), to = max(RhoTom.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(RhoTom.tot$triC), to = max(RhoTom.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(RhoTom.tot$twiC), to = max(RhoTom.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(RhoTom.tot$tempjja_ts_30C), to = max(RhoTom.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(RhoTom.tot$precipjja_ts_30C), to = max(RhoTom.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(RhoTom.tot$tempcont_ts_30C), to = max(RhoTom.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(RhoTom.tot$tempjjaC), to = max(RhoTom.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(RhoTom.tot$precipjjaC), to = max(RhoTom.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(RhoTom.tot$tempcontC), to = max(RhoTom.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(RhoTom.tot$tempjja_ts_30C,0.05),quantile(RhoTom.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(RhoTom.tot$tempjjaC,0.05),quantile(RhoTom.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.RhoTom.data)
@@ -1248,9 +1187,7 @@ shrub_gradient_jags.SalArc.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = SalArc.dis$cover,
-  plotgroup.dis = SalArc.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = SalArc.dis$site_alt.NUM,
-  # inclin_down.dis = SalArc.dis$inclin_downC,
+  plotgroup.dis = SalArc.dis$plotgroup.NUM,
   sri.dis = SalArc.dis$sriC,
   tri.dis = SalArc.dis$triC,
   twi.dis = SalArc.dis$twiC,
@@ -1259,9 +1196,7 @@ shrub_gradient_jags.SalArc.data <- list(
   
   # ...and continuous part of the data
   cov.cont = SalArc.cont$cover,
-  plotgroup.cont = SalArc.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = SalArc.cont$site_alt.NUM,
-  # inclin_down.cont = SalArc.cont$inclin_downC,
+  plotgroup.cont = SalArc.cont$plotgroup.NUM,
   sri.cont = SalArc.cont$sriC,
   tri.cont = SalArc.cont$triC,
   twi.cont = SalArc.cont$twiC,
@@ -1269,30 +1204,23 @@ shrub_gradient_jags.SalArc.data <- list(
   N_cont = nrow(SalArc.cont),
   
   # plot group level predictors
-  tempjja.tot = SalArc.tot$tempjja_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = SalArc.tot$tempmax_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)],
-  # tempmin.tot = SalArc.tot$tempmin_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)],
-  tempcont.tot = SalArc.tot$tempcont_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)],
-  precipjja.tot = SalArc.tot$precipjja_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)],
-  # precipjfmam.tot = SalArc.tot$precipjfmam_ts_30C[!duplicated(SalArc.tot$plotgroup.NUM)]
+  tempjja.tot = SalArc.tot$tempjjaC[!duplicated(SalArc.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = SalArc.tot$tempcontC[!duplicated(SalArc.tot$plotgroup.NUM)],
+  precipjja.tot = SalArc.tot$precipjjaC[!duplicated(SalArc.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(SalArc.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = SalArc.tot$altC[!duplicated(SalArc.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(SalArc.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(SalArc.tot$competC), to = max(SalArc.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(SalArc.tot$sriC), to = max(SalArc.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalArc.tot$triC), to = max(SalArc.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(SalArc.tot$twiC), to = max(SalArc.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(SalArc.tot$tempjja_ts_30C), to = max(SalArc.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(SalArc.tot$precipjja_ts_30C), to = max(SalArc.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(SalArc.tot$tempcont_ts_30C), to = max(SalArc.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(SalArc.tot$tempjjaC), to = max(SalArc.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(SalArc.tot$precipjjaC), to = max(SalArc.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(SalArc.tot$tempcontC), to = max(SalArc.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(SalArc.tot$tempjja_ts_30C,0.05),quantile(SalArc.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(SalArc.tot$tempjjaC,0.05),quantile(SalArc.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.SalArc.data)
@@ -1302,9 +1230,7 @@ shrub_gradient_jags.SalGla.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = SalGla.dis$cover,
-  plotgroup.dis = SalGla.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = SalGla.dis$site_alt.NUM,
-  # inclin_down.dis = SalGla.dis$inclin_downC,
+  plotgroup.dis = SalGla.dis$plotgroup.NUM,
   sri.dis = SalGla.dis$sriC,
   tri.dis = SalGla.dis$triC,
   twi.dis = SalGla.dis$twiC,
@@ -1313,9 +1239,7 @@ shrub_gradient_jags.SalGla.data <- list(
   
   # ...and continuous part of the data
   cov.cont = SalGla.cont$cover,
-  plotgroup.cont = SalGla.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = SalGla.cont$site_alt.NUM,
-  # inclin_down.cont = SalGla.cont$inclin_downC,
+  plotgroup.cont = SalGla.cont$plotgroup.NUM,
   sri.cont = SalGla.cont$sriC,
   tri.cont = SalGla.cont$triC,
   twi.cont = SalGla.cont$twiC,
@@ -1323,30 +1247,23 @@ shrub_gradient_jags.SalGla.data <- list(
   N_cont = nrow(SalGla.cont),
   
   # plot group level predictors
-  tempjja.tot = SalGla.tot$tempjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = SalGla.tot$tempmax_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
-  # tempmin.tot = SalGla.tot$tempmin_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
-  tempcont.tot = SalGla.tot$tempcont_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
-  precipjja.tot = SalGla.tot$precipjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
-  # precipjfmam.tot = SalGla.tot$precipjfmam_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)]
+  tempjja.tot = SalGla.tot$tempjjaC[!duplicated(SalGla.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = SalGla.tot$tempcontC[!duplicated(SalGla.tot$plotgroup.NUM)],
+  precipjja.tot = SalGla.tot$precipjjaC[!duplicated(SalGla.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = SalGla.tot$altC[!duplicated(SalGla.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(SalGla.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(SalGla.tot$competC), to = max(SalGla.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(SalGla.tot$sriC), to = max(SalGla.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalGla.tot$triC), to = max(SalGla.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(SalGla.tot$twiC), to = max(SalGla.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(SalGla.tot$tempjja_ts_30C), to = max(SalGla.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(SalGla.tot$precipjja_ts_30C), to = max(SalGla.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(SalGla.tot$tempcont_ts_30C), to = max(SalGla.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(SalGla.tot$tempjjaC), to = max(SalGla.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(SalGla.tot$precipjjaC), to = max(SalGla.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(SalGla.tot$tempcontC), to = max(SalGla.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(SalGla.tot$tempjja_ts_30C,0.05),quantile(SalGla.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(SalGla.tot$tempjjaC,0.05),quantile(SalGla.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.SalGla.data)
@@ -1356,9 +1273,7 @@ shrub_gradient_jags.VacUli.data <- list(
   
   # plot level predictors, for discrete...
   cov.dis = VacUli.dis$cover,
-  plotgroup.dis = VacUli.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = VacUli.dis$site_alt.NUM,
-  # inclin_down.dis = VacUli.dis$inclin_downC,
+  plotgroup.dis = VacUli.dis$plotgroup.NUM,
   sri.dis = VacUli.dis$sriC,
   tri.dis = VacUli.dis$triC,
   twi.dis = VacUli.dis$twiC,
@@ -1367,9 +1282,7 @@ shrub_gradient_jags.VacUli.data <- list(
   
   # ...and continuous part of the data
   cov.cont = VacUli.cont$cover,
-  plotgroup.cont = VacUli.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = VacUli.cont$site_alt.NUM,
-  # inclin_down.cont = VacUli.cont$inclin_downC,
+  plotgroup.cont = VacUli.cont$plotgroup.NUM,
   sri.cont = VacUli.cont$sriC,
   tri.cont = VacUli.cont$triC,
   twi.cont = VacUli.cont$twiC,
@@ -1377,30 +1290,23 @@ shrub_gradient_jags.VacUli.data <- list(
   N_cont = nrow(VacUli.cont),
   
   # plot group level predictors
-  tempjja.tot = VacUli.tot$tempjja_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = VacUli.tot$tempmax_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)],
-  # tempmin.tot = VacUli.tot$tempmin_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)],
-  tempcont.tot = VacUli.tot$tempcont_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)],
-  precipjja.tot = VacUli.tot$precipjja_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)],
-  # precipjfmam.tot = VacUli.tot$precipjfmam_ts_30C[!duplicated(VacUli.tot$plotgroup.NUM)]
+  tempjja.tot = VacUli.tot$tempjjaC[!duplicated(VacUli.tot$plotgroup.NUM)], # one value per tXpg
+  tempcont.tot = VacUli.tot$tempcontC[!duplicated(VacUli.tot$plotgroup.NUM)],
+  precipjja.tot = VacUli.tot$precipjjaC[!duplicated(VacUli.tot$plotgroup.NUM)],
   N_plotgroups = length(unique(VacUli.tot$site_alt_plotgroup_id)),
-  
-  # # site/alt level predictors
-  # alt.tot = VacUli.tot$altC[!duplicated(VacUli.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(VacUli.tot$site_alt_id))
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(VacUli.tot$competC), to = max(VacUli.tot$competC), length.out = 100),
   xhat_sri = seq(from = min(VacUli.tot$sriC), to = max(VacUli.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(VacUli.tot$triC), to = max(VacUli.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(VacUli.tot$twiC), to = max(VacUli.tot$twiC), length.out = 100),
-  xhat_tempjja = seq(from = min(VacUli.tot$tempjja_ts_30C), to = max(VacUli.tot$tempjja_ts_30C), length.out = 100),
-  xhat_precipjja = seq(from = min(VacUli.tot$precipjja_ts_30C), to = max(VacUli.tot$precipjja_ts_30C), length.out = 100),
-  xhat_tempcont = seq(from = min(VacUli.tot$tempcont_ts_30C), to = max(VacUli.tot$tempcont_ts_30C), length.out = 100),
+  xhat_tempjja = seq(from = min(VacUli.tot$tempjjaC), to = max(VacUli.tot$tempjjaC), length.out = 100),
+  xhat_precipjja = seq(from = min(VacUli.tot$precipjjaC), to = max(VacUli.tot$precipjjaC), length.out = 100),
+  xhat_tempcont = seq(from = min(VacUli.tot$tempcontC), to = max(VacUli.tot$tempcontC), length.out = 100),
   Nxhat = 100,
   
   # ... and for predicting at high/low temperature levels
-  xhat_tempjja2 = as.numeric(c(quantile(VacUli.tot$tempjja_ts_30C,0.05),quantile(VacUli.tot$tempjja_ts_30C,0.95))), 
+  xhat_tempjja2 = as.numeric(c(quantile(VacUli.tot$tempjjaC,0.05),quantile(VacUli.tot$tempjjaC,0.95))), 
   Nxhat2 = 2
 )
 str(shrub_gradient_jags.VacUli.data)
@@ -2883,22 +2789,6 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
 ### *Betula nana* - temperature variability
 ```{r}
 
-# Coefficients extraction ----
-coeff.shrub_gradient.SalGla2.xhat <- model_out.shrub_gradient.SalGla2.xhat$BUGSoutput$summary %>% 
-  as.data.frame %>% 
-  select('mean','sd','2.5%','97.5%','Rhat') %>% 
-  # add identifying info to data frame
-  rownames_to_column(var = "param")
-
-
-# reorder and rename cols
-coeff.shrub_gradient.SalGla2.xhat <- coeff.shrub_gradient.SalGla2.xhat %>% 
-
-  select(param, mean, sd, 
-         l95 = "2.5%",
-         u95 = "97.5%",
-         Rhat) %>% print
-
 # assemble predicted and predictor values
 phats <- coeff.shrub_gradient.BetNan2 %>% 
   
@@ -2906,18 +2796,19 @@ phats <- coeff.shrub_gradient.BetNan2 %>%
   filter(param %in% c(paste0("phat_tempcont[", seq(from = 1, to = 100), "]"))) %>% 
   
   # add xhats column
-  mutate(xhats = seq(from = min(BetNan.tot$tempcont_ts_30C),
-                     to = max(BetNan.tot$tempcont_ts_30C),
+  mutate(xhats = seq(from = min(BetNan.tot$tempcontC),
+                     to = max(BetNan.tot$tempcontC),
                      length.out = 100))
 
 # back-center and back-scale predictor values (xhats)
-phats$tempcont <- phats$xhats*attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:scale') + attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:center') 
+#phats$tempcont <- phats$xhats*attr(scale(BetNan.tot$tempcont), 'scaled:scale') + attr(scale(BetNan.tot$tempcont), 'scaled:center') 
+phats$tempcont <- phats$xhats*attr(scale(BetNan.tot["tempcont"]), 'scaled:scale') + attr(scale(BetNan.tot["tempcont"]), 'scaled:center') 
 
 
 # GRAPH
 ggplot() +
   # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
-  geom_point(data = BetNan.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont_ts_30), cover = mean(cover)), 
+  geom_point(data = BetNan.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont), cover = mean(cover)), 
              aes(x = tempcont, 
                  y = cover), 
              size = 2,
@@ -2946,7 +2837,7 @@ ggplot() +
   theme_bw()
 
 # old version ---
-unique.tempcont <- seq(min(BetNan.tot$tempcont_ts_30C), max(BetNan.tot$tempcont_ts_30C), by=0.02) 
+unique.tempcont <- seq(min(BetNan.tot$tempcontC), max(BetNan.tot$tempcontC), by=0.02) 
 
 preds.tempcont.BetNan <- array(dim=c(length(unique.tempcont), 
                                      nrow(model_out.shrub_gradient.BetNan2$BUGSoutput$sims.list$b_plotgroup)))
@@ -2977,7 +2868,7 @@ for (i in 1:length(unique.tempcont)){#tempcont
 
 quantiles.tempcont.BetNan[1:5,1:5]
 
-predsmatrix.tempcont.BetNan <- data.frame(expand.grid(tempcont_ts_30C=c(unique.tempcont)))
+predsmatrix.tempcont.BetNan <- data.frame(expand.grid(tempcontC=c(unique.tempcont)))
 predsmatrix.tempcont.BetNan$l95CI<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
 predsmatrix.tempcont.BetNan$l90CI<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
 predsmatrix.tempcont.BetNan$med<-rep(NA, nrow(predsmatrix.tempcont.BetNan))
@@ -2992,11 +2883,11 @@ for (i in 1:nrow(predsmatrix.tempcont.BetNan)){
   predsmatrix.tempcont.BetNan[i,c(2:6)] <- quantiles.tempcont.BetNan[i,]
 }
 
-predsmatrix.tempcont.BetNan$tempcont <- attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:scale') + attr(scale(BetNan.tot$tempcont_ts_30), 'scaled:center')
+predsmatrix.tempcont.BetNan$tempcont <- attr(scale(BetNan.tot$tempcont), 'scaled:scale') + attr(scale(BetNan.tot$tempcont), 'scaled:center')
 
 ggplot() +
   # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
-  geom_point(data = BetNan.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont_ts_30), cover = mean(cover)), 
+  geom_point(data = BetNan.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont), cover = mean(cover)), 
              aes(x = tempcont, 
                  y = cover), 
              size = 2,
@@ -3154,15 +3045,15 @@ shrub_gradient_jags.SalGla.xhat.data <- list(
   N_cont = nrow(SalGla.cont),
   
   # plot group level predictors
-  tempjja.tot = SalGla.tot$tempjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)], # one value per tXpg
+  tempjja.tot = SalGla.tot$tempjjaC[!duplicated(SalGla.tot$plotgroup.NUM)], # one value per tXpg
   # tempmax.tot = SalGla.tot$tempmax_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
   # tempmin.tot = SalGla.tot$tempmin_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
-  tempcont.tot = SalGla.tot$tempcont_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
-  precipjja.tot = SalGla.tot$precipjja_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)],
+  tempcont.tot = SalGla.tot$tempcontC[!duplicated(SalGla.tot$plotgroup.NUM)],
+  precipjja.tot = SalGla.tot$precipjjaC[!duplicated(SalGla.tot$plotgroup.NUM)],
   # precipjfmam.tot = SalGla.tot$precipjfmam_ts_30C[!duplicated(SalGla.tot$plotgroup.NUM)]
   N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
   
-  xhat = seq(from = min(SalGla.tot$tempcont_ts_30C), to = max(SalGla.tot$tempcont_ts_30C), length.out = 100),
+  xhat = seq(from = min(SalGla.tot$tempcontC), to = max(SalGla.tot$tempcontC), length.out = 100),
   Nxhat = 100
   # # site/alt level predictors
   # alt.tot = SalGla.tot$altC[!duplicated(SalGla.tot$site_alt.NUM)],
@@ -3357,17 +3248,17 @@ phats <- coeff.shrub_gradient.SalGla2.xhat %>%
   filter(param %in% c(paste0("phat[", seq(from = 1, to = 100), "]"))) %>% 
   
   # add xhats column
-  mutate(xhats = seq(from = min(SalGla.tot$tempcont_ts_30C),
-                     to = max(SalGla.tot$tempcont_ts_30C),
+  mutate(xhats = seq(from = min(SalGla.tot$tempcontC),
+                     to = max(SalGla.tot$tempcontC),
                      length.out = 100))
   
 # back-center and back-scale predictor values (xhats)
 
-phats$tempcont <- phats$xhats*attr(scale(SalGla.tot$tempcont_ts_30), 'scaled:scale') + attr(scale(SalGla.tot$tempcont_ts_30), 'scaled:center') 
+phats$tempcont <- phats$xhats*attr(scale(SalGla.tot$tempcont), 'scaled:scale') + attr(scale(SalGla.tot$tempcont), 'scaled:center') 
 
 ggplot() +
   # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
-  geom_point(data = SalGla.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont_ts_30), cover = mean(cover)), 
+  geom_point(data = SalGla.tot %>% group_by(site_alt_plotgroup_id) %>% summarise(tempcont = mean(tempcont), cover = mean(cover)), 
              aes(x = tempcont, 
                  y = cover), 
              size = 2,
@@ -3470,7 +3361,7 @@ pred_plot.compet.SalGla +
 
 ## Save / load workspace image
 ```{r}
-# save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
+# save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed_graphs.RData"))
 
 # load ws for further analyses/plotting etc)
 # load(file.path("data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
