@@ -8,30 +8,18 @@
       
       b.compet ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
-      b.twi_90m ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
       b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -40,11 +28,9 @@
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
-                        b.twi_90m * twi_90m.dis[i] + 
+                        b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
       }
@@ -56,11 +42,9 @@
         cov.cont[j] ~ dbeta(p[j], q[j])
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
-                        b.twi_90m * twi_90m.cont[j] + 
+                        b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
@@ -73,26 +57,40 @@
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
                     # b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2)
       }
       
       
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_sri[m] <- intercept + 
+                        b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + 
+                        b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + 
+                        b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + 
+                            b.tempjja.x * xhat_tempjja[m] # + 
+                            # b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + 
+                            b.tempcont.x * xhat_tempcont[m] # + 
+                            # b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + 
+                              b.precipjja.x * xhat_precipjja[m] # + 
+                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
+        
+        for (p in 1:Nxhat2){
+          phat_tempcontXtemp[m,p] <- intercept +
+                                      b.tempcont.x * xhat_tempcont[m] +
+                                      # b.tempcont.x2 * (xhat_tempcont[m]^2) +
+                                      b.tempjja.x * xhat_tempjja2[p] # +
+                                      # b.tempjja.x2 * (xhat_tempjja2[p]^2)
+        }
+      }
 
     
       }

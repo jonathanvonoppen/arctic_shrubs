@@ -188,6 +188,21 @@ env_cov <- env_pred_nuuk.bio %>%
 
 # Make the variable site into a factor to be used as a random factor
   mutate(site = as.factor(site)) %>% 
+  
+# create columns for total, deciduous & evergreen shrub cover from focal species covers
+  mutate(cov_All_shrubs = cov_Betula_nana + cov_Cassiope_tetragona + cov_Empetrum_nigrum + cov_Phyllodoce_coerulea +
+                      cov_Ledum_groenlandicum + cov_Ledum_palustre + cov_Salix_arctophila + cov_Salix_glauca + cov_Vaccinium_uliginosum,
+         
+         cov_All_deciduous = cov_Betula_nana + cov_Salix_arctophila + cov_Salix_glauca + cov_Vaccinium_uliginosum,
+         
+         cov_All_evergreens = cov_Cassiope_tetragona + cov_Empetrum_nigrum + cov_Phyllodoce_coerulea + cov_Ledum_groenlandicum + cov_Ledum_palustre) %>% 
+  
+# copy all shrub cover column into predictor column
+  mutate(shrub_cover = cov_All_shrubs) %>% 
+  
+# rename graminoids column to not match reduction pattern in next step
+  rename(graminoid_cover = cov_graminoids) %>% 
+  
   as.data.frame %>% 
   droplevels()
 
@@ -255,14 +270,15 @@ env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio,
          inclin_down, inclin_dir, tri,                              # terrain variables
          twi_90m, ndwi, tcws,                                       # moisture variables
          sri,                                                       # solar radiation
-         ndvi, compet,                                              # biotic variables: productivity, height-derived competitive pressure
-         taxon,
+         ndvi, compet,                                              # biotic variables I: productivity, height-derived competitive pressure
+         ends_with("_cover"),                                       # biotic variables II: shrub & graminoid cover
+         taxon,                                                     # shrub species or func group (all shrubs/deciduous/evergreens)
          cover)                                                     # response variable: relative no. pin hits per plot group
 
 # filter dataset to only include species we have competition values for: ----
-spp_compet <- levels(droplevels(env_cov_long$taxon[!is.na(env_cov_long$compet)]))
-env_cov_long_spp_compet <- env_cov_long %>% 
-  filter(taxon %in% spp_compet) %>% 
+env_cov_long_target_groups <- env_cov_long %>% 
+  filter(taxon %in% c("Betula nana", "Cassiope tetragona", "Empetrum nigrum", "Phyllodoce caerulea", "Rhododendron groenlandicum", "Rhododendron tomentosum", 
+                      "Salix arctophila", "Salix glauca", "Vaccinium uliginosum", "All shrubs", "All deciduous", "All evergreens")) %>% 
   droplevels()
 
 # Write new table: ----
@@ -271,5 +287,5 @@ env_cov_long_spp_compet <- env_cov_long %>%
 # write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plotgroups.csv"))
 
 # >> for plot level: ----
-write_csv(env_cov_long_spp_compet, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plots.csv")
-write_csv(env_cov_long_spp_compet, path = file.path("data", "nuuk_env_cover_plots.csv"))
+write_csv(env_cov_long_target_groups, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plots.csv")
+write_csv(env_cov_long_target_groups, path = file.path("data", "nuuk_env_cover_plots.csv"))
