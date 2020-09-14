@@ -72,32 +72,20 @@
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
+                      # b.tempjja.x2 * (tempjja.tot[k]^2) +  # eliminated, as n.s.
                     b.tempcont.x * tempcont.tot[k] + 
-                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
+                      # b.tempcont.x2 * (tempcont.tot[k]^2) +  # eliminated, as n.s.
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+                      # b.precipjja.x2 * (precipjja.tot[k]^2)  # eliminated, as n.s.
+                    
       }
-      
-      
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
-
-      
-      # add predicted values (derived quantities)
+  
+  
+      # add predicted values (derived parameters)
       for (m in 1:Nxhat){
-        phat[m] <- intercept + b.compet * xhat[m]
+        for (p in 1:Nxhat2){
+        phat[m,p] <- intercept + b.tempcont.x * xhat[m] + b.compet * xhat2[p]
+        }
       }
     
       }

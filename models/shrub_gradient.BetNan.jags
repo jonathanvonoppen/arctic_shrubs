@@ -17,7 +17,7 @@
       
       # sigma.isocline ~ dunif(0,100)
       # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      
+      # 
       # b.alt.x ~ dnorm(0, 0.001)
       # b.alt.x2 ~ dnorm(0, 0.001)
       b.tempjja.x ~ dnorm(0, 0.001)
@@ -46,7 +46,7 @@
                         # b.inclin_down * inclin_down.dis[i] +
                         b.twi_90m * twi_90m.dis[i] + 
                         b.sri * sri.dis[i] +
-                        b.tri * tri.dis[i] 
+                        b.tri * tri.dis[i]
       }
       
       
@@ -61,7 +61,7 @@
                         b.compet * compet.cont[j] +
                         # b.inclin_down * inclin_down.cont[j] +
                         b.twi_90m * twi_90m.cont[j] + 
-                        b.sri * sri.cont[j] + 
+                        b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
       }
 
@@ -90,10 +90,16 @@
       #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
       #   mu.isocline[l] <- intercept + 
       #   
-      #               # isocline-level predictor, linear term
-      #               b.alt.x * alt.tot[l] #+
-      #               #b.alt.x2 * (alt.tot[l]^2)
+      #               # isocline-level predictor
+      #               b.alt.x * alt.tot[l]
       # }
+      
+      # DERIVED PARAMETERS
+      
+      for (i in 1:nxhats){
+        phats[i] <- intercept + b.tempcont.x*xhats[i] + b.tempcont.x2*(xhats[i]^2) 
+        #assumes all other predictors = 0
+      }
 
     
       }
