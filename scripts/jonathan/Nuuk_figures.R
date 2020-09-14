@@ -252,9 +252,11 @@ pred.plot.grid(env_cov_bio.long)
 # 4) Cover and predictions for all species and predictors ----
 
 
-prediction_plots <- function(species) {
+prediction_plots_species <- function(species) {
   
-  predictor_phats <- c("phat_compet", "phat_sri", "phat_tri", "phat_twi", "phat_tempjja", "phat_tempcont", "phat_precipjja")
+  predictor_phats <- c("phat_compet", "phat_shrub_cover", "phat_graminoid_cover", 
+                       "phat_sri", "phat_tri", "phat_tcws", 
+                       "phat_tempjja", "phat_tempcont", "phat_precipjja")
   
   # # test
   # species <- "BetNan"
@@ -323,7 +325,7 @@ prediction_plots <- function(species) {
            pred_value = V10) %>% 
     # extract predictor strings from param column
     mutate(pred_id = factor(str_remove(str_remove(param, "phat_"), "\\[\\d+\\]"),
-                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "twi", "compet")))
+                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "compet")))
   
   # >> facet solution (simple) ----
   
@@ -371,13 +373,13 @@ prediction_plots <- function(species) {
     mutate(pred_id = fct_recode(pred_id,
                                   "Solar Radiation Index" = "sri",
                                   "Terrain Ruggedness Index" = "tri",
-                                  "Topographic Wetness Index" = "twi",
+                                  "Tasseled-cap Wetness Index" = "tcws",
                                   "overgrowing competition" = "compet"),
            pred_id = fct_relevel(pred_id,
-                                   "Solar Radiation Index",
-                                   "Terrain Ruggedness Index",
-                                   "Topographic Wetness Index",
-                                   "overgrowing competition"))
+                                 "Solar Radiation Index",
+                                 "Terrain Ruggedness Index",
+                                 "Tasseled-cap Wetness Index",
+                                 "overgrowing competition"))
   
   # rename factor levels in predictions dataset
   phats_long <- phats_long %>% 
@@ -389,7 +391,7 @@ prediction_plots <- function(species) {
                                 "cumulative summer precipitation [mm]" = "precipjja",
                                 "Solar Radiation Index" = "sri",
                                 "Terrain Ruggedness Index" = "tri",
-                                "Topographic Wetness Index" = "twi",
+                                "Tasseled-cap Wetness Index" = "tcws",
                                 "overgrowing competition" = "compet"),
            pred_id = fct_relevel(pred_id,
                                  "summer temperature [°C]",
@@ -397,7 +399,7 @@ prediction_plots <- function(species) {
                                  "cumulative summer precipitation [mm]",
                                  "Solar Radiation Index",
                                  "Terrain Ruggedness Index",
-                                 "Topographic Wetness Index",
+                                 "Tasseled-cap Wetness Index",
                                  "overgrowing competition"))
   
   # compile plot
@@ -506,19 +508,220 @@ prediction_plots <- function(species) {
   # # combine graphs
 }
 
-prediction_plots(species = "BetNan")
-prediction_plots(species = "CasTet")
-prediction_plots(species = "EmpNig")
-prediction_plots(species = "PhyCae")
-prediction_plots(species = "RhoGro")
-prediction_plots(species = "RhoTom")
-prediction_plots(species = "SalArc")
-prediction_plots(species = "SalGla")
-prediction_plots(species = "VacUli")
+prediction_plots_species(species = "BetNan")
+prediction_plots_species(species = "CasTet")
+prediction_plots_species(species = "EmpNig")
+prediction_plots_species(species = "PhyCae")
+prediction_plots_species(species = "RhoGro")
+prediction_plots_species(species = "RhoTom")
+prediction_plots_species(species = "SalArc")
+prediction_plots_species(species = "SalGla")
+prediction_plots_species(species = "VacUli")
+
+
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
+
+# 5) Cover and predictions for all groupss and predictors ----
+
+
+prediction_plots_groups <- function(fgroup) {
+  
+  predictor_phats <- c("phat_sri", "phat_tri", "phat_tcws", 
+                       "phat_tempjja", "phat_tempcont", "phat_precipjja", 
+                       "phat_graminoid_cover")
+  
+  # # test
+  # species <- "BetNan"
+  
+  if(fgroup == "AllShr") model_coeff_output <- coeff.shrub_gradient.AllShr
+  if(fgroup == "AllEve") model_coeff_output <- coeff.shrub_gradient.AllEve
+  if(fgroup == "AllDec") model_coeff_output <- coeff.shrub_gradient.AllDec
+  
+  
+  if(fgroup == "AllShr") group_df <- AllShr.tot
+  if(fgroup == "AllEve") group_df <- AllEve.tot
+  if(fgroup == "AllDec") group_df <- AllDec.tot
+
+  
+  # define initial predictions df
+  phats_long <- as.data.frame(matrix(data = NA, 
+                                     nrow = 100 * length(predictor_phats), 
+                                     ncol = length(model_coeff_output) + 2))
+  names(phats_long)[1:length(model_coeff_output)] <- names(model_coeff_output)
+  
+  # extract predictions into phats data frame 
+  for (phat_predictor in predictor_phats){
+    
+    predictor <- str_remove(phat_predictor, "phat_")
+    predictor_min <- min(group_df[, paste0(predictor, "C")])
+    predictor_max <- max(group_df[, paste0(predictor, "C")])
+    
+    # assemble predicted and predictor values, for 100 rows (one predictor) at a time
+    phats_long[(100 * match(phat_predictor, predictor_phats) -99) : (100 * match(phat_predictor, predictor_phats)),] <- model_coeff_output %>% 
+      
+      # filter for predicted values
+      filter(param %in% c(paste0(phat_predictor, "[", seq(from = 1, to = 100), "]"))) %>% 
+      
+      # add xhats column
+      mutate(xhats = seq(from = predictor_min,
+                         to = predictor_max,
+                         length.out = 100)) %>% 
+      
+      # add column for back-centered and back-scaled values
+      mutate(pred_values = xhats * attr(scale(group_df[, predictor]), 'scaled:scale') + attr(scale(group_df[, predictor]), 'scaled:center'))
+    
+    # # back-center and back-scale predictor values (xhats), for rows 1:100, 101:200 a.s.o.
+    # phats_long$xhats[(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)] <- phats_long$xhats[(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)]*attr(scale(group_df[, predictor]), 'scaled:scale') + attr(scale(group_df[, predictor]), 'scaled:center') 
+  }
+  # [(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)]
+  
+  # # pivot data frame to long format
+  # phats_long <- phats %>% 
+  #   pivot_longer(cols = c(str_remove(predictor_phats, "phat_")),
+  #                names_to = "predictor",
+  #                values_to = "phat")
+  
+  phats_long <- phats_long %>% 
+    # rename added columns
+    rename(xhat = V9,
+           pred_value = V10) %>% 
+    # extract predictor strings from param column
+    mutate(pred_id = factor(str_remove(str_remove(param, "phat_"), "\\[\\d+\\]"),
+                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "graminoid_cover")))
+  
+  # >> facet solution (simple) ----
+  
+  # data for point plots: on plotgroup level for climate vars...
+  point_data_pg <- group_df %>% 
+    # select necessary columns
+    select(site_alt_plotgroup_id,
+           plot,
+           levels(phats_long$pred_id),
+           cover) %>% 
+    # arrange vertically
+    pivot_longer(cols = levels(phats_long$pred_id),
+                 names_to = "pred_id",
+                 values_to = "pred_value") %>%
+    # filter for climate vars
+    filter(pred_id %in% c("tempjja", "tempcont", "precipjja")) %>% 
+    # reduce to plotgroup level
+    group_by(site_alt_plotgroup_id, pred_id) %>% 
+    summarise(pred_value = mean(pred_value), 
+              cover = mean(cover)) %>% ungroup() %>% 
+    # rename predictors
+    mutate(pred_id = fct_recode(pred_id,
+                                "summer temperature [°C]" = "tempjja",
+                                "annual temperature variability [°C]" = "tempcont",
+                                "cumulative summer precipitation [mm]" = "precipjja"),
+           pred_id = fct_relevel(pred_id,
+                                 "summer temperature [°C]",
+                                 "annual temperature variability [°C]",
+                                 "cumulative summer precipitation [mm]"))
+  
+  # ... and on plot level for topo & compet vars
+  point_data_plot <- group_df %>% 
+    # select necessary columns
+    select(site_alt_plotgroup_id,
+           plot,
+           levels(phats_long$pred_id),
+           cover) %>% 
+    # arrange vertically
+    pivot_longer(cols = levels(phats_long$pred_id),
+                 names_to = "pred_id",
+                 values_to = "pred_value") %>%
+    # filter for climate vars
+    filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) %>% 
+    # rename predictors
+    mutate(pred_id = fct_recode(pred_id,
+                                "Solar Radiation Index" = "sri",
+                                "Terrain Ruggedness Index" = "tri",
+                                "Tasseled-cap Wetness Index" = "tcws",
+                                "graminoid cover" = "graminoid_cover"),
+           pred_id = fct_relevel(pred_id,
+                                 "Solar Radiation Index",
+                                 "Terrain Ruggedness Index",
+                                 "Tasseled-cap Wetness Index",
+                                 "graminoid cover"))
+  
+  # rename factor levels in predictions dataset
+  phats_long <- phats_long %>% 
+    
+    # rename predictors
+    mutate(pred_id = fct_recode(pred_id,
+                                "summer temperature [°C]" = "tempjja",
+                                "annual temperature variability [°C]" = "tempcont",
+                                "cumulative summer precipitation [mm]" = "precipjja",
+                                "Solar Radiation Index" = "sri",
+                                "Terrain Ruggedness Index" = "tri",
+                                "Tasseled-cap Wetness Index" = "tcws",
+                                "graminoid cover" = "graminoid_cover"),
+           pred_id = fct_relevel(pred_id,
+                                 "summer temperature [°C]",
+                                 "annual temperature variability [°C]",
+                                 "cumulative summer precipitation [mm]",
+                                 "Solar Radiation Index",
+                                 "Terrain Ruggedness Index",
+                                 "Tasseled-cap Wetness Index",
+                                 "graminoid cover"))
+  
+  # compile plot
+  pred_plot <- ggplot(data = phats_long,
+                      aes(group = pred_id)) +
+    
+    # plotgroup level
+    geom_point(data = point_data_pg,
+               aes(x = pred_value,
+                   y = cover),
+               size = 2,
+               position = position_jitter(width=0, height=.01),
+               alpha=0.5) +
+    
+    # plot level
+    geom_point(data = point_data_plot,
+               aes(x = pred_value,
+                   y = cover),
+               size = 2,
+               position = position_jitter(width=0, height=.01),
+               alpha=0.5) + 
+    
+    # draw line of predicted values
+    geom_line(aes(x = pred_value,
+                  y = plogis(mean)), 
+              colour = "orange",
+              alpha = 1,
+              size = 2) + 
+    
+    # draw predicted 95% CI
+    geom_ribbon(aes(x = pred_value,
+                    ymin = plogis(l95), 
+                    ymax = plogis(u95)),
+                fill = "orange",
+                alpha = 0.2) +
+    
+    # make facets for predictors
+    facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
+    
+    scale_y_continuous("relative no. pin hits per plot group",
+                       limits = c(0, max(group_df %>% 
+                                           pull(cover)))) +
+    
+    labs(x = "predictor value") +
+    ggtitle(paste0(fgroup, " cover ~ predictors")) +
+    theme_bw() +
+    theme(legend.position = "none",
+          axis.title.x = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          strip.background = element_blank(),
+          strip.placement = "outside",
+          panel.spacing.y = unit(1.5, "lines"))
+  
+  return(pred_plot)
+  
+}
 
 # ---
 
-# predictor grid function to draw from
+# effect size plot function to draw from
 model_plot_sig_function <- function(model_coeff_output, title_string, plot_width) {
   target_vars <- c("b.tempjja.x", "b.tempjja.x2",
                    "b.tempcont.x", "b.tempcont.x2",
