@@ -260,25 +260,25 @@ prediction_plots_species <- function(species) {
   # # test
   # species <- "BetNan"
   
-  if(species == "BetNan") model_coeff_output <- coeff.shrub_gradient.BetNan2
-  if(species == "CasTet") model_coeff_output <- coeff.shrub_gradient.CasTet
-  if(species == "EmpNig") model_coeff_output <- coeff.shrub_gradient.EmpNig2
-  if(species == "PhyCae") model_coeff_output <- coeff.shrub_gradient.PhyCae
-  if(species == "RhoGro") model_coeff_output <- coeff.shrub_gradient.RhoGro2
-  if(species == "RhoTom") model_coeff_output <- coeff.shrub_gradient.RhoTom
-  if(species == "SalArc") model_coeff_output <- coeff.shrub_gradient.SalArc
-  if(species == "SalGla") model_coeff_output <- coeff.shrub_gradient.SalGla2
-  if(species == "VacUli") model_coeff_output <- coeff.shrub_gradient.VacUli2
+  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
+  if(species == "Cassiope tetragona") model_coeff_output <- coeff.shrub_gradient.CasTet
+  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.EmpNig2
+  if(species == "Phyllodoce caerulea") model_coeff_output <- coeff.shrub_gradient.PhyCae
+  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.RhoGro2
+  if(species == "Rhododendron tomentosum") model_coeff_output <- coeff.shrub_gradient.RhoTom
+  if(species == "Salix arctophila") model_coeff_output <- coeff.shrub_gradient.SalArc
+  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
+  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
   
-  if(species == "BetNan") species_df <- BetNan.tot
-  if(species == "CasTet") species_df <- CasTet.tot
-  if(species == "EmpNig") species_df <- EmpNig.tot
-  if(species == "PhyCae") species_df <- PhyCae.tot
-  if(species == "RhoGro") species_df <- RhoGro.tot
-  if(species == "RhoTom") species_df <- RhoTom.tot
-  if(species == "SalArc") species_df <- SalArc.tot
-  if(species == "SalGla") species_df <- SalGla.tot
-  if(species == "VacUli") species_df <- VacUli.tot
+  if(species == "Betula nana") species_df <- BetNan.tot
+  if(species == "Cassiope tetragona") species_df <- CasTet.tot
+  if(species == "Empetrum nigrum") species_df <- EmpNig.tot
+  if(species == "Phyllodoce caerulea") species_df <- PhyCae.tot
+  if(species == "Rhododendron groenlandicum") species_df <- RhoGro.tot
+  if(species == "Rhododendron tomentosum") species_df <- RhoTom.tot
+  if(species == "Salix arctophila") species_df <- SalArc.tot
+  if(species == "Salix glauca") species_df <- SalGla.tot
+  if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
   
   # define initial predictions df
   phats_long <- as.data.frame(matrix(data = NA, 
@@ -508,30 +508,26 @@ prediction_plots_species <- function(species) {
 }
 
 
-# >> load model outputs ----
-model_output_path <- file.path("data", "model_outputs") 
-
-coeff.shrub_gradient.BetNan2 <- load(file.path(model_output_path, "model_output_BetNan2.Rdata"))
-coeff.shrub_gradient.CasTet <- load(file.path(model_output_path, "model_output_CasTet.Rdata"))
-coeff.shrub_gradient.EmpNig2 <- load(file.path(model_output_path, "model_output_EmpNig2.Rdata"))
-coeff.shrub_gradient.PhyCae <- load(file.path(model_output_path, "model_output_PhyCae.Rdata"))
-coeff.shrub_gradient.RhoGro2 <- load(file.path(model_output_path, "model_output_RhoGro2.Rdata"))
-coeff.shrub_gradient.RhoTom <- load(file.path(model_output_path, "model_output_RhoTom.Rdata"))
-coeff.shrub_gradient.SalArc <- load(file.path(model_output_path, "model_output_SalArc.Rdata"))
-coeff.shrub_gradient.SalGla2 <- load(file.path(model_output_path, "model_output_SalGla2.Rdata"))
-coeff.shrub_gradient.VacUli2 <- load(file.path(model_output_path, "model_output_VacUli2.Rdata"))
+# >> load data ----
+# load model outputs
+model_outputs_focal_species <- file.path("data", "model_outputs", list.files(path = file.path("data", "model_outputs"), pattern = "*.Rdata"))
+for (model_output in model_outputs_focal_species){
+  load(model_output)
+}
+# load input data
+load(file = file.path("data", ""))
 
 
 # >> plot graphs ----
-prediction_plots_species(species = "BetNan")
-prediction_plots_species(species = "CasTet")
-prediction_plots_species(species = "EmpNig")
-prediction_plots_species(species = "PhyCae")
-prediction_plots_species(species = "RhoGro")
-prediction_plots_species(species = "RhoTom")
-prediction_plots_species(species = "SalArc")
-prediction_plots_species(species = "SalGla")
-prediction_plots_species(species = "VacUli")
+prediction_plots_species(species = "Betula nana")
+prediction_plots_species(species = "Cassiope tetragona")
+prediction_plots_species(species = "Empetrum nigrum")
+prediction_plots_species(species = "Phyllodoce caerulea")
+prediction_plots_species(species = "Rhododendron groenlandicum")
+prediction_plots_species(species = "Rhodedendron tomentosum")
+prediction_plots_species(species = "Salix arctophila")
+prediction_plots_species(species = "Salix glauca")
+prediction_plots_species(species = "Vaccinium uliginosum")
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -545,17 +541,15 @@ prediction_plots_groups <- function(fgroup) {
                        "phat_tempjja", "phat_tempcont", "phat_precipjja", 
                        "phat_graminoid_cover")
   
-  # # test
-  # species <- "BetNan"
   
-  if(fgroup == "AllShr") model_coeff_output <- coeff.shrub_gradient.AllShr
-  if(fgroup == "AllEve") model_coeff_output <- coeff.shrub_gradient.AllEve
-  if(fgroup == "AllDec") model_coeff_output <- coeff.shrub_gradient.AllDec
+  if(fgroup == "all shrub") model_coeff_output <- model_output_AllShr2
+  if(fgroup == "evergreen shrub") model_coeff_output <- model_output_AllEve2
+  if(fgroup == "deciduous shrub") model_coeff_output <- model_output_AllDec2
   
   
-  if(fgroup == "AllShr") group_df <- AllShr.tot
-  if(fgroup == "AllEve") group_df <- AllEve.tot
-  if(fgroup == "AllDec") group_df <- AllDec.tot
+  if(fgroup == "all shrub") group_df <- AllShr.tot
+  if(fgroup == "evergreen shrub") group_df <- AllEve.tot
+  if(fgroup == "deciduous shrub") group_df <- AllDec.tot
   
   
   # define initial predictions df
@@ -734,7 +728,27 @@ prediction_plots_groups <- function(fgroup) {
   
 }
 
-# ---
+
+# >> load model outputs ----
+model_output_path <- file.path("data", "model_outputs") 
+
+lapply(paste(model_output_path, c("model_output_AllShr2.Rdata",
+                                  "model_output_AllEve2.Rdata",
+                                  "model_output_AllDec2.Rdata"),
+             sep = "/"),
+       load,
+       .GlobalEnv) 
+
+
+# >> plot graphs ----
+prediction_plots_groups(fgroup = "all shrub")
+prediction_plots_groups(fgroup = "evergreen shrub")
+prediction_plots_groups(fgroup = "deciduous shrub")
+
+
+
+
+# ________________________----
 
 # effect size plot function to draw from
 model_plot_sig_function <- function(model_coeff_output, title_string, plot_width) {
