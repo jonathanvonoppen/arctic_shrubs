@@ -6,7 +6,6 @@
       
       intercept ~ dnorm(0, 0.0001)
       
-      b.compet ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
@@ -28,10 +27,8 @@
       b.tempXtcws ~ dnorm(0, 0.001)
       b.tempXtcws2 ~ dnorm(0, 0.001)
       
-      phi ~ dgamma(0.1, 0.1)
       
-      
-    # LIKELIHOOD
+    # plot level
 
       for (i in 1:N_plots){ 
         cov.tot[i] ~ dlnorm(mu.plot[i], tau.plot)
@@ -45,6 +42,8 @@
       }
 
 
+    # plot group level
+    
       for (k in 1:N_plotgroups){ # length of total plotgroups
         b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
         mu.plotgroup[k] <- intercept + 

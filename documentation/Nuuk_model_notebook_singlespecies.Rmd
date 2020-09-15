@@ -748,7 +748,7 @@ JAGS needs data input in list format, so I provided all relevant variables as fo
 shrub_gradient_jags.AllShr.data <- list(
   
   # plot level predictors
-  cov.tot = AllShr.tot$cover + .01,
+  cov.tot = AllShr.tot$cover + 1,
   plotgroup.tot = AllShr.tot$plotgroup.NUM,
   sri.tot = AllShr.tot$sriC,
   tri.tot = AllShr.tot$triC,
@@ -783,7 +783,7 @@ str(shrub_gradient_jags.AllShr.data)
 shrub_gradient_jags.AllEve.data <- list(
   
   # plot level predictors
-  cov.tot = AllEve.tot$cover + 0.01,
+  cov.tot = AllEve.tot$cover + 1,
   plotgroup.tot = AllEve.tot$plotgroup.NUM,
   sri.tot = AllEve.tot$sriC,
   tri.tot = AllEve.tot$triC,
@@ -818,7 +818,7 @@ str(shrub_gradient_jags.AllEve.data)
 shrub_gradient_jags.AllDec.data <- list(
   
   # plot level predictors
-  cov.tot = AllDec.tot$cover + 0.01,
+  cov.tot = AllDec.tot$cover + 1,
   plotgroup.tot = AllDec.tot$plotgroup.NUM,
   sri.tot = AllDec.tot$sriC,
   tri.tot = AllDec.tot$triC,
@@ -860,7 +860,6 @@ write("
       
       intercept ~ dnorm(0, 0.0001)
       
-      b.compet ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
       b.tri ~ dnorm(0, 0.0001)
@@ -882,10 +881,8 @@ write("
       b.tempXtcws ~ dnorm(0, 0.001)
       b.tempXtcws2 ~ dnorm(0, 0.001)
       
-      phi ~ dgamma(0.1, 0.1)
       
-      
-    # LIKELIHOOD
+    # plot level
 
       for (i in 1:N_plots){ 
         cov.tot[i] ~ dlnorm(mu.plot[i], tau.plot)
@@ -899,6 +896,8 @@ write("
       }
 
 
+    # plot group level
+    
       for (k in 1:N_plotgroups){ # length of total plotgroups
         b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
         mu.plotgroup[k] <- intercept + 
@@ -951,7 +950,6 @@ params_groups <- c("intercept",
                    "b.tcws",
                    "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
                    "sigma.plotgroup",
-                   "phi",
                    "phat_graminoid_cover", 
                    "phat_sri", "phat_tcws", "phat_tri", 
                    "phat_tempjja", "phat_tempcont", "phat_precipjja",
@@ -969,7 +967,7 @@ model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # in
                                         params_groups,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
-                                        n.iter = 10000, n.burnin = 7000,  # no. iterations & burn-in fraction per chain
+                                        n.iter = 10000, n.burnin = 7000,    # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
                                         DIC = FALSE,                        # do not compute deviance, pD, and DIC
                                         working.directory = NULL, 
