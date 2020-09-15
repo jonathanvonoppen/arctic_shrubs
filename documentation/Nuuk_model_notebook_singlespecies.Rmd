@@ -1797,9 +1797,12 @@ write("
       b.tempjja.x ~ dnorm(0, 0.001)
       # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
-      b.tempcont.x2 ~ dnorm(0, 0.001)
+      # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
+      
+      b.tempXtcws ~ dnorm(0, 0.001)
+      # b.tempXtcws2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -1809,9 +1812,11 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
+                        b.compet * compet.dis[i] + 
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
-                        b.compet * compet.dis[i] + 
+                        b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
+                        # b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
                         b.tcws * tcws.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -1826,8 +1831,10 @@ write("
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        b.shrub_cov * shrub_cov.cont[j] + 
-                        b.gramin_cov * gramin_cov.cont[j] + 
+                        b.shrub_cov * shrub_cov.cont[j] +
+                        b.gramin_cov * gramin_cov.cont[j] +
+                        b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
+                        # b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -1842,44 +1849,34 @@ write("
                     b.tempjja.x * tempjja.tot[k] + 
                     # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
-                    b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
       
       
       # add predicted values (derived parameters)
       for (m in 1:Nxhat){
-        phat_compet[m] <- intercept + 
-                          b.compet * xhat_compet[m]
-        phat_graminoid_cover[m] <- intercept + 
-                                    b.gramin_cov * xhat_graminoid_cover[m]
-        phat_shrub_cover[m] <- intercept + 
-                                b.shrub_cover * xhat_shrub_cover[m]
-        phat_sri[m] <- intercept + 
-                        b.sri * xhat_sri[m]
-        phat_tri[m] <- intercept + 
-                        b.tri * xhat_tri[m]
-        phat_tcws[m] <- intercept + 
-                        b.tcws * xhat_tcws[m]
-        phat_tempjja[m] <- intercept + 
-                            b.tempjja.x * xhat_tempjja[m] # + 
-                            # b.tempjja.x2 * (xhat_tempjja[m]^2)
-        phat_tempcont[m] <- intercept + 
-                            b.tempcont.x * xhat_tempcont[m] + 
-                            b.tempcont.x2 * (xhat_tempcont[m]^2)
-        phat_precipjja[m] <- intercept + 
-                              b.precipjja.x * xhat_precipjja[m] # + 
-                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
-        
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
+        phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
+        phat_sri[m] <- intercept + b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
+      
         for (p in 1:Nxhat2){
-          phat_tempcontXtemp[m,p] <- intercept +
-                                      b.tempcont.x * xhat_tempcont[m] +
-                                      b.tempcont.x2 * (xhat_tempcont[m]^2) +
-                                      b.tempjja.x * xhat_tempjja2[p] # +
-                                      # b.tempjja.x2 * (xhat_tempjja2[p]^2)
+          phat_tempXmoist[m,p] <- intercept +
+                                      b.tempjja.x * xhat_tempjja[m] +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.tcws * xhat_tcws2[p] +
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] # +
+                                      # b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+          }
         }
-      }
+
     
       }
   ", file.path("..", "models", "shrub_gradient.BetNan2.jags"))
@@ -1887,7 +1884,7 @@ write("
 # specify new set of parameters to be monitored
 params_BetNan2 <- c("intercept",
                     "b.tempjja.x", # "b.tempjja.x2",
-                    "b.tempcont.x", "b.tempcont.x2",
+                    "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
                     "b.compet", 
                     "b.shrub_cov",
@@ -2087,11 +2084,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
+      
+      b.tempXtcws ~ dnorm(0, 0.001)
+      # b.tempXtcws2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -2100,10 +2100,12 @@ write("
 
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
+                        b.compet * compet.dis[i] + 
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
-                        b.compet * compet.dis[i] + 
+                        b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
+                        # b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
                         b.tcws * tcws.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -2116,10 +2118,12 @@ write("
         cov.cont[j] ~ dbeta(p[j], q[j])
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        b.shrub_cov * shrub_cov.cont[j] + 
-                        b.gramin_cov * gramin_cov.cont[j] + 
+                        b.shrub_cov * shrub_cov.cont[j] +
+                        b.gramin_cov * gramin_cov.cont[j] +
+                        b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
+                        # b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -2132,46 +2136,35 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
-                    # b.precipjja.x2 * (precipjja.tot[k]^2)
+                    # b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
       
       
       # add predicted values (derived parameters)
       for (m in 1:Nxhat){
-        phat_compet[m] <- intercept + 
-                          b.compet * xhat_compet[m]
-        phat_graminoid_cover[m] <- intercept + 
-                                    b.gramin_cov * xhat_graminoid_cover[m]
-        phat_shrub_cover[m] <- intercept + 
-                                b.shrub_cover * xhat_shrub_cover[m]
-        phat_sri[m] <- intercept + 
-                        b.sri * xhat_sri[m]
-        phat_tri[m] <- intercept + 
-                        b.tri * xhat_tri[m]
-        phat_tcws[m] <- intercept + 
-                        b.tcws * xhat_tcws[m]
-        phat_tempjja[m] <- intercept + 
-                            b.tempjja.x * xhat_tempjja[m] + 
-                            b.tempjja.x2 * (xhat_tempjja[m]^2)
-        phat_tempcont[m] <- intercept + 
-                            b.tempcont.x * xhat_tempcont[m] # + 
-                            # b.tempcont.x2 * (xhat_tempcont[m]^2)
-        phat_precipjja[m] <- intercept + 
-                              b.precipjja.x * xhat_precipjja[m] # + 
-                              # b.precipjja.x2 * (xhat_precipjja[m]^2)
-        
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
+        phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
+        phat_sri[m] <- intercept + b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
+      
         for (p in 1:Nxhat2){
-          phat_tempcontXtemp[m,p] <- intercept +
-                                      b.tempcont.x * xhat_tempcont[m] +
-                                      # b.tempcont.x2 * (xhat_tempcont[m]^2) +
-                                      b.tempjja.x * xhat_tempjja2[p] +
-                                      b.tempjja.x2 * (xhat_tempjja2[p]^2)
+          phat_tempXmoist[m,p] <- intercept +
+                                      b.tempjja.x * xhat_tempjja[m] +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.tcws * xhat_tcws2[p] +
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] # +
+                                      # b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+          }
         }
-      }
 
     
       }
@@ -2179,7 +2172,7 @@ write("
 
 # specify new set of parameters to be monitored
 params_EmpNig2 <- c("intercept",
-                    "b.tempjja.x", "b.tempjja.x2",
+                    "b.tempjja.x", # "b.tempjja.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
                     "b.compet", 
@@ -2302,6 +2295,132 @@ save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "model_outputs"
 
 ### *Rhododendron groenlandicum*
 ```{r}
+# new model object with compet removed
+write("
+  
+  model{
+    
+    # priors
+      
+      intercept ~ dnorm(0, 0.0001)
+      
+      # b.compet ~ dnorm(0, 0.0001)
+      b.shrub_cov ~ dnorm(0, 0.0001)
+      b.gramin_cov ~ dnorm(0, 0.0001)
+      b.sri ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
+      b.tcws ~ dnorm(0, 0.0001)
+
+      sigma.plotgroup ~ dunif(0,100)
+      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
+      
+      b.tempjja.x ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.precipjja.x ~ dnorm(0, 0.001)
+      b.precipjja.x2 ~ dnorm(0, 0.001)
+      
+      b.tempXtcws ~ dnorm(0, 0.001)
+      b.tempXtcws2 ~ dnorm(0, 0.001)
+      
+      phi ~ dgamma(0.1, 0.1)
+      
+      
+    # LIKELIHOOD for discrete part
+
+      for (i in 1:N_discrete){ 
+        cov.dis[i] ~ dbern(mu[i])
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
+                        # b.compet * compet.dis[i] + 
+                        b.shrub_cov * shrub_cov.dis[i] + 
+                        b.gramin_cov * gramin_cov.dis[i] + 
+                        b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
+                        b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
+                        b.tcws * tcws.dis[i] + 
+                        b.sri * sri.dis[i] +
+                        b.tri * tri.dis[i]
+      }
+      
+      
+    # LIKELIHOOD for continuous part
+
+      for (j in 1:N_cont){
+        cov.cont[j] ~ dbeta(p[j], q[j])
+        p[j] <- mu2[j] * phi
+        q[j] <- (1 - mu2[j]) * phi
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
+                        # b.compet * compet.cont[j] +
+                        b.shrub_cov * shrub_cov.cont[j] +
+                        b.gramin_cov * gramin_cov.cont[j] +
+                        b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
+                        b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
+                        b.tcws * tcws.cont[j] + 
+                        b.sri * sri.cont[j] +
+                        b.tri * tri.cont[j]
+      }
+
+
+      for (k in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
+        mu.plotgroup[k] <- intercept + 
+                    
+                    # plot group level predictors, linear and quadratic term
+                    b.tempjja.x * tempjja.tot[k] + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    b.tempcont.x * tempcont.tot[k] + 
+                    b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] # + 
+                    b.precipjja.x2 * (precipjja.tot[k]^2) 
+      }
+      
+      
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        # phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
+        phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
+        phat_sri[m] <- intercept + b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
+      
+        for (p in 1:Nxhat2){
+          phat_tempXmoist[m,p] <- intercept +
+                                      b.tempjja.x * xhat_tempjja[m] +
+                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.tcws * xhat_tcws2[p] +
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
+                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+          }
+        }
+
+    
+      }
+  ", file.path("..", "models", "shrub_gradient.RhoGro.jags"))
+
+# specify new set of parameters to be monitored
+params_RhoGro <- c("intercept",
+            "b.tempjja.x", "b.tempjja.x2",
+            "b.tempcont.x", "b.tempcont.x2",
+            "b.precipjja.x", "b.precipjja.x2",
+            # "b.compet",
+            "b.shrub_cov", 
+            "b.gramin_cov",
+            "b.sri",
+            "b.tri",
+            "b.tcws",
+            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
+            "sigma.plotgroup",
+            "phi",
+            "phat_compet", "phat_shrub_cover", "phat_graminoid_cover", 
+            "phat_sri", "phat_tcws", "phat_tri", 
+            "phat_tempjja", "phat_tempcont", "phat_precipjja", 
+            "phat_tempXmoist")
+```
+```{r}
 model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.RhoGro.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2347,7 +2466,7 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
 save(coeff.shrub_gradient.RhoGro, file = file.path("..", "data", "model_outputs", "model_output_RhoGro.Rdata"))
 
 # effect size plot
-(effect_size_plot.RhoGro <- model_plot_sig_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum", plot_width = 12.5))
+(effect_size_plot.RhoGro <- model_plot_sig_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum", plot_width = 11.5))
 
 ```
 
@@ -2369,7 +2488,7 @@ write("
       
       intercept ~ dnorm(0, 0.0001)
       
-      b.compet ~ dnorm(0, 0.0001)
+      # b.compet ~ dnorm(0, 0.0001)
       b.shrub_cov ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
@@ -2397,7 +2516,7 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-                        b.compet * compet.dis[i] + 
+                        # b.compet * compet.dis[i] + 
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
@@ -2415,7 +2534,7 @@ write("
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-                        b.compet * compet.cont[j] +
+                        # b.compet * compet.cont[j] +
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
@@ -2442,7 +2561,7 @@ write("
       
       # add predicted values (derived parameters)
       for (m in 1:Nxhat){
-        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        # phat_compet[m] <- intercept + b.compet * xhat_compet[m]
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
@@ -2471,7 +2590,7 @@ params_RhoGro2 <- c("intercept",
                     "b.tempjja.x", "b.tempjja.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    "b.compet", 
+                    # "b.compet", 
                     "b.shrub_cov",
                     "b.gramin_cov",
                     "b.sri",
@@ -2480,7 +2599,8 @@ params_RhoGro2 <- c("intercept",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
                     "sigma.plotgroup",
                     "phi",
-                    "phat_compet", "phat_shrub_cover", "phat_graminoid_cover", 
+                    # "phat_compet", 
+                    "phat_shrub_cover", "phat_graminoid_cover", 
                     "phat_sri", "phat_tri", "phat_tcws", 
                     "phat_tempjja", "phat_tempcont", "phat_precipjja",
                     "phat_tempXmoist")
@@ -2704,7 +2824,7 @@ As the quadratic terms for summer temperature, temperature variability and summe
 write("
   
   model{
-    adjust quadratic terms
+
     # priors
       
       intercept ~ dnorm(0, 0.0001)
@@ -2720,14 +2840,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
-      b.tempcont.x2 ~ dnorm(0, 0.001)
+      # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
-      b.precipjja.x2 ~ dnorm(0, 0.001)
+      # b.precipjja.x2 ~ dnorm(0, 0.001)
       
       b.tempXtcws ~ dnorm(0, 0.001)
-      b.tempXtcws2 ~ dnorm(0, 0.001)
+      # b.tempXtcws2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -2741,7 +2861,7 @@ write("
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
-                        b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
+                        # b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
                         b.tcws * tcws.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -2759,7 +2879,7 @@ write("
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
-                        b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
+                        # b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -2772,11 +2892,11 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
-                    b.tempcont.x2 * (tempcont.tot[k]^2) +
-                    b.precipjja.x * precipjja.tot[k] + 
-                    b.precipjja.x2 * (precipjja.tot[k]^2) 
+                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] # + 
+                    # b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
       
       
@@ -2788,17 +2908,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
-        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
-        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.tcws * xhat_tcws2[p] +
-                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
-                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] # +
+                                      # b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
           }
         }
 
@@ -2941,7 +3061,7 @@ As the quadratic terms for temperature variability and precipitation were not si
 write("
   
   model{
-    adjust quadratic terms
+
     # priors
       
       intercept ~ dnorm(0, 0.0001)
@@ -2957,14 +3077,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
-      b.tempcont.x2 ~ dnorm(0, 0.001)
+      # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
-      b.precipjja.x2 ~ dnorm(0, 0.001)
+      # b.precipjja.x2 ~ dnorm(0, 0.001)
       
       b.tempXtcws ~ dnorm(0, 0.001)
-      b.tempXtcws2 ~ dnorm(0, 0.001)
+      # b.tempXtcws2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -2978,7 +3098,7 @@ write("
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
-                        b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
+                        # b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
                         b.tcws * tcws.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -2996,7 +3116,7 @@ write("
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
-                        b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
+                        # b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -3009,11 +3129,11 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
-                    b.tempcont.x2 * (tempcont.tot[k]^2) +
-                    b.precipjja.x * precipjja.tot[k] + 
-                    b.precipjja.x2 * (precipjja.tot[k]^2) 
+                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] # + 
+                    # b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
       
       
@@ -3025,17 +3145,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
-        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
-        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.tcws * xhat_tcws2[p] +
-                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
-                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] # +
+                                      # b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
           }
         }
 
@@ -3045,7 +3165,7 @@ write("
 
 # specify new set of parameters to be monitored
 params_VacUli2 <- c("intercept",
-                    "b.tempjja.x", "b.tempjja.x2",
+                    "b.tempjja.x", # "b.tempjja.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
                     "b.compet",
