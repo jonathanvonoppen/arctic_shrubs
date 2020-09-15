@@ -751,12 +751,13 @@ shrub_gradient_jags.AllShr.data <- list(
   tri.tot = AllShr.tot$triC,
   tcws.tot = AllShr.tot$tcwsC,
   gramin_cov.tot = AllShr.tot$graminoid_coverC,
+  tempjja.tot.plot = AllShr$tempjjaC,
   N_plots = length(unique(AllShr.tot$plot)),
   
   # plot group level predictors
-  tempjja.tot = AllShr.tot$tempjjaC[!duplicated(AllShr.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = AllShr.tot$tempcontC[!duplicated(AllShr.tot$plotgroup.NUM)],
-  precipjja.tot = AllShr.tot$precipjjaC[!duplicated(AllShr.tot$plotgroup.NUM)],
+  tempjja.tot = AllShr.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = AllShr.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = AllShr.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(AllShr.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -785,12 +786,13 @@ shrub_gradient_jags.AllEve.data <- list(
   tri.tot = AllEve.tot$triC,
   tcws.tot = AllEve.tot$tcwsC,
   gramin_cov.tot = AllEve.tot$graminoid_coverC,
+  tempjja.tot.plot = AllEve$tempjjaC,
   N_plots = length(unique(AllEve.tot$plot)),
   
   # plot group level predictors
-  tempjja.tot = AllEve.tot$tempjjaC[!duplicated(AllEve.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = AllEve.tot$tempcontC[!duplicated(AllEve.tot$plotgroup.NUM)],
-  precipjja.tot = AllEve.tot$precipjjaC[!duplicated(AllEve.tot$plotgroup.NUM)],
+  tempjja.tot = AllEve.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = AllEve.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = AllEve.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(AllEve.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -819,12 +821,13 @@ shrub_gradient_jags.AllDec.data <- list(
   tri.tot = AllDec.tot$triC,
   tcws.tot = AllDec.tot$tcwsC,
   gramin_cov.tot = AllDec.tot$graminoid_coverC,
+  tempjja.tot.plot = AllDec$tempjjaC,
   N_plots = length(unique(AllDec.tot$plot)),
   
   # plot group level predictors
-  tempjja.tot = AllDec.tot$tempjjaC[!duplicated(AllDec.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = AllDec.tot$tempcontC[!duplicated(AllDec.tot$plotgroup.NUM)],
-  precipjja.tot = AllDec.tot$precipjjaC[!duplicated(AllDec.tot$plotgroup.NUM)],
+  tempjja.tot = AllDec.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = AllDec.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = AllDec.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(AllDec.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -860,6 +863,9 @@ write("
       b.tri ~ dnorm(0, 0.0001)
       b.tcws ~ dnorm(0, 0.0001)
 
+      sigma.plot ~ dunif(0,100)
+      tau.plot <- 1/(sigma.plot * sigma.plot)
+      
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
@@ -870,10 +876,8 @@ write("
       b.precipjja.x ~ dnorm(0, 0.001)
       b.precipjja.x2 ~ dnorm(0, 0.001)
       
-      b.tempXtcws2a ~ dnorm(0, 0.001)
-      b.tempXtcws2b ~ dnorm(0, 0.001)
-      b.tempXtcws2c ~ dnorm(0, 0.001)
-      b.tempXtcws3 ~ dnorm(0, 0.001)
+      b.tempXtcws ~ dnorm(0, 0.001)
+      b.tempXtcws2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -881,10 +885,12 @@ write("
     # LIKELIHOOD
 
       for (i in 1:N_plots){ 
-        cov.tot[i] ~ dlnorm(mu[i])
+        cov.tot[i] ~ dlnorm(mu.plot[i], tau.plot)
         log(mu[i]) <- b_plotgroup[plotgroup.tot[i]] + # ~= random effect of plot group
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.tcws * tcws.tot[i] + 
+                        b.tempXtcws * tempjja.tot.plot[i] * tcws.tot[i] +       # for interaction
+                        b.tempXtcws2 * (tempjja.tot.plot[i]^2) * tcws.tot[i] +  # for interaction
                         b.sri * sri.tot[i] +
                         b.tri * tri.tot[i]
       }
@@ -920,10 +926,8 @@ write("
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.tcws.x * xhat_tcws2[p] +
-                                      b.tempXtcws2a * xhat_tempjja[m] * (xhat_tempjja[m]^2) +
-                                      b.tempXtcws2b * xhat_tempjja[m] * xhat_tcws2[p] +
-                                      b.tempXtcws2c * (xhat_tempjja[m]^2) * xhat_tcws2[p] +
-                                      b.tempXtcws3 * xhat_tempjja[m] * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
+                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[m]
         }
 
     
@@ -1123,6 +1127,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # plot level predictors, for discrete...
   cov.dis = BetNan.dis$cover,
   plotgroup.dis = BetNan.dis$plotgroup.NUM,
+  tempjja.dis = BetNan.dis$tempjjaC,
   sri.dis = BetNan.dis$sriC,
   tri.dis = BetNan.dis$triC,
   tcws.dis = BetNan.dis$tcwsC,
@@ -1134,6 +1139,7 @@ shrub_gradient_jags.BetNan.data <- list(
   # ...and continuous part of the data
   cov.cont = BetNan.cont$cover,
   plotgroup.cont = BetNan.cont$plotgroup.NUM,
+  tempjja.cont = BetNan.cont$tempjjaC,
   sri.cont = BetNan.cont$sriC,
   tri.cont = BetNan.cont$triC,
   tcws.cont = BetNan.cont$tcwsC,
@@ -1143,9 +1149,9 @@ shrub_gradient_jags.BetNan.data <- list(
   N_cont = nrow(BetNan.cont),
   
   # plot group level predictors
-  tempjja.tot = BetNan.tot$tempjjaC[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = BetNan.tot$tempcontC[!duplicated(BetNan.tot$plotgroup.NUM)],
-  precipjja.tot = BetNan.tot$precipjjaC[!duplicated(BetNan.tot$plotgroup.NUM)],
+  tempjja.tot = BetNan.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = BetNan.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = BetNan.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1172,6 +1178,7 @@ shrub_gradient_jags.CasTet.data <- list(
   # plot level predictors, for discrete...
   cov.dis = CasTet.dis$cover,
   plotgroup.dis = CasTet.dis$plotgroup.NUM,
+  tempjja.dis = CasTet.dis$tempjjaC,
   sri.dis = CasTet.dis$sriC,
   tri.dis = CasTet.dis$triC,
   tcws.dis = CasTet.dis$tcwsC,
@@ -1183,6 +1190,7 @@ shrub_gradient_jags.CasTet.data <- list(
   # ...and continuous part of the data
   cov.cont = CasTet.cont$cover,
   plotgroup.cont = CasTet.cont$plotgroup.NUM,
+  tempjja.cont = CasTet.cont$tempjjaC,
   sri.cont = CasTet.cont$sriC,
   tri.cont = CasTet.cont$triC,
   tcws.cont = CasTet.cont$tcwsC,
@@ -1192,9 +1200,9 @@ shrub_gradient_jags.CasTet.data <- list(
   N_cont = nrow(CasTet.cont),
   
   # plot group level predictors
-  tempjja.tot = CasTet.tot$tempjjaC[!duplicated(CasTet.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = CasTet.tot$tempcontC[!duplicated(CasTet.tot$plotgroup.NUM)],
-  precipjja.tot = CasTet.tot$precipjjaC[!duplicated(CasTet.tot$plotgroup.NUM)],
+  tempjja.tot = CasTet.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = CasTet.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = CasTet.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(CasTet.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1221,6 +1229,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   # plot level predictors, for discrete...
   cov.dis = EmpNig.dis$cover,
   plotgroup.dis = EmpNig.dis$plotgroup.NUM,
+  tempjja.dis = EmpNig.dis$tempjjaC,
   sri.dis = EmpNig.dis$sriC,
   tri.dis = EmpNig.dis$triC,
   tcws.dis = EmpNig.dis$tcwsC,
@@ -1232,6 +1241,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   # ...and continuous part of the data
   cov.cont = EmpNig.cont$cover,
   plotgroup.cont = EmpNig.cont$plotgroup.NUM,
+  tempjja.cont = EmpNig.cont$tempjjaC,
   sri.cont = EmpNig.cont$sriC,
   tri.cont = EmpNig.cont$triC,
   tcws.cont = EmpNig.cont$tcwsC,
@@ -1241,9 +1251,9 @@ shrub_gradient_jags.EmpNig.data <- list(
   N_cont = nrow(EmpNig.cont),
   
   # plot group level predictors
-  tempjja.tot = EmpNig.tot$tempjjaC[!duplicated(EmpNig.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = EmpNig.tot$tempcontC[!duplicated(EmpNig.tot$plotgroup.NUM)],
-  precipjja.tot = EmpNig.tot$precipjjaC[!duplicated(EmpNig.tot$plotgroup.NUM)],
+  tempjja.tot = EmpNig.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = EmpNig.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = EmpNig.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(EmpNig.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1270,6 +1280,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   # plot level predictors, for discrete...
   cov.dis = PhyCae.dis$cover,
   plotgroup.dis = PhyCae.dis$plotgroup.NUM,
+  tempjja.dis = PhyCae.dis$tempjjaC,
   sri.dis = PhyCae.dis$sriC,
   tri.dis = PhyCae.dis$triC,
   tcws.dis = PhyCae.dis$tcwsC,
@@ -1281,6 +1292,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   # ...and continuous part of the data
   cov.cont = PhyCae.cont$cover,
   plotgroup.cont = PhyCae.cont$plotgroup.NUM,
+  tempjja.cont = PhyCae.cont$tempjjaC,
   sri.cont = PhyCae.cont$sriC,
   tri.cont = PhyCae.cont$triC,
   tcws.cont = PhyCae.cont$tcwsC,
@@ -1290,9 +1302,9 @@ shrub_gradient_jags.PhyCae.data <- list(
   N_cont = nrow(PhyCae.cont),
   
   # plot group level predictors
-  tempjja.tot = PhyCae.tot$tempjjaC[!duplicated(PhyCae.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = PhyCae.tot$tempcontC[!duplicated(PhyCae.tot$plotgroup.NUM)],
-  precipjja.tot = PhyCae.tot$precipjjaC[!duplicated(PhyCae.tot$plotgroup.NUM)],
+  tempjja.tot = PhyCae.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = PhyCae.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = PhyCae.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(PhyCae.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1319,6 +1331,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   # plot level predictors, for discrete...
   cov.dis = RhoGro.dis$cover,
   plotgroup.dis = RhoGro.dis$plotgroup.NUM,
+  tempjja.dis = RhoGro.dis$tempjjaC,
   sri.dis = RhoGro.dis$sriC,
   tri.dis = RhoGro.dis$triC,
   tcws.dis = RhoGro.dis$tcwsC,
@@ -1330,6 +1343,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   # ...and continuous part of the data
   cov.cont = RhoGro.cont$cover,
   plotgroup.cont = RhoGro.cont$plotgroup.NUM,
+  tempjja.cont = RhoGro.cont$tempjjaC,
   sri.cont = RhoGro.cont$sriC,
   tri.cont = RhoGro.cont$triC,
   tcws.cont = RhoGro.cont$tcwsC,
@@ -1339,9 +1353,9 @@ shrub_gradient_jags.RhoGro.data <- list(
   N_cont = nrow(RhoGro.cont),
   
   # plot group level predictors
-  tempjja.tot = RhoGro.tot$tempjjaC[!duplicated(RhoGro.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = RhoGro.tot$tempcontC[!duplicated(RhoGro.tot$plotgroup.NUM)],
-  precipjja.tot = RhoGro.tot$precipjjaC[!duplicated(RhoGro.tot$plotgroup.NUM)],
+  tempjja.tot = RhoGro.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = RhoGro.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = RhoGro.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(RhoGro.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1368,6 +1382,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   # plot level predictors, for discrete...
   cov.dis = RhoTom.dis$cover,
   plotgroup.dis = RhoTom.dis$plotgroup.NUM,
+  tempjja.dis = RhoTom.dis$tempjjaC,
   sri.dis = RhoTom.dis$sriC,
   tri.dis = RhoTom.dis$triC,
   tcws.dis = RhoTom.dis$tcwsC,
@@ -1379,6 +1394,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   # ...and continuous part of the data
   cov.cont = RhoTom.cont$cover,
   plotgroup.cont = RhoTom.cont$plotgroup.NUM,
+  tempjja.cont = RhoTom.cont$tempjjaC,
   sri.cont = RhoTom.cont$sriC,
   tri.cont = RhoTom.cont$triC,
   tcws.cont = RhoTom.cont$tcwsC,
@@ -1388,9 +1404,9 @@ shrub_gradient_jags.RhoTom.data <- list(
   N_cont = nrow(RhoTom.cont),
   
   # plot group level predictors
-  tempjja.tot = RhoTom.tot$tempjjaC[!duplicated(RhoTom.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = RhoTom.tot$tempcontC[!duplicated(RhoTom.tot$plotgroup.NUM)],
-  precipjja.tot = RhoTom.tot$precipjjaC[!duplicated(RhoTom.tot$plotgroup.NUM)],
+  tempjja.tot = RhoTom.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = RhoTom.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = RhoTom.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(RhoTom.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1417,6 +1433,7 @@ shrub_gradient_jags.SalArc.data <- list(
   # plot level predictors, for discrete...
   cov.dis = SalArc.dis$cover,
   plotgroup.dis = SalArc.dis$plotgroup.NUM,
+  tempjja.dis = SalArc.dis$tempjjaC,
   sri.dis = SalArc.dis$sriC,
   tri.dis = SalArc.dis$triC,
   tcws.dis = SalArc.dis$tcwsC,
@@ -1428,6 +1445,7 @@ shrub_gradient_jags.SalArc.data <- list(
   # ...and continuous part of the data
   cov.cont = SalArc.cont$cover,
   plotgroup.cont = SalArc.cont$plotgroup.NUM,
+  tempjja.cont = SalArc.cont$tempjjaC,
   sri.cont = SalArc.cont$sriC,
   tri.cont = SalArc.cont$triC,
   tcws.cont = SalArc.cont$tcwsC,
@@ -1437,9 +1455,9 @@ shrub_gradient_jags.SalArc.data <- list(
   N_cont = nrow(SalArc.cont),
   
   # plot group level predictors
-  tempjja.tot = SalArc.tot$tempjjaC[!duplicated(SalArc.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = SalArc.tot$tempcontC[!duplicated(SalArc.tot$plotgroup.NUM)],
-  precipjja.tot = SalArc.tot$precipjjaC[!duplicated(SalArc.tot$plotgroup.NUM)],
+  tempjja.tot = SalArc.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = SalArc.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = SalArc.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(SalArc.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1466,6 +1484,7 @@ shrub_gradient_jags.SalGla.data <- list(
   # plot level predictors, for discrete...
   cov.dis = SalGla.dis$cover,
   plotgroup.dis = SalGla.dis$plotgroup.NUM,
+  tempjja.dis = SalGla.dis$tempjjaC,
   sri.dis = SalGla.dis$sriC,
   tri.dis = SalGla.dis$triC,
   tcws.dis = SalGla.dis$tcwsC,
@@ -1477,6 +1496,7 @@ shrub_gradient_jags.SalGla.data <- list(
   # ...and continuous part of the data
   cov.cont = SalGla.cont$cover,
   plotgroup.cont = SalGla.cont$plotgroup.NUM,
+  tempjja.cont = SalGla.cont$tempjjaC,
   sri.cont = SalGla.cont$sriC,
   tri.cont = SalGla.cont$triC,
   tcws.cont = SalGla.cont$tcwsC,
@@ -1486,9 +1506,9 @@ shrub_gradient_jags.SalGla.data <- list(
   N_cont = nrow(SalGla.cont),
   
   # plot group level predictors
-  tempjja.tot = SalGla.tot$tempjjaC[!duplicated(SalGla.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = SalGla.tot$tempcontC[!duplicated(SalGla.tot$plotgroup.NUM)],
-  precipjja.tot = SalGla.tot$precipjjaC[!duplicated(SalGla.tot$plotgroup.NUM)],
+  tempjja.tot = SalGla.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = SalGla.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = SalGla.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1515,6 +1535,7 @@ shrub_gradient_jags.VacUli.data <- list(
   # plot level predictors, for discrete...
   cov.dis = VacUli.dis$cover,
   plotgroup.dis = VacUli.dis$plotgroup.NUM,
+  tempjja.dis = VacUli.dis$tempjjaC,
   sri.dis = VacUli.dis$sriC,
   tri.dis = VacUli.dis$triC,
   tcws.dis = VacUli.dis$tcwsC,
@@ -1526,6 +1547,7 @@ shrub_gradient_jags.VacUli.data <- list(
   # ...and continuous part of the data
   cov.cont = VacUli.cont$cover,
   plotgroup.cont = VacUli.cont$plotgroup.NUM,
+  tempjja.cont = VacUli.cont$tempjjaC,
   sri.cont = VacUli.cont$sriC,
   tri.cont = VacUli.cont$triC,
   tcws.cont = VacUli.cont$tcwsC,
@@ -1535,9 +1557,9 @@ shrub_gradient_jags.VacUli.data <- list(
   N_cont = nrow(VacUli.cont),
   
   # plot group level predictors
-  tempjja.tot = VacUli.tot$tempjjaC[!duplicated(VacUli.tot$plotgroup.NUM)], # one value per tXpg
-  tempcont.tot = VacUli.tot$tempcontC[!duplicated(VacUli.tot$plotgroup.NUM)],
-  precipjja.tot = VacUli.tot$precipjjaC[!duplicated(VacUli.tot$plotgroup.NUM)],
+  tempjja.tot = VacUli.tot %>% group_by(plotgroup.NUM) %>% summarise(tempjja.tot = mean(tempjjaC)) %>% pull(tempjja.tot), # one value per tXpg
+  tempcont.tot = VacUli.tot %>% group_by(plotgroup.NUM) %>% summarise(tempcont.tot = mean(tempcontC)) %>% pull(tempcont.tot),
+  precipjja.tot = VacUli.tot %>% group_by(plotgroup.NUM) %>% summarise(precipjja.tot = mean(precipjjaC)) %>% pull(precipjja.tot),
   N_plotgroups = length(unique(VacUli.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
@@ -1588,6 +1610,9 @@ write("
       b.precipjja.x ~ dnorm(0, 0.001)
       b.precipjja.x2 ~ dnorm(0, 0.001)
       
+      b.tempXtcws ~ dnorm(0, 0.001)
+      b.tempXtcws2 ~ dnorm(0, 0.001)
+      
       phi ~ dgamma(0.1, 0.1)
       
       
@@ -1599,6 +1624,8 @@ write("
                         b.compet * compet.dis[i] + 
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
+                        b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
+                        b.tempXtcws2 * (tempjja.dis[i]^2) * tcws.dis[i] +  # for interaction
                         b.tcws * tcws.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -1615,6 +1642,8 @@ write("
                         b.compet * compet.cont[j] +
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
+                        b.tempXtcws * tempjja.cont[i] * tcws.cont[i] +       # for interaction
+                        b.tempXtcws2 * (tempjja.cont[i]^2) * tcws.cont[i] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -1652,7 +1681,9 @@ write("
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
-                                      b.tcws.x * xhat_tcws2[p]
+                                      b.tcws.x * xhat_tcws2[p] +
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
+                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[m]
         }
 
     
