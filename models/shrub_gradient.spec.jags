@@ -55,8 +55,8 @@
                         b.compet * compet.cont[j] +
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
-                        b.tempXtcws * tempjja.cont[i] * tcws.cont[i] +       # for interaction
-                        b.tempXtcws2 * (tempjja.cont[i]^2) * tcws.cont[i] +  # for interaction
+                        b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
+                        b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -81,7 +81,7 @@
       for (m in 1:Nxhat){
         phat_compet[m] <- intercept + b.compet * xhat_compet[m]
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
-        phat_shrub_cover[m] <- intercept + b.shrub_cover * xhat_shrub_cover[m]
+        phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
