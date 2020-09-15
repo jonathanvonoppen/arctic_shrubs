@@ -80,7 +80,9 @@ model_plot_sig_function <- function(model_coeff_output, title_string, plot_width
                    "b.precipjja.x", "b.precipjja.x2",
                    "b.sri",
                    "b.tri",
-                   "b.twi", 
+                   "b.tcws", 
+                   "b.shrub_cov",
+                   "b.gramin_cov",
                    "b.compet")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
@@ -151,7 +153,9 @@ model_plot_marg_function <- function(model_coeff_output, title_string, plot_widt
                    "b.precipjja.x", "b.precipjja.x2",
                    "b.sri",
                    "b.tri",
-                   "b.twi", 
+                   "b.tcws", 
+                   "b.shrub_cov",
+                   "b.gramin_cov",
                    "b.compet")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
@@ -745,7 +749,7 @@ JAGS needs data input in list format, so I provided all relevant variables as fo
 shrub_gradient_jags.AllShr.data <- list(
   
   # plot level predictors
-  cov.tot = AllShr.tot$cover,
+  cov.tot = AllShr.tot$cover + .01,
   plotgroup.tot = AllShr.tot$plotgroup.NUM,
   sri.tot = AllShr.tot$sriC,
   tri.tot = AllShr.tot$triC,
@@ -780,7 +784,7 @@ str(shrub_gradient_jags.AllShr.data)
 shrub_gradient_jags.AllEve.data <- list(
   
   # plot level predictors
-  cov.tot = AllEve.tot$cover,
+  cov.tot = AllEve.tot$cover + 0.01,
   plotgroup.tot = AllEve.tot$plotgroup.NUM,
   sri.tot = AllEve.tot$sriC,
   tri.tot = AllEve.tot$triC,
@@ -815,7 +819,7 @@ str(shrub_gradient_jags.AllEve.data)
 shrub_gradient_jags.AllDec.data <- list(
   
   # plot level predictors
-  cov.tot = AllDec.tot$cover,
+  cov.tot = AllDec.tot$cover + 0.01,
   plotgroup.tot = AllDec.tot$plotgroup.NUM,
   sri.tot = AllDec.tot$sriC,
   tri.tot = AllDec.tot$triC,
@@ -1072,7 +1076,7 @@ model_out.shrub_gradient.AllDec <- jags(shrub_gradient_jags.AllDec.data,    # in
                                         params_groups,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
-                                        n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
+                                        n.iter = 10000, n.burnin = 7000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
                                         DIC = FALSE,                        # do not compute deviance, pD, and DIC
                                         working.directory = NULL, 
@@ -1513,8 +1517,8 @@ shrub_gradient_jags.SalGla.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(SalGla.tot$competC), to = max(SalGla.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(SaGla.tot$shrub_coverC), to = max(SaGla.tot$shrub_coverC), length.out = 100),
-  xhat_graminoid_cover = seq(from = min(SaGla.tot$graminoid_coverC), to = max(SaGla.tot$graminoid_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(SalGla.tot$shrub_coverC), to = max(SalGla.tot$shrub_coverC), length.out = 100),
+  xhat_graminoid_cover = seq(from = min(SalGla.tot$graminoid_coverC), to = max(SalGla.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(SalGla.tot$sriC), to = max(SalGla.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalGla.tot$triC), to = max(SalGla.tot$triC), length.out = 100),
   xhat_tcws = seq(from = min(SalGla.tot$tcwsC), to = max(SalGla.tot$tcwsC), length.out = 100),
@@ -1642,8 +1646,8 @@ write("
                         b.compet * compet.cont[j] +
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
-                        b.tempXtcws * tempjja.cont[i] * tcws.cont[i] +       # for interaction
-                        b.tempXtcws2 * (tempjja.cont[i]^2) * tcws.cont[i] +  # for interaction
+                        b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
+                        b.tempXtcws2 * (tempjja.cont[j]^2) * tcws.cont[j] +  # for interaction
                         b.tcws * tcws.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -1668,7 +1672,7 @@ write("
       for (m in 1:Nxhat){
         phat_compet[m] <- intercept + b.compet * xhat_compet[m]
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
-        phat_shrub_cover[m] <- intercept + b.shrub_cover * xhat_shrub_cover[m]
+        phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
@@ -1760,7 +1764,9 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-(effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 11))
+save(coeff.shrub_gradient.BetNan, file = file.path("..", "data", "model_outputs", "model_output_BetNan.Rdata"))
+
+(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 12.5))
 ```
 
 * **unimodal response to temperature variability (sig)**
@@ -1939,8 +1945,10 @@ coeff.shrub_gradient.BetNan2 <- coeff.shrub_gradient.BetNan2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.BetNan2, file.path("..", "data", "processed", "model_outputs", "model_output_BetNan2.Rdata"))
+
 # effect size plot
-(effect_size_plot.BetNan2 <- model_plot_marg_function(coeff.shrub_gradient.BetNan2, title_string = "Betula nana", plot_width = 8.5))
+(effect_size_plot.BetNan2 <- model_plot_marg_function(coeff.shrub_gradient.BetNan2, title_string = "Betula nana", plot_width = 10.5))
 
 ```
 
@@ -1994,6 +2002,8 @@ coeff.shrub_gradient.CasTet <- coeff.shrub_gradient.CasTet %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.CasTet, file = file.path("..", "data", "model_outputs", "model_output_CasTet.Rdata"))
+
 # (effect_size_plot.CasTet <- model_plot_function(coeff.shrub_gradient.CasTet))
 ```
 
@@ -2044,8 +2054,10 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.EmpNig, file = file.path("..", "data", "model_outputs", "model_output_EmpNig.Rdata"))
+
 # effect size plot
-(effect_size_plot.EmpNig <- model_plot_sig_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum", plot_width = 11))
+(effect_size_plot.EmpNig <- model_plot_sig_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum", plot_width = 12.5))
 
 ```
 
@@ -2226,8 +2238,10 @@ coeff.shrub_gradient.EmpNig2 <- coeff.shrub_gradient.EmpNig2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.EmpNig2, file = file.path("..", "data", "model_outputs", "model_output_EmpNig2.Rdata"))
+
 # effect size plot
-(effect_size_plot.EmpNig2 <- model_plot_marg_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 8.5))
+(effect_size_plot.EmpNig2 <- model_plot_marg_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 10.5))
 
 ```
 
@@ -2280,6 +2294,8 @@ coeff.shrub_gradient.PhyCae <- coeff.shrub_gradient.PhyCae %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "model_outputs", "model_output_PhyCae.Rdata"))
+
 ```
 
 * **not converged** (only 10 non-zero values)
@@ -2329,8 +2345,10 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.RhoGro, file = file.path("..", "data", "model_outputs", "model_output_RhoGro.Rdata"))
+
 # effect size plot
-(effect_size_plot.RhoGro <- model_plot_sig_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum", plot_width = 11))
+(effect_size_plot.RhoGro <- model_plot_sig_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum", plot_width = 12.5))
 
 ```
 
@@ -2514,8 +2532,10 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "model_outputs", "model_output_RhoGro2.Rdata"))
+
 # effect size plot
-(effect_size_plot.RhoGro2 <- model_plot_sig_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 8.5))
+(effect_size_plot.RhoGro2 <- model_plot_sig_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 10.5))
 
 ```
 
@@ -2569,6 +2589,8 @@ coeff.shrub_gradient.RhoTom <- coeff.shrub_gradient.RhoTom %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.RhoTom, file = file.path("..", "data", "model_outputs", "model_output_RhoTom.Rdata"))
+
 ```
 
 * **not converging**: relatively large R-hat values, large variation in parameter estimates (only 13 non-zero values)
@@ -2617,6 +2639,8 @@ coeff.shrub_gradient.SalArc <- coeff.shrub_gradient.SalArc %>%
          u90 = q95,
          u95 = "97.5%",
          Rhat) %>% print
+
+save(coeff.shrub_gradient.SalArc, file = file.path("..", "data", "model_outputs", "model_output_SalArc.Rdata"))
 
 ```
 
@@ -2667,8 +2691,10 @@ coeff.shrub_gradient.SalGla <- coeff.shrub_gradient.SalGla %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.SalGla, file = file.path("..", "data", "model_outputs", "model_output_SalGla.Rdata"))
+
 # effect size plot
-(effect_size_plot.SalGla <- model_plot_sig_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 11))
+(effect_size_plot.SalGla <- model_plot_sig_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
 
 ```
 
@@ -2849,8 +2875,10 @@ coeff.shrub_gradient.SalGla2 <- coeff.shrub_gradient.SalGla2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.SalGla2, file = file.path("..", "data", "model_outputs", "model_output_SalGla2.Rdata"))
+
 # effect size plot
-(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 8))
+(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 10))
 
 ```
 
@@ -2904,8 +2932,10 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "model_outputs", "model_output_VacUli.Rdata"))
+
 # effect size plot
-(effect_size_plot.VacUli <- model_plot_marg_function(coeff.shrub_gradient.VacUli, title_string = "Vaccinium uliginosum", plot_width = 11))
+(effect_size_plot.VacUli <- model_plot_marg_function(coeff.shrub_gradient.VacUli, title_string = "Vaccinium uliginosum", plot_width = 12.5))
 
 ```
 
@@ -3086,8 +3116,10 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "model_outputs", "model_output_VacUli2.Rdata"))
+
 # effect size plot
-(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 8.5))
+(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 10.5))
 
 ```
 
