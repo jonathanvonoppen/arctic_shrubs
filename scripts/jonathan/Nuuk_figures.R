@@ -686,15 +686,15 @@ prediction_plots_groups <- function(fgroup) {
     
     # draw line of predicted values
     geom_line(aes(x = pred_value,
-                  y = plogis(mean)), 
+                  y = exp(mean)), 
               colour = "orange",
               alpha = 1,
               size = 2) + 
     
     # draw predicted 95% CI
     geom_ribbon(aes(x = pred_value,
-                    ymin = plogis(l95), 
-                    ymax = plogis(u95)),
+                    ymin = exp(l95), 
+                    ymax = exp(u95)),
                 fill = "orange",
                 alpha = 0.2) +
     
