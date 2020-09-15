@@ -313,7 +313,7 @@ Check for correlation between predictors:
 predictors_set <- env_cov_bio_sub %>% 
   select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
          inclin_down, sri, tri, tcws,      # environmental data
-         ends_with("_cover"), compet) %>%  # biotic predictors
+         shrub_cover, graminoid_cover, compet) %>%  # biotic predictors
   names()
 # create basic correlation matrix
 (cor_mat <- env_cov_bio_sub %>% 
@@ -660,8 +660,7 @@ num_pred <- env_cov_bio_sub %>% select(tempjja,
                                        sri, 
                                        tcws,
                                        tri, 
-                                       shrub_cover,
-                                       graminoid_cover,
+                                       ends_with("_cover"),
                                        matches("compet"))
 for(i in 1:length(num_pred)){
   col <- colnames(num_pred[i])
@@ -1135,7 +1134,7 @@ shrub_gradient_jags.BetNan.data <- list(
   sri.dis = BetNan.dis$sriC,
   tri.dis = BetNan.dis$triC,
   tcws.dis = BetNan.dis$tcwsC,
-  shrub_cov.dis = BetNan.dis$shrub_coverC,
+  shrub_cov.dis = BetNan.dis$BetNan_shrub_coverC,
   gramin_cov.dis = BetNan.dis$graminoid_coverC,
   compet.dis = BetNan.dis$competC,
   N_discrete = nrow(BetNan.dis),
@@ -1147,7 +1146,7 @@ shrub_gradient_jags.BetNan.data <- list(
   sri.cont = BetNan.cont$sriC,
   tri.cont = BetNan.cont$triC,
   tcws.cont = BetNan.cont$tcwsC,
-  shrub_cov.cont = BetNan.cont$shrub_coverC,
+  shrub_cov.cont = BetNan.cont$BetNan_shrub_coverC,
   gramin_cov.cont = BetNan.cont$graminoid_coverC,
   compet.cont = BetNan.cont$competC,
   N_cont = nrow(BetNan.cont),
@@ -1160,7 +1159,7 @@ shrub_gradient_jags.BetNan.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(BetNan.tot$competC), to = max(BetNan.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(BetNan.tot$shrub_coverC), to = max(BetNan.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(BetNan.tot$BetNan_shrub_coverC), to = max(BetNan.tot$BetNan_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(BetNan.tot$graminoid_coverC), to = max(BetNan.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(BetNan.tot$sriC), to = max(BetNan.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(BetNan.tot$triC), to = max(BetNan.tot$triC), length.out = 100),
@@ -1186,7 +1185,7 @@ shrub_gradient_jags.CasTet.data <- list(
   sri.dis = CasTet.dis$sriC,
   tri.dis = CasTet.dis$triC,
   tcws.dis = CasTet.dis$tcwsC,
-  shrub_cov.dis = CasTet.dis$shrub_coverC,
+  shrub_cov.dis = CasTet.dis$CasTet_shrub_coverC,
   gramin_cov.dis = CasTet.dis$graminoid_coverC,
   compet.dis = CasTet.dis$competC,
   N_discrete = nrow(CasTet.dis),
@@ -1198,7 +1197,7 @@ shrub_gradient_jags.CasTet.data <- list(
   sri.cont = CasTet.cont$sriC,
   tri.cont = CasTet.cont$triC,
   tcws.cont = CasTet.cont$tcwsC,
-  shrub_cov.cont = CasTet.cont$shrub_coverC,
+  shrub_cov.cont = CasTet.cont$CasTet_shrub_coverC,
   gramin_cov.cont = CasTet.cont$graminoid_coverC,
   compet.cont = CasTet.cont$competC,
   N_cont = nrow(CasTet.cont),
@@ -1211,8 +1210,8 @@ shrub_gradient_jags.CasTet.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(CasTet.tot$competC), to = max(CasTet.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(BetNan.tot$shrub_coverC), to = max(BetNan.tot$shrub_coverC), length.out = 100),
-  xhat_graminoid_cover = seq(from = min(BetNan.tot$graminoid_coverC), to = max(BetNan.tot$graminoid_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(CasTet.tot$CasTet_shrub_coverC), to = max(CasTet.tot$CasTet_shrub_coverC), length.out = 100),
+  xhat_graminoid_cover = seq(from = min(CasTet.tot$graminoid_coverC), to = max(CasTet.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(CasTet.tot$sriC), to = max(CasTet.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(CasTet.tot$triC), to = max(CasTet.tot$triC), length.out = 100),
   xhat_tcws = seq(from = min(CasTet.tot$tcwsC), to = max(CasTet.tot$tcwsC), length.out = 100),
@@ -1237,7 +1236,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   sri.dis = EmpNig.dis$sriC,
   tri.dis = EmpNig.dis$triC,
   tcws.dis = EmpNig.dis$tcwsC,
-  shrub_cov.dis = EmpNig.dis$shrub_coverC,
+  shrub_cov.dis = EmpNig.dis$EmpNig_shrub_coverC,
   gramin_cov.dis = EmpNig.dis$graminoid_coverC,
   compet.dis = EmpNig.dis$competC,
   N_discrete = nrow(EmpNig.dis),
@@ -1249,7 +1248,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   sri.cont = EmpNig.cont$sriC,
   tri.cont = EmpNig.cont$triC,
   tcws.cont = EmpNig.cont$tcwsC,
-  shrub_cov.cont = EmpNig.cont$shrub_coverC,
+  shrub_cov.cont = EmpNig.cont$EmpNig_shrub_coverC,
   gramin_cov.cont = EmpNig.cont$graminoid_coverC,
   compet.cont = EmpNig.cont$competC,
   N_cont = nrow(EmpNig.cont),
@@ -1262,7 +1261,7 @@ shrub_gradient_jags.EmpNig.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(EmpNig.tot$competC), to = max(EmpNig.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(EmpNig.tot$shrub_coverC), to = max(EmpNig.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(EmpNig.tot$EmpNig_shrub_coverC), to = max(EmpNig.tot$EmpNig_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(EmpNig.tot$graminoid_coverC), to = max(EmpNig.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(EmpNig.tot$sriC), to = max(EmpNig.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(EmpNig.tot$triC), to = max(EmpNig.tot$triC), length.out = 100),
@@ -1288,7 +1287,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   sri.dis = PhyCae.dis$sriC,
   tri.dis = PhyCae.dis$triC,
   tcws.dis = PhyCae.dis$tcwsC,
-  shrub_cov.dis = PhyCae.dis$shrub_coverC,
+  shrub_cov.dis = PhyCae.dis$PhyCae_shrub_coverC,
   gramin_cov.dis = PhyCae.dis$graminoid_coverC,
   compet.dis = PhyCae.dis$competC,
   N_discrete = nrow(PhyCae.dis),
@@ -1300,7 +1299,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   sri.cont = PhyCae.cont$sriC,
   tri.cont = PhyCae.cont$triC,
   tcws.cont = PhyCae.cont$tcwsC,
-  shrub_cov.cont = PhyCae.cont$shrub_coverC,
+  shrub_cov.cont = PhyCae.cont$PhyCae_shrub_coverC,
   gramin_cov.cont = PhyCae.cont$graminoid_coverC,
   compet.cont = PhyCae.cont$competC,
   N_cont = nrow(PhyCae.cont),
@@ -1313,7 +1312,7 @@ shrub_gradient_jags.PhyCae.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(PhyCae.tot$competC), to = max(PhyCae.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(PhyCae.tot$shrub_coverC), to = max(PhyCae.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(PhyCae.tot$PhyCae_shrub_coverC), to = max(PhyCae.tot$PhyCae_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(PhyCae.tot$graminoid_coverC), to = max(PhyCae.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(PhyCae.tot$sriC), to = max(PhyCae.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(PhyCae.tot$triC), to = max(PhyCae.tot$triC), length.out = 100),
@@ -1339,7 +1338,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   sri.dis = RhoGro.dis$sriC,
   tri.dis = RhoGro.dis$triC,
   tcws.dis = RhoGro.dis$tcwsC,
-  shrub_cov.dis = RhoGro.dis$shrub_coverC,
+  shrub_cov.dis = RhoGro.dis$RhoGro_shrub_coverC,
   gramin_cov.dis = RhoGro.dis$graminoid_coverC,
   compet.dis = RhoGro.dis$competC,
   N_discrete = nrow(RhoGro.dis),
@@ -1351,7 +1350,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   sri.cont = RhoGro.cont$sriC,
   tri.cont = RhoGro.cont$triC,
   tcws.cont = RhoGro.cont$tcwsC,
-  shrub_cov.cont = RhoGro.cont$shrub_coverC,
+  shrub_cov.cont = RhoGro.cont$RhoGro_shrub_coverC,
   gramin_cov.cont = RhoGro.cont$graminoid_coverC,
   compet.cont = RhoGro.cont$competC,
   N_cont = nrow(RhoGro.cont),
@@ -1364,7 +1363,7 @@ shrub_gradient_jags.RhoGro.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(RhoGro.tot$competC), to = max(RhoGro.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(RhoGro.tot$shrub_coverC), to = max(RhoGro.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(RhoGro.tot$RhoGro_shrub_coverC), to = max(RhoGro.tot$RhoGro_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(RhoGro.tot$graminoid_coverC), to = max(RhoGro.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(RhoGro.tot$sriC), to = max(RhoGro.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(RhoGro.tot$triC), to = max(RhoGro.tot$triC), length.out = 100),
@@ -1390,7 +1389,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   sri.dis = RhoTom.dis$sriC,
   tri.dis = RhoTom.dis$triC,
   tcws.dis = RhoTom.dis$tcwsC,
-  shrub_cov.dis = RhoTom.dis$shrub_coverC,
+  shrub_cov.dis = RhoTom.dis$RhoTom_shrub_coverC,
   gramin_cov.dis = RhoTom.dis$graminoid_coverC,
   compet.dis = RhoTom.dis$competC,
   N_discrete = nrow(RhoTom.dis),
@@ -1402,7 +1401,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   sri.cont = RhoTom.cont$sriC,
   tri.cont = RhoTom.cont$triC,
   tcws.cont = RhoTom.cont$tcwsC,
-  shrub_cov.cont = RhoTom.cont$shrub_coverC,
+  shrub_cov.cont = RhoTom.cont$RhoTom_shrub_coverC,
   gramin_cov.cont = RhoTom.cont$graminoid_coverC,
   compet.cont = RhoTom.cont$competC,
   N_cont = nrow(RhoTom.cont),
@@ -1415,7 +1414,7 @@ shrub_gradient_jags.RhoTom.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(RhoTom.tot$competC), to = max(RhoTom.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(RhoTom.tot$shrub_coverC), to = max(RhoTom.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(RhoTom.tot$RhoTom_shrub_coverC), to = max(RhoTom.tot$RhoTom_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(RhoTom.tot$graminoid_coverC), to = max(RhoTom.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(RhoTom.tot$sriC), to = max(RhoTom.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(RhoTom.tot$triC), to = max(RhoTom.tot$triC), length.out = 100),
@@ -1441,7 +1440,7 @@ shrub_gradient_jags.SalArc.data <- list(
   sri.dis = SalArc.dis$sriC,
   tri.dis = SalArc.dis$triC,
   tcws.dis = SalArc.dis$tcwsC,
-  shrub_cov.dis = SalArc.dis$shrub_coverC,
+  shrub_cov.dis = SalArc.dis$SalArc_shrub_coverC,
   gramin_cov.dis = SalArc.dis$graminoid_coverC,
   compet.dis = SalArc.dis$competC,
   N_discrete = nrow(SalArc.dis),
@@ -1453,7 +1452,7 @@ shrub_gradient_jags.SalArc.data <- list(
   sri.cont = SalArc.cont$sriC,
   tri.cont = SalArc.cont$triC,
   tcws.cont = SalArc.cont$tcwsC,
-  shrub_cov.cont = SalArc.cont$shrub_coverC,
+  shrub_cov.cont = SalArc.cont$SalArc_shrub_coverC,
   gramin_cov.cont = SalArc.cont$graminoid_coverC,
   compet.cont = SalArc.cont$competC,
   N_cont = nrow(SalArc.cont),
@@ -1466,7 +1465,7 @@ shrub_gradient_jags.SalArc.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(SalArc.tot$competC), to = max(SalArc.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(SalArc.tot$shrub_coverC), to = max(SalArc.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(SalArc.tot$SalArc_shrub_coverC), to = max(SalArc.tot$SalArc_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(SalArc.tot$graminoid_coverC), to = max(SalArc.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(SalArc.tot$sriC), to = max(SalArc.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalArc.tot$triC), to = max(SalArc.tot$triC), length.out = 100),
@@ -1492,7 +1491,7 @@ shrub_gradient_jags.SalGla.data <- list(
   sri.dis = SalGla.dis$sriC,
   tri.dis = SalGla.dis$triC,
   tcws.dis = SalGla.dis$tcwsC,
-  shrub_cov.dis = SalGla.dis$shrub_coverC,
+  shrub_cov.dis = SalGla.dis$SalGla_shrub_coverC,
   gramin_cov.dis = SalGla.dis$graminoid_coverC,
   compet.dis = SalGla.dis$competC,
   N_discrete = nrow(SalGla.dis),
@@ -1504,7 +1503,7 @@ shrub_gradient_jags.SalGla.data <- list(
   sri.cont = SalGla.cont$sriC,
   tri.cont = SalGla.cont$triC,
   tcws.cont = SalGla.cont$tcwsC,
-  shrub_cov.cont = SalGla.cont$shrub_coverC,
+  shrub_cov.cont = SalGla.cont$SalGla_shrub_coverC,
   gramin_cov.cont = SalGla.cont$graminoid_coverC,
   compet.cont = SalGla.cont$competC,
   N_cont = nrow(SalGla.cont),
@@ -1517,7 +1516,7 @@ shrub_gradient_jags.SalGla.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(SalGla.tot$competC), to = max(SalGla.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(SalGla.tot$shrub_coverC), to = max(SalGla.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(SalGla.tot$SalGla_shrub_coverC), to = max(SalGla.tot$SalGla_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(SalGla.tot$graminoid_coverC), to = max(SalGla.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(SalGla.tot$sriC), to = max(SalGla.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(SalGla.tot$triC), to = max(SalGla.tot$triC), length.out = 100),
@@ -1543,7 +1542,7 @@ shrub_gradient_jags.VacUli.data <- list(
   sri.dis = VacUli.dis$sriC,
   tri.dis = VacUli.dis$triC,
   tcws.dis = VacUli.dis$tcwsC,
-  shrub_cov.dis = VacUli.dis$shrub_coverC,
+  shrub_cov.dis = VacUli.dis$VacUli_shrub_coverC,
   gramin_cov.dis = VacUli.dis$graminoid_coverC,
   compet.dis = VacUli.dis$competC,
   N_discrete = nrow(VacUli.dis),
@@ -1555,7 +1554,7 @@ shrub_gradient_jags.VacUli.data <- list(
   sri.cont = VacUli.cont$sriC,
   tri.cont = VacUli.cont$triC,
   tcws.cont = VacUli.cont$tcwsC,
-  shrub_cov.cont = VacUli.cont$shrub_coverC,
+  shrub_cov.cont = VacUli.cont$VacUli_shrub_coverC,
   gramin_cov.cont = VacUli.cont$graminoid_coverC,
   compet.cont = VacUli.cont$competC,
   N_cont = nrow(VacUli.cont),
@@ -1568,7 +1567,7 @@ shrub_gradient_jags.VacUli.data <- list(
   
   # subset of values for prediction, for each predictor...
   xhat_compet = seq(from = min(VacUli.tot$competC), to = max(VacUli.tot$competC), length.out = 100),
-  xhat_shrub_cover = seq(from = min(VacUli.tot$shrub_coverC), to = max(VacUli.tot$shrub_coverC), length.out = 100),
+  xhat_shrub_cover = seq(from = min(VacUli.tot$VacUli_shrub_coverC), to = max(VacUli.tot$VacUli_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(VacUli.tot$graminoid_coverC), to = max(VacUli.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(VacUli.tot$sriC), to = max(VacUli.tot$sriC), length.out = 100),
   xhat_tri = seq(from = min(VacUli.tot$triC), to = max(VacUli.tot$triC), length.out = 100),
