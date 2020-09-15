@@ -751,7 +751,7 @@ shrub_gradient_jags.AllShr.data <- list(
   tri.tot = AllShr.tot$triC,
   tcws.tot = AllShr.tot$tcwsC,
   gramin_cov.tot = AllShr.tot$graminoid_coverC,
-  tempjja.tot.plot = AllShr$tempjjaC,
+  tempjja.tot.plot = AllShr.tot$tempjjaC,
   N_plots = length(unique(AllShr.tot$plot)),
   
   # plot group level predictors
@@ -786,7 +786,7 @@ shrub_gradient_jags.AllEve.data <- list(
   tri.tot = AllEve.tot$triC,
   tcws.tot = AllEve.tot$tcwsC,
   gramin_cov.tot = AllEve.tot$graminoid_coverC,
-  tempjja.tot.plot = AllEve$tempjjaC,
+  tempjja.tot.plot = AllEve.tot$tempjjaC,
   N_plots = length(unique(AllEve.tot$plot)),
   
   # plot group level predictors
@@ -821,7 +821,7 @@ shrub_gradient_jags.AllDec.data <- list(
   tri.tot = AllDec.tot$triC,
   tcws.tot = AllDec.tot$tcwsC,
   gramin_cov.tot = AllDec.tot$graminoid_coverC,
-  tempjja.tot.plot = AllDec$tempjjaC,
+  tempjja.tot.plot = AllDec.tot$tempjjaC,
   N_plots = length(unique(AllDec.tot$plot)),
   
   # plot group level predictors
@@ -886,7 +886,7 @@ write("
 
       for (i in 1:N_plots){ 
         cov.tot[i] ~ dlnorm(mu.plot[i], tau.plot)
-        log(mu[i]) <- b_plotgroup[plotgroup.tot[i]] + # ~= random effect of plot group
+        log(mu.plot[i]) <- b_plotgroup[plotgroup.tot[i]] + # ~= random effect of plot group
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.tcws * tcws.tot[i] + 
                         b.tempXtcws * tempjja.tot.plot[i] * tcws.tot[i] +       # for interaction
@@ -919,16 +919,16 @@ write("
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
-      }
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
-                                      b.tcws.x * xhat_tcws2[p] +
+                                      b.tcws * xhat_tcws2[p] +
                                       b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
-                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[m]
+                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
         }
+      }
 
     
       }
@@ -937,22 +937,22 @@ write("
 
 Specify the parameters to be monitored:
 ```{r}
-params <- c("intercept",
-            "b.tempjja.x", "b.tempjja.x2",
-            "b.tempcont.x", "b.tempcont.x2",
-            "b.precipjja.x", "b.precipjja.x2",
-            "b.compet",
-            "b.gramin_cov",
-            "b.sri",
-            "b.tri",
-            "b.tcws",
-            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-            "sigma.plotgroup",
-            "phi",
-            "phat_graminoid_cover", 
-            "phat_sri", "phat_tcws", "phat_tri", 
-            "phat_tempjja", "phat_tempcont", "phat_precipjja",
-            "phat_tempXmoist")
+params_groups <- c("intercept",
+                   "b.tempjja.x", "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
+                   "b.precipjja.x", "b.precipjja.x2",
+                   "b.compet",
+                   "b.gramin_cov",
+                   "b.sri",
+                   "b.tri",
+                   "b.tcws",
+                   "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
+                   "sigma.plotgroup",
+                   "phi",
+                   "phat_graminoid_cover", 
+                   "phat_sri", "phat_tcws", "phat_tri", 
+                   "phat_tempjja", "phat_tempcont", "phat_precipjja",
+                   "phat_tempXmoist")
 ```
 
 ### > run & evaluate model
@@ -963,10 +963,10 @@ params <- c("intercept",
 # run model
 model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params,                             # parameters to be saved
+                                        params_groups,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
-                                        n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
+                                        n.iter = 10000, n.burnin = 7000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
                                         DIC = FALSE,                        # do not compute deviance, pD, and DIC
                                         working.directory = NULL, 
@@ -1016,10 +1016,10 @@ coeff.shrub_gradient.AllShr <- coeff.shrub_gradient.AllShr %>%
 # run model
 model_out.shrub_gradient.AllEve <- jags(shrub_gradient_jags.AllEve.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params,                             # parameters to be saved
+                                        params_groups,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
-                                        n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
+                                        n.iter = 10000, n.burnin = 7000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
                                         DIC = FALSE,                        # do not compute deviance, pD, and DIC
                                         working.directory = NULL, 
@@ -1069,7 +1069,7 @@ coeff.shrub_gradient.AllEve <- coeff.shrub_gradient.AllEve %>%
 # run model
 model_out.shrub_gradient.AllDec <- jags(shrub_gradient_jags.AllDec.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params,                             # parameters to be saved
+                                        params_groups,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -1675,15 +1675,15 @@ write("
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
-      }
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
-                                      b.tcws.x * xhat_tcws2[p] +
+                                      b.tcws * xhat_tcws2[p] +
                                       b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
-                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[m]
+                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+          }
         }
 
     

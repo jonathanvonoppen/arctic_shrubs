@@ -12,6 +12,9 @@
       b.tri ~ dnorm(0, 0.0001)
       b.tcws ~ dnorm(0, 0.0001)
 
+      sigma.plot ~ dunif(0,100)
+      tau.plot <- 1/(sigma.plot * sigma.plot)
+      
       sigma.plotgroup ~ dunif(0,100)
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
@@ -22,10 +25,8 @@
       b.precipjja.x ~ dnorm(0, 0.001)
       b.precipjja.x2 ~ dnorm(0, 0.001)
       
-      b.tempXtcws2a ~ dnorm(0, 0.001)
-      b.tempXtcws2b ~ dnorm(0, 0.001)
-      b.tempXtcws2c ~ dnorm(0, 0.001)
-      b.tempXtcws3 ~ dnorm(0, 0.001)
+      b.tempXtcws ~ dnorm(0, 0.001)
+      b.tempXtcws2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -33,10 +34,12 @@
     # LIKELIHOOD
 
       for (i in 1:N_plots){ 
-        cov.tot[i] ~ dlnorm(mu[i])
-        log(mu[i]) <- b_plotgroup[plotgroup.tot[i]] + # ~= random effect of plot group
+        cov.tot[i] ~ dlnorm(mu.plot[i], tau.plot)
+        log(mu.plot[i]) <- b_plotgroup[plotgroup.tot[i]] + # ~= random effect of plot group
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.tcws * tcws.tot[i] + 
+                        b.tempXtcws * tempjja.tot.plot[i] * tcws.tot[i] +       # for interaction
+                        b.tempXtcws2 * (tempjja.tot.plot[i]^2) * tcws.tot[i] +  # for interaction
                         b.sri * sri.tot[i] +
                         b.tri * tri.tot[i]
       }
@@ -65,18 +68,16 @@
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
-      }
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
-                                      b.tcws.x * xhat_tcws2[p] +
-                                      b.tempXtcws2a * xhat_tempjja[m] * (xhat_tempjja[m]^2) +
-                                      b.tempXtcws2b * xhat_tempjja[m] * xhat_tcws2[p] +
-                                      b.tempXtcws2c * (xhat_tempjja[m]^2) * xhat_tcws2[p] +
-                                      b.tempXtcws3 * xhat_tempjja[m] * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+                                      b.tcws * xhat_tcws2[p] +
+                                      b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
+                                      b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
         }
+      }
 
     
       }
