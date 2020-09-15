@@ -2214,7 +2214,7 @@ coeff.shrub_gradient.EmpNig2 <- model_out.shrub_gradient.EmpNig2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.EmpNig2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.EmpNig$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.EmpNig2$BUGSoutput$sims.list)-4)){
   ci_90.EmpNig2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.EmpNig2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.EmpNig2[param, 3] <- names(data.frame(model_out.shrub_gradient.EmpNig2$BUGSoutput$sims.list))[param]
 }
@@ -2233,7 +2233,7 @@ coeff.shrub_gradient.EmpNig2 <- coeff.shrub_gradient.EmpNig2 %>%
 save(coeff.shrub_gradient.EmpNig2, file = file.path("..", "data", "model_outputs", "model_output_EmpNig2.Rdata"))
 
 # effect size plot
-(effect_size_plot.EmpNig2 <- model_plot_marg_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 10.5))
+(effect_size_plot.EmpNig2 <- model_plot_sig_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 10.5))
 
 ```
 
@@ -3043,7 +3043,8 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "model_outputs", "model_output_VacUli.Rdata"))
+# save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "model_outputs", "model_output_VacUli.Rdata"))
+# load(file.path("..", "data", "model_outputs", "model_output_VacUli.Rdata"))
 
 # effect size plot
 (effect_size_plot.VacUli <- model_plot_marg_function(coeff.shrub_gradient.VacUli, title_string = "Vaccinium uliginosum", plot_width = 12.5))
@@ -3207,7 +3208,7 @@ coeff.shrub_gradient.VacUli2 <- model_out.shrub_gradient.VacUli2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.VacUli2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.VacUli$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.VacUli2$BUGSoutput$sims.list)-4)){
   ci_90.VacUli2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.VacUli2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.VacUli2[param, 3] <- names(data.frame(model_out.shrub_gradient.VacUli2$BUGSoutput$sims.list))[param]
 }
@@ -3237,6 +3238,18 @@ save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "model_outputs
 
 ### > combine all plots 
 ```{r, eval = FALSE}
+model_outputs_focal_species <- file.path("..", "data", "model_outputs", list.files(path = file.path("..", "data", "model_outputs"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_focal_species){
+  load(model_output)
+}
+
+(effect_size_plot.BetNan2 <- model_plot_marg_function(coeff.shrub_gradient.BetNan2, title_string = "Betula nana", plot_width = 10.5))
+(effect_size_plot.EmpNig2 <- model_plot_marg_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 10.5))
+(effect_size_plot.RhoGro2 <- model_plot_marg_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 10.5))
+(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 10.5))
+(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 10.5))
+
+
 # 3x2 grid (vertical layout)
 (nuuk_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan, 
                                             effect_size_plot.EmpNig, 
