@@ -943,7 +943,6 @@ params_groups <- c("intercept",
                    "b.tempjja.x", "b.tempjja.x2",
                    "b.tempcont.x", "b.tempcont.x2",
                    "b.precipjja.x", "b.precipjja.x2",
-                   "b.compet",
                    "b.gramin_cov",
                    "b.sri",
                    "b.tri",
@@ -967,7 +966,7 @@ model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # in
                                         params_groups,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
-                                        n.iter = 10000, n.burnin = 7000,    # no. iterations & burn-in fraction per chain
+                                        n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
                                         DIC = FALSE,                        # do not compute deviance, pD, and DIC
                                         working.directory = NULL, 
