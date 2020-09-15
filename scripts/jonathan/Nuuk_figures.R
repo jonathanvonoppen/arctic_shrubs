@@ -77,17 +77,17 @@ species_count <- ggplot(n_levels %>% filter(group == "species")) +
         axis.line = element_line(size = 1.5))
 
 driver_count <- ggplot(n_levels %>% filter(group == "drivers")) +
-    geom_bar(aes(x = freq), stat = "count", width = .9) +
-    #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
-    scale_y_continuous(limits = c(0,14), breaks = c(3,6,9,12)) +
-    labs(x = "number of drivers studied",
-         y = "number of published studies") +
-    theme_bw() +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-          axis.text = element_text(size = 32),
-          axis.title = element_text(size = 40),
-          axis.ticks = element_line(size = 1.5),
-          axis.line = element_line(size = 1.5))
+  geom_bar(aes(x = freq), stat = "count", width = .9) +
+  #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
+  scale_y_continuous(limits = c(0,14), breaks = c(3,6,9,12)) +
+  labs(x = "number of drivers studied",
+       y = "number of published studies") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text = element_text(size = 32),
+        axis.title = element_text(size = 40),
+        axis.ticks = element_line(size = 1.5),
+        axis.line = element_line(size = 1.5))
 
 (driver_count / species_count) + 
   plot_annotation(tag_levels = "a", 
@@ -132,19 +132,19 @@ predictor_set_env <- c("sri",
 
 # summer temperature
 (plot_tempjja_grad <- ggplot(data = pred_gradient_data_clim,
-                            aes(x = site,
-                                y = tempjja_ts_30,
-                                fill = alt)) +
-  geom_boxplot() +
-  labs(x = "site",
-       y = "mean JJA temperature") +
-  theme_bw())
+                             aes(x = site,
+                                 y = tempjja_ts_30,
+                                 fill = alt)) +
+   geom_boxplot() +
+   labs(x = "site",
+        y = "mean JJA temperature") +
+   theme_bw())
 
 # summer precipitation
 (plot_precipjja_grad <- ggplot(data = pred_gradient_data_clim,
-                             aes(x = site,
-                                 y = precipjja_ts_30,
-                                 fill = alt)) +
+                               aes(x = site,
+                                   y = precipjja_ts_30,
+                                   fill = alt)) +
     geom_boxplot() +
     labs(x = "site",
          y = "mean JJA precipitation") +
@@ -152,9 +152,9 @@ predictor_set_env <- c("sri",
 
 # temperature variability
 (plot_tempcont_grad <- ggplot(data = pred_gradient_data_clim,
-                             aes(x = site,
-                                 y = tempcont_ts_30,
-                                 fill = alt)) +
+                              aes(x = site,
+                                  y = tempcont_ts_30,
+                                  fill = alt)) +
     geom_boxplot() +
     labs(x = "site",
          y = "mean annual temperature variability") +
@@ -162,9 +162,9 @@ predictor_set_env <- c("sri",
 
 # solar radiation
 (plot_sri_grad <- ggplot(data = pred_gradient_data,
-                             aes(x = site,
-                                 y = sri,
-                                 fill = alt)) +
+                         aes(x = site,
+                             y = sri,
+                             fill = alt)) +
     geom_boxplot() +
     labs(x = "site",
          y = "mean Solar Radiation Index") +
@@ -172,9 +172,9 @@ predictor_set_env <- c("sri",
 
 # terrain ruggedness
 (plot_tri_grad <- ggplot(data = pred_gradient_data,
-                             aes(x = site,
-                                 y = tri,
-                                 fill = alt)) +
+                         aes(x = site,
+                             y = tri,
+                             fill = alt)) +
     geom_boxplot() +
     labs(x = "site",
          y = "mean Terrain Ruggedness Index") +
@@ -182,9 +182,9 @@ predictor_set_env <- c("sri",
 
 # topographic wetness
 (plot_twi_grad <- ggplot(data = pred_gradient_data,
-                             aes(x = site,
-                                 y = twi_90m,
-                                 fill = alt)) +
+                         aes(x = site,
+                             y = twi_90m,
+                             fill = alt)) +
     geom_boxplot() +
     labs(x = "site",
          y = "mean Topographic Wetness Index") +
@@ -370,10 +370,10 @@ prediction_plots_species <- function(species) {
     filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) %>% 
     # rename predictors
     mutate(pred_id = fct_recode(pred_id,
-                                  "Solar Radiation Index" = "sri",
-                                  "Terrain Ruggedness Index" = "tri",
-                                  "Tasseled-cap Wetness Index" = "tcws",
-                                  "overgrowing competition" = "compet"),
+                                "Solar Radiation Index" = "sri",
+                                "Terrain Ruggedness Index" = "tri",
+                                "Tasseled-cap Wetness Index" = "tcws",
+                                "overgrowing competition" = "compet"),
            pred_id = fct_relevel(pred_id,
                                  "Solar Radiation Index",
                                  "Terrain Ruggedness Index",
@@ -556,7 +556,7 @@ prediction_plots_groups <- function(fgroup) {
   if(fgroup == "AllShr") group_df <- AllShr.tot
   if(fgroup == "AllEve") group_df <- AllEve.tot
   if(fgroup == "AllDec") group_df <- AllDec.tot
-
+  
   
   # define initial predictions df
   phats_long <- as.data.frame(matrix(data = NA, 
