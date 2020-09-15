@@ -198,7 +198,16 @@ env_cov <- env_pred_nuuk.bio %>%
          cov_All_evergreens = cov_Cassiope_tetragona + cov_Empetrum_nigrum + cov_Phyllodoce_coerulea + cov_Ledum_groenlandicum + cov_Ledum_palustre) %>% 
   
 # copy all shrub cover column into predictor column
-  mutate(shrub_cover = cov_All_shrubs) %>% 
+  mutate(shrub_cover = cov_All_shrubs,
+         BetNan_shrub_cover = cov_All_shrubs - cov_Betula_nana,
+         CasTet_shrub_cover = cov_All_shrubs - cov_Cassiope_tetragona,
+         EmpNig_shrub_cover = cov_All_shrubs - cov_Empetrum_nigrum,
+         PhyCae_shrub_cover = cov_All_shrubs - cov_Phyllodoce_coerulea,
+         RhoGro_shrub_cover = cov_All_shrubs - cov_Ledum_groenlandicum,
+         RhoTom_shrub_cover = cov_All_shrubs - cov_Ledum_palustre,
+         SalArc_shrub_cover = cov_All_shrubs - cov_Salix_arctophila,
+         SalGla_shrub_cover = cov_All_shrubs - cov_Salix_glauca,
+         VacUli_shrub_cover = cov_All_shrubs - cov_Vaccinium_uliginosum) %>% 
   
 # rename graminoids column to not match reduction pattern in next step
   rename(graminoid_cover = cov_graminoids) %>% 
