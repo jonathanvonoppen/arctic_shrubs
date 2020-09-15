@@ -251,7 +251,6 @@ pred.plot.grid(env_cov_bio.long)
 
 # 4) Cover and predictions for all species and predictors ----
 
-
 prediction_plots_species <- function(species) {
   
   predictor_phats <- c("phat_compet", "phat_shrub_cover", "phat_graminoid_cover", 
@@ -508,6 +507,22 @@ prediction_plots_species <- function(species) {
   # # combine graphs
 }
 
+
+# >> load model outputs ----
+model_output_path <- file.path("data", "model_outputs") 
+
+coeff.shrub_gradient.BetNan2 <- load(file.path(model_output_path, "model_output_BetNan2.Rdata"))
+coeff.shrub_gradient.CasTet <- load(file.path(model_output_path, "model_output_CasTet.Rdata"))
+coeff.shrub_gradient.EmpNig2 <- load(file.path(model_output_path, "model_output_EmpNig2.Rdata"))
+coeff.shrub_gradient.PhyCae <- load(file.path(model_output_path, "model_output_PhyCae.Rdata"))
+coeff.shrub_gradient.RhoGro2 <- load(file.path(model_output_path, "model_output_RhoGro2.Rdata"))
+coeff.shrub_gradient.RhoTom <- load(file.path(model_output_path, "model_output_RhoTom.Rdata"))
+coeff.shrub_gradient.SalArc <- load(file.path(model_output_path, "model_output_SalArc.Rdata"))
+coeff.shrub_gradient.SalGla2 <- load(file.path(model_output_path, "model_output_SalGla2.Rdata"))
+coeff.shrub_gradient.VacUli2 <- load(file.path(model_output_path, "model_output_VacUli2.Rdata"))
+
+
+# >> plot graphs ----
 prediction_plots_species(species = "BetNan")
 prediction_plots_species(species = "CasTet")
 prediction_plots_species(species = "EmpNig")
