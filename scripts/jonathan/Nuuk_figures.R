@@ -258,7 +258,7 @@ prediction_plots_species <- function(species) {
                        "phat_tempjja", "phat_tempcont", "phat_precipjja")
   
   # # test
-  # species <- "BetNan"
+  # species <- "Rhododendron tomentosum"
   
   if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
   if(species == "Cassiope tetragona") model_coeff_output <- coeff.shrub_gradient.CasTet
@@ -532,7 +532,7 @@ prediction_plots_species(species = "Cassiope tetragona")
 prediction_plots_species(species = "Empetrum nigrum")
 prediction_plots_species(species = "Phyllodoce caerulea")
 prediction_plots_species(species = "Rhododendron groenlandicum")
-prediction_plots_species(species = "Rhododendron tomentosum")
+prediction_plots_species(species = "Rhododendron tomentosum")     # prediction curves / CIs out of y range
 prediction_plots_species(species = "Salix arctophila")
 prediction_plots_species(species = "Salix glauca")
 prediction_plots_species(species = "Vaccinium uliginosum")
@@ -550,9 +550,9 @@ prediction_plots_groups <- function(fgroup) {
                        "phat_graminoid_cover")
   
   
-  if(fgroup == "all shrub") model_coeff_output <- model_output_AllShr2
-  if(fgroup == "evergreen shrub") model_coeff_output <- model_output_AllEve2
-  if(fgroup == "deciduous shrub") model_coeff_output <- model_output_AllDec2
+  if(fgroup == "all shrub") model_coeff_output <- coeff.shrub_gradient.AllShr2
+  if(fgroup == "evergreen shrub") model_coeff_output <- coeff.shrub_gradient.AllEve2
+  if(fgroup == "deciduous shrub") model_coeff_output <- coeff.shrub_gradient.AllDec2
   
   
   if(fgroup == "all shrub") group_df <- AllShr.tot
@@ -737,7 +737,7 @@ prediction_plots_groups <- function(fgroup) {
 }
 
 
-model_outputs_groupss <- file.path("data", "model_outputs", "groups", list.files(path = file.path("data", "model_outputs", "groups"), 
+model_outputs_groups <- file.path("data", "model_outputs", "groups", list.files(path = file.path("data", "model_outputs", "groups"), 
                                                                                  pattern = "*.Rdata"))
 for (model_output in model_outputs_groups){
   load(model_output)
