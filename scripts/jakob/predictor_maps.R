@@ -41,6 +41,11 @@ raster_list <- append(
   setNames(
     raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
     "tri"))
+# add tcw raster to list
+raster_list <- append(
+  raster_list,
+  setNames(raster("O:/Nat_Ecoinformatics/C_Write/_Proj/Greenland_NormandVegDyn_au150176/NuukFjord/spatial_data_for_Nathalie_by_Jakob/nathalie_90m_grid_polar_stereo/landsatTCwet_nuuk.tif"),
+           "tcws"))
 
 ## Load plot locations
 nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
@@ -48,7 +53,7 @@ nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
   distinct(site, lat, long) %>%
   st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
   st_transform(crs = crs(projection_temp)) %>% 
-  mutate(site = paste0("Station ", site)) %>%
+  mutate(site = paste0("Site ", site)) %>%
   group_by(site) %>%
   summarise() %>%
   st_centroid() %>%
@@ -64,7 +69,8 @@ lookup_table <- data.frame(
                    "Annual Maximum Temperature (°C)",
                    "Annual Minimum Temperature (°C)",
                    "Temperature Continentality",
-                   "Topographic Roughness Index"),
+                   "Topographic Roughness Index",
+                   "Tasseled Cap Wetness Index"),
   scale_name = c("Oranges",
                  "Blues",
                  "Blues",
@@ -72,7 +78,8 @@ lookup_table <- data.frame(
                  "Oranges",
                  "Blues",
                  "Greens",
-                 "YlOrBr"),
+                 "YlOrBr",
+                 "Blues"),
   label_colour = c(
     "white",
     "black",
@@ -81,6 +88,7 @@ lookup_table <- data.frame(
     "white",
     "white",
     "white",
+    "black",
     "black"
   ),
   stringsAsFactors = F
