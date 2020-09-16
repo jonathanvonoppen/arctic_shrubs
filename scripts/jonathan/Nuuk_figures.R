@@ -249,7 +249,7 @@ pred.plot.grid(env_cov_bio.long)
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
-# 4) Cover and predictions for all species and predictors ----
+# 4) Species: cover and predictions for all predictors ----
 
 prediction_plots_species <- function(species) {
   
@@ -518,8 +518,8 @@ prediction_plots_species <- function(species) {
 
 # >> load data ----
 # load model outputs
-model_outputs_focal_species <- file.path("data", "model_outputs", "species", list.files(path = file.path("data", "model_outputs", "species"), pattern = "*.Rdata"))
-for (model_output in model_outputs_focal_species){
+model_outputs_species <- file.path("data", "model_outputs", "species", list.files(path = file.path("data", "model_outputs", "species"), pattern = "*.Rdata"))
+for (model_output in model_outputs_species){
   load(model_output)
 }
 # load input data
@@ -540,7 +540,7 @@ prediction_plots_species(species = "Vaccinium uliginosum")
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
-# 5) Cover and predictions for all groupss and predictors ----
+# 5) Groups: cover and predictions for all predictors ----
 
 
 prediction_plots_groups <- function(fgroup) {
@@ -737,6 +737,7 @@ prediction_plots_groups <- function(fgroup) {
 }
 
 
+# >> load data ----
 model_outputs_groups <- file.path("data", "model_outputs", "groups", list.files(path = file.path("data", "model_outputs", "groups"), 
                                                                                  pattern = "*.Rdata"))
 for (model_output in model_outputs_groups){
@@ -753,6 +754,143 @@ prediction_plots_groups(fgroup = "deciduous shrub")
 
 
 
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
+
+# 6) Species: interaction plots temp X moisture ----
+
+interaction_plots_species <- function(species) {
+  
+  # # test
+  # species <- "Salix glauca"
+  
+  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
+  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.EmpNig2
+  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.RhoGro2
+  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
+  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
+  
+  if(species == "Betula nana") species_df <- BetNan.tot
+  if(species == "Empetrum nigrum") species_df <- EmpNig.tot
+  if(species == "Rhododendron groenlandicum") species_df <- RhoGro.tot
+  if(species == "Salix glauca") species_df <- SalGla.tot
+  if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
+  
+  # define initial predictions df
+  phats <- as.data.frame(matrix(data = NA,
+                                nrow = 100, 
+                                ncol = length(model_coeff_output) + 2))
+  names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
+  
+  # extract predictions into phats data frame 
+  phat_predictor <- "phat_tempXmoist"
+    
+  predictor_min <- min(species_df$tempjjaC)
+  predictor_max <- max(species_df$tempjjaC)
+    
+    # assemble predicted and predictor values, for 100 rows (one predictor) at a time
+    phats <- model_coeff_output %>% 
+      
+      # filter for predicted values
+      filter(param %in% c(paste0(phat_predictor,
+                                 "[", 
+                                 rep(seq(from = 1, to = 100), times = 2),
+                                 ",",
+                                 rep(seq(from = 1, to = 2), each = 100), 
+                                 "]"))) %>% 
+      
+      # add xhats column
+      mutate(xhats = rep(seq(from = predictor_min, 
+                             to = predictor_max,
+                             length.out = 100), times = 2)) %>% 
+      
+      # add column for back-centered and back-scaled values
+      mutate(tempjja = xhats * attr(scale(species_df$tempjja), 'scaled:scale') + attr(scale(species_df$tempjja), 'scaled:center'),
+             
+      # add column for low/high moisture level values
+             tcws = rep(c("low", "high"),
+                        each = 100))
+    
+    # graph
+    
+    int_plot <- ggplot() +
+      # tempjja is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
+      geom_point(data = species_df %>% group_by(site_alt_plotgroup_id) %>% summarise(tempjja = mean(tempjja), cover = mean(cover)), 
+                 aes(x = tempjja, 
+                     y = cover), 
+                 size = 2,
+                 position = position_jitter(width=0, height=.01),
+                 alpha=0.5) +
+      
+      # draw line of predicted values
+      geom_line(data = phats, 
+                aes(x = tempjja, 
+                    y = plogis(mean),
+                    colour = tcws), 
+                alpha = 1,
+                size = 3) + 
+      
+      # draw predicted 95% CI
+      geom_ribbon(data = phats,
+                  aes(x = tempjja, 
+                      ymin = plogis(l95), 
+                      ymax = plogis(u95),
+                      fill = tcws),
+                  alpha = 0.2) +
+      
+      # define appearance
+      ggtitle(paste0(species)) +
+      scale_colour_manual(values = c("orange","darkgreen")) +
+      scale_fill_manual(values = c("orange","darkgreen")) +
+      labs(x = "mean summer temperature [°C]",
+           y = "relative no. hits per plot") + 
+      theme_cowplot(18) +
+      theme(plot.title = element_text(colour = "grey10", face = "italic", size = 15))
+    
+    # labs(x = "predictor value") +
+    # ggtitle(paste0(species, " cover ~ predictors")) +
+    # theme_bw() +
+    # theme(legend.position = "none",
+    #       axis.title.x = element_blank(),
+    #       plot.title = element_text(hjust = 0.5),
+    #       strip.background = element_blank(),
+    #       strip.placement = "outside",
+    #       panel.spacing.y = unit(1.5, "lines"))
+  
+  return(int_plot)
+
+}
+
+# >> load data ----
+model_outputs_focal_species <- file.path("data", "model_outputs", "species", list.files(path = file.path("data", "model_outputs", "species"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_focal_species){
+  load(model_output)
+}
+# load input data
+load(file = file.path("data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+
+
+# >> plot graphs ----
+(int_plot_BetNan <- interaction_plots_species(species = "Betula nana"))
+(int_plot_EmpNig <- interaction_plots_species(species = "Empetrum nigrum"))
+(int_plot_RhoGro <- interaction_plots_species(species = "Rhododendron groenlandicum"))
+(int_plot_SalGla <- interaction_plots_species(species = "Salix glauca"))
+(int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
+
+# 3x2 grid (vertical layout)
+(nuuk_interaction_plot_grid_ver <- plot_grid(int_plot_BetNan, 
+                                             int_plot_EmpNig, 
+                                             int_plot_RhoGro, 
+                                             int_plot_SalGla, 
+                                             int_plot_VacUli,
+                                             labels = c("a)", "b)", "c)", "d)", "e)"),
+                                             label_size = 20,
+                                             label_fontface = "plain",
+                                             hjust = -2,
+                                             ncol = 2))
+
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_vert.eps"),
+#           nuuk_reduced_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
 
 # ________________________----
 
