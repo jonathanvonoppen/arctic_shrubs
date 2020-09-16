@@ -324,7 +324,7 @@ prediction_plots_species <- function(species) {
            pred_value = V10) %>% 
     # extract predictor strings from param column
     mutate(pred_id = factor(str_remove(str_remove(param, "phat_"), "\\[\\d+\\]"),
-                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "compet")))
+                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "compet", "shrub_cover", "graminoid_cover")))
   
   # >> facet solution (simple) ----
   
@@ -373,12 +373,16 @@ prediction_plots_species <- function(species) {
                                 "Solar Radiation Index" = "sri",
                                 "Terrain Ruggedness Index" = "tri",
                                 "Tasseled-cap Wetness Index" = "tcws",
-                                "overgrowing competition" = "compet"),
+                                "overgrowing competition" = "compet",
+                                "cover of other shrub species" = "shrub_cover",
+                                "cover of graminoids" = "graminoid_cover"),
            pred_id = fct_relevel(pred_id,
                                  "Solar Radiation Index",
                                  "Terrain Ruggedness Index",
                                  "Tasseled-cap Wetness Index",
-                                 "overgrowing competition"))
+                                 "overgrowing competition",
+                                 "cover of other shrub species",
+                                 "cover of graminoids"))
   
   # rename factor levels in predictions dataset
   phats_long <- phats_long %>% 
@@ -391,7 +395,9 @@ prediction_plots_species <- function(species) {
                                 "Solar Radiation Index" = "sri",
                                 "Terrain Ruggedness Index" = "tri",
                                 "Tasseled-cap Wetness Index" = "tcws",
-                                "overgrowing competition" = "compet"),
+                                "overgrowing competition" = "compet",
+                                "cover of other shrub species" = "shrub_cover",
+                                "cover of graminoids" = "graminoid_cover"),
            pred_id = fct_relevel(pred_id,
                                  "summer temperature [°C]",
                                  "annual temperature variability [°C]",
@@ -399,7 +405,9 @@ prediction_plots_species <- function(species) {
                                  "Solar Radiation Index",
                                  "Terrain Ruggedness Index",
                                  "Tasseled-cap Wetness Index",
-                                 "overgrowing competition"))
+                                 "overgrowing competition",
+                                 "cover of other shrub species",
+                                 "cover of graminoids"))
   
   # compile plot
   pred_plot <- ggplot(data = phats_long,
@@ -510,12 +518,12 @@ prediction_plots_species <- function(species) {
 
 # >> load data ----
 # load model outputs
-model_outputs_focal_species <- file.path("data", "model_outputs", list.files(path = file.path("data", "model_outputs"), pattern = "*.Rdata"))
+model_outputs_focal_species <- file.path("data", "model_outputs", "species", list.files(path = file.path("data", "model_outputs", "species"), pattern = "*.Rdata"))
 for (model_output in model_outputs_focal_species){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", ""))
+load(file = file.path("data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
 
 
 # >> plot graphs ----
@@ -645,12 +653,12 @@ prediction_plots_groups <- function(fgroup) {
                                 "Solar Radiation Index" = "sri",
                                 "Terrain Ruggedness Index" = "tri",
                                 "Tasseled-cap Wetness Index" = "tcws",
-                                "graminoid cover" = "graminoid_cover"),
+                                "cover of graminoids" = "graminoid_cover"),
            pred_id = fct_relevel(pred_id,
                                  "Solar Radiation Index",
                                  "Terrain Ruggedness Index",
                                  "Tasseled-cap Wetness Index",
-                                 "graminoid cover"))
+                                 "cover of graminoids"))
   
   # rename factor levels in predictions dataset
   phats_long <- phats_long %>% 
@@ -663,7 +671,7 @@ prediction_plots_groups <- function(fgroup) {
                                 "Solar Radiation Index" = "sri",
                                 "Terrain Ruggedness Index" = "tri",
                                 "Tasseled-cap Wetness Index" = "tcws",
-                                "graminoid cover" = "graminoid_cover"),
+                                "cover of graminoids" = "graminoid_cover"),
            pred_id = fct_relevel(pred_id,
                                  "summer temperature [°C]",
                                  "annual temperature variability [°C]",
@@ -671,7 +679,7 @@ prediction_plots_groups <- function(fgroup) {
                                  "Solar Radiation Index",
                                  "Terrain Ruggedness Index",
                                  "Tasseled-cap Wetness Index",
-                                 "graminoid cover"))
+                                 "cover of graminoids"))
   
   # compile plot
   pred_plot <- ggplot(data = phats_long,
@@ -729,15 +737,13 @@ prediction_plots_groups <- function(fgroup) {
 }
 
 
-# >> load model outputs ----
-model_output_path <- file.path("data", "model_outputs") 
-
-lapply(paste(model_output_path, c("model_output_AllShr2.Rdata",
-                                  "model_output_AllEve2.Rdata",
-                                  "model_output_AllDec2.Rdata"),
-             sep = "/"),
-       load,
-       .GlobalEnv) 
+model_outputs_groupss <- file.path("data", "model_outputs", "groups", list.files(path = file.path("data", "model_outputs", "groups"), 
+                                                                                 pattern = "*.Rdata"))
+for (model_output in model_outputs_groups){
+  load(model_output)
+}
+# load input data
+load(file = file.path("data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
 
 
 # >> plot graphs ----
