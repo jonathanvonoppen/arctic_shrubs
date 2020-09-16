@@ -736,6 +736,26 @@ for (taxon_id in 1:nlevels(env_cov_bio_sub$taxon)){
          env_cov_bio_sub_spec.cont[[taxon_id]])
 }
 
+# save all input data
+# groups
+save(list = c("AllShr.tot",
+              "AllEve.tot",
+              "AllDec.tot"), 
+     file = file.path("..", "data", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
+
+# species
+# groups
+save(list = c("BetNan.tot",
+              "CasTet.tot",
+              "EmpNig.tot",
+              "PhyCae.tot",
+              "RhoGro.tot",
+              "RhoTom.tot",
+              "SalArc.tot",
+              "SalGla.tot",
+              "VacUli.tot"), 
+     file = file.path("..", "data", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+
 ```
 
 ### Groups
