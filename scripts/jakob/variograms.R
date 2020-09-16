@@ -48,12 +48,16 @@ raster_list <- lapply(
   }
 )
 
-# # add TRI raster to list
-# raster_list <- append(
-#   raster_list, 
-#   setNames(
-#     raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
-#     "tri"))
+# add TRI and TCW to raster to list
+raster_list <- append(
+  raster_list,
+  setNames(
+    raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
+    "tri"))
+raster_list <- append(
+  raster_list,
+  setNames(raster("O:/Nat_Ecoinformatics/C_Write/_Proj/Greenland_NormandVegDyn_au150176/NuukFjord/spatial_data_for_Nathalie_by_Jakob/nathalie_90m_grid_polar_stereo/landsatTCwet_nuuk.tif"),
+           "tcws"))
 
 ### Define functions to calculate and fit variograms ----
 
@@ -108,7 +112,8 @@ lookup_table <- data.frame(
                    "Mean Temperature June-July-August (°C)",
                    "Annual Maximum Temperature (°C)",
                    "Annual Minimum Temperature (°C)",
-                   "Temperature Continentality"),
+                   "Temperature Continentality",
+                   "Landsat Tasseled Cap Wetness (90 m)"),
   stringsAsFactors = F)
 
 # Plot Variograms
@@ -130,9 +135,29 @@ plot_variogram <- function(vario){
 }
 lapply(vario_list, plot_variogram)
 
-## Variograms for non-raster variables
+## Variograms for SRI (a non-raster variable)
 nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
                        stringsAsFactors = F) %>%
+  distinct(plot, lat, long, sri) %>%
   st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-  st_transform(crs = crs(projection_temp)) %>% 
-  mutate(site = paste0("Station ", site))
+  st_transform(crs = crs(projection_temp)) %>%
+  as_Spatial()
+
+sri_vario <- variogram(sri ~ 1, nuuk_plots,
+          width = 90)
+
+sri_vario_plot <- ggplot(
+  sri_vario, 
+  aes(x = dist / 1000, y = gamma)) + 
+  geom_point() +
+  labs(x = "Distance (km)", 
+       y = "Semivariance",
+       title = "Solar Radiation") +
+  scale_x_continuous(limits = c(0,40),
+                     breaks = seq(0,40,5)) +
+  theme_cowplot(15)
+
+save_plot("figures/variograms/sri.png",
+          sri_vario_plot,
+          base_aspect_ratio = 1.3,
+          base_height = 5)
