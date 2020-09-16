@@ -851,11 +851,12 @@ str(shrub_gradient_jags.AllDec.data)
 
 
 # save model input data
-shrub_gradient_jags.groupdata <- list(shrub_gradient_jags.AllShr.data,
-                                      shrub_gradient_jags.AllEve.data,
-                                      shrub_gradient_jags.AllDec.data)
+shrub_gradient_jags.groupdata <- list
 
-save(shrub_gradient_jags.groupdata, file = file.path("..", "data", "model_input_data", "shrub_gradient_jags.groupdata.Rdata"))
+save(list = c("shrub_gradient_jags.AllShr.data",
+              "shrub_gradient_jags.AllEve.data",
+              "shrub_gradient_jags.AllDec.data"), 
+     file = file.path("..", "data", "model_input_data", "shrub_gradient_jags.groupdata.Rdata"))
 ```
 
 ### > specifying model
@@ -1021,6 +1022,7 @@ save(coeff.shrub_gradient.AllShr, file = file.path("..", "data", "model_outputs"
 
 <br>
 
+As none of the quadratic terms come out significant, re-run without them:
 ```{r}
 write("
   
@@ -1125,7 +1127,7 @@ params_AllShr2 <- c("intercept",
 # run model
 model_out.shrub_gradient.AllShr2 <- jags(shrub_gradient_jags.AllShr.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params_groups,                      # parameters to be saved
+                                        params_AllShr2,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.AllShr2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -1148,7 +1150,7 @@ coeff.shrub_gradient.AllShr2 <- model_out.shrub_gradient.AllShr2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.AllShr2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.AllEve$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.AllShr2$BUGSoutput$sims.list)-4)){
   ci_90.AllShr2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.AllShr2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.AllShr2[param, 3] <- names(data.frame(model_out.shrub_gradient.AllShr2$BUGSoutput$sims.list))[param]
 }
@@ -1166,7 +1168,7 @@ coeff.shrub_gradient.AllShr2 <- coeff.shrub_gradient.AllShr2 %>%
 
 save(coeff.shrub_gradient.AllShr2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllShr2.Rdata"))
 
-(effect_size_plot.AllShr2 <- model_plot_sig_function(coeff.shrub_gradient.AllShr2, title_string = "all shrubs", plot_width = 11))
+(effect_size_plot.AllShr2 <- model_plot_sig_function(coeff.shrub_gradient.AllShr2, title_string = "all shrubs", plot_width = 7.5))
 ```
 
 ### *Evergreen shrubs*
@@ -1328,7 +1330,7 @@ params_AllEve2 <- c("intercept",
 # run model
 model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params_groups,                      # parameters to be saved
+                                        params_AllEve2,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.AllEve2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -1368,9 +1370,9 @@ coeff.shrub_gradient.AllEve2 <- coeff.shrub_gradient.AllEve2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllEve2.Rdata"))
+# save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllEve2.Rdata"))
 
-(effect_size_plot.AllEve2 <- model_plot_sig_function(coeff.shrub_gradient.AllEve2, title_string = "evergreen shrubs", plot_width = 11))
+(effect_size_plot.AllEve2 <- model_plot_sig_function(coeff.shrub_gradient.AllEve2, title_string = "evergreen shrubs", plot_width = 8.5))
 ```
 
 ### *Deciduous shrubs*
@@ -1418,7 +1420,7 @@ coeff.shrub_gradient.AllDec <- coeff.shrub_gradient.AllDec %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllDec.Rdata"))
+# save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllDec.Rdata"))
 
 (effect_size_plot.AllDec <- model_plot_marg_function(coeff.shrub_gradient.AllDec, title_string = "deciduous shrubs", plot_width = 11))
 ```
@@ -1483,7 +1485,7 @@ write("
                     b.tempjja.x * tempjja.tot[k] + 
                     # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
-                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
                     # b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
@@ -1496,7 +1498,7 @@ write("
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
-        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
@@ -1515,8 +1517,8 @@ write("
 
 # specify new set of parameters
 params_AllDec2 <- c("intercept",
-                   "b.tempjja.x", "b.tempjja.x2",
-                   "b.tempcont.x", # "b.tempcont.x2",
+                   "b.tempjja.x", # "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
                    "b.precipjja.x", # "b.precipjja.x2",
                    "b.gramin_cov",
                    "b.sri",
@@ -1532,7 +1534,7 @@ params_AllDec2 <- c("intercept",
 # run model
 model_out.shrub_gradient.AllDec2 <- jags(shrub_gradient_jags.AllDec.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params_groups,                      # parameters to be saved
+                                        params_AllDec2,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.AllDec2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -1573,7 +1575,7 @@ coeff.shrub_gradient.AllDec2 <- coeff.shrub_gradient.AllDec2 %>%
 
 save(coeff.shrub_gradient.AllDec2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllDec2.Rdata"))
 
-(effect_size_plot.AllDec2 <- model_plot_sig_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 11))
+(effect_size_plot.AllDec2 <- model_plot_sig_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 8.5))
 ```
 
 ### Species
@@ -2041,17 +2043,16 @@ str(shrub_gradient_jags.VacUli.data)
 
 
 # save model input data
-shrub_gradient_jags.speciesdata <- list(shrub_gradient_jags.BetNan.data,
-                                        shrub_gradient_jags.CasTet.data,
-                                        shrub_gradient_jags.EmpNig.data,
-                                        shrub_gradient_jags.PhyCae.data,
-                                        shrub_gradient_jags.RhoGro.data,
-                                        shrub_gradient_jags.RhoTom.data,
-                                        shrub_gradient_jags.SalArc.data,
-                                        shrub_gradient_jags.SalGla.data,
-                                        shrub_gradient_jags.VacUli.data)
-
-save(shrub_gradient_jags.speciesdata, file = file.path("..", "data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+save(list = c("shrub_gradient_jags.BetNan.data",
+              "shrub_gradient_jags.CasTet.data",
+              "shrub_gradient_jags.EmpNig.data",
+              "shrub_gradient_jags.PhyCae.data",
+              "shrub_gradient_jags.RhoGro.data",
+              "shrub_gradient_jags.RhoTom.data",
+              "shrub_gradient_jags.SalArc.data",
+              "shrub_gradient_jags.SalGla.data",
+              "shrub_gradient_jags.VacUli.data"), 
+     file = file.path("..", "data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
 ```
 
 ### > specifying model
@@ -2834,7 +2835,7 @@ write("
       
       intercept ~ dnorm(0, 0.0001)
       
-      # b.compet ~ dnorm(0, 0.0001)
+      b.compet ~ dnorm(0, 0.0001)
       b.shrub_cov ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
@@ -2862,7 +2863,7 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-                        # b.compet * compet.dis[i] + 
+                        b.compet * compet.dis[i] + 
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
@@ -2880,7 +2881,7 @@ write("
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-                        # b.compet * compet.cont[j] +
+                        b.compet * compet.cont[j] +
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
@@ -2907,7 +2908,7 @@ write("
       
       # add predicted values (derived parameters)
       for (m in 1:Nxhat){
-        # phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
@@ -2936,7 +2937,7 @@ params_RhoGro2 <- c("intercept",
                     "b.tempjja.x", "b.tempjja.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    # "b.compet", 
+                    "b.compet", 
                     "b.shrub_cov",
                     "b.gramin_cov",
                     "b.sri",
@@ -2945,7 +2946,7 @@ params_RhoGro2 <- c("intercept",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
                     "sigma.plotgroup",
                     "phi",
-                    # "phat_compet", 
+                    "phat_compet", 
                     "phat_shrub_cover", "phat_graminoid_cover", 
                     "phat_sri", "phat_tri", "phat_tcws", 
                     "phat_tempjja", "phat_tempcont", "phat_precipjja",
@@ -2977,7 +2978,7 @@ coeff.shrub_gradient.RhoGro2 <- model_out.shrub_gradient.RhoGro2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.RhoGro2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.RhoGro$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.RhoGro2$BUGSoutput$sims.list)-4)){
   ci_90.RhoGro2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.RhoGro2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.RhoGro2[param, 3] <- names(data.frame(model_out.shrub_gradient.RhoGro2$BUGSoutput$sims.list))[param]
 }
@@ -2997,7 +2998,7 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
 # load(file.path("..", "data", "model_outputs", "species", "model_output_RhoGro2.Rdata"))
 
 # effect size plot
-(effect_size_plot.RhoGro2 <- model_plot_sig_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 10.5))
+(effect_size_plot.RhoGro2 <- model_plot_marg_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 10.5))
 
 ```
 
@@ -3587,6 +3588,7 @@ save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "model_outputs
 
 ### > combine all plots 
 ```{r, eval = FALSE}
+# reduced models (insig. quadratic terms removed)
 model_outputs_focal_species <- file.path("..", "data", "model_outputs", list.files(path = file.path("..", "data", "model_outputs"), pattern = "*2.Rdata"))
 for (model_output in model_outputs_focal_species){
   load(model_output)
@@ -3598,24 +3600,7 @@ for (model_output in model_outputs_focal_species){
 (effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 10.5))
 (effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 10.5))
 
-
 # 3x2 grid (vertical layout)
-(nuuk_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan, 
-                                            effect_size_plot.EmpNig, 
-                                            effect_size_plot.RhoGro, 
-                                            effect_size_plot.SalGla, 
-                                            effect_size_plot.VacUli,
-                                            labels = c("a)", "b)", "c)", "d)", "e)"),
-                                            label_size = 20,
-                                            label_fontface = "plain",
-                                            hjust = -2,
-                                            ncol = 2))
-
-# save plot
-# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
-#           nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
-
-# 3x2 grid reduced predictor terms
 (nuuk_reduced_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan2, 
                                             effect_size_plot.EmpNig2, 
                                             effect_size_plot.RhoGro2, 
@@ -3631,37 +3616,54 @@ for (model_output in model_outputs_focal_species){
 # save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_vert.eps"),
 #           nuuk_reduced_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
 
-# 2x3 grid (horizontal layout)
-(nuuk_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan, 
-                                            effect_size_plot.EmpNig, 
-                                            effect_size_plot.RhoGro, 
-                                            effect_size_plot.SalGla, 
-                                            effect_size_plot.VacUli,
-                                            labels = c("a)", "b)", "c)", "d)", "e)"),
-                                            label_size = 20,
-                                            label_fontface = "plain",
-                                            hjust = -2,
-                                            ncol = 3))
+# # 2x3 grid (horizontal layout)
+# (nuuk_reduced_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan2, 
+#                                             effect_size_plot.EmpNig2, 
+#                                             effect_size_plot.RhoGro2, 
+#                                             effect_size_plot.SalGla2, 
+#                                             effect_size_plot.VacUli2,
+#                                             labels = c("a)", "b)", "c)", "d)", "e)"),
+#                                             label_size = 20,
+#                                             label_fontface = "plain",
+#                                             hjust = -2,
+#                                             ncol = 3))
+# 
+# # save plot
+# # save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_hor.eps"),
+# #           nuuk_reduced_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
 
-# save plot
-# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
-#           nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
-
-# 2x3 grid reduced predictor terms
-(nuuk_reduced_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan2, 
-                                            effect_size_plot.EmpNig2, 
-                                            effect_size_plot.RhoGro2, 
-                                            effect_size_plot.SalGla2, 
-                                            effect_size_plot.VacUli2,
-                                            labels = c("a)", "b)", "c)", "d)", "e)"),
-                                            label_size = 20,
-                                            label_fontface = "plain",
-                                            hjust = -2,
-                                            ncol = 3))
-
-# save plot
-# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_hor.eps"),
-#           nuuk_reduced_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
+# # original models (incl all quadratic terms)
+# # 3x2 grid (vertical layout)
+# (nuuk_effectsize_plot_grid_ver <- plot_grid(effect_size_plot.BetNan, 
+#                                             effect_size_plot.EmpNig, 
+#                                             effect_size_plot.RhoGro, 
+#                                             effect_size_plot.SalGla, 
+#                                             effect_size_plot.VacUli,
+#                                             labels = c("a)", "b)", "c)", "d)", "e)"),
+#                                             label_size = 20,
+#                                             label_fontface = "plain",
+#                                             hjust = -2,
+#                                             ncol = 2))
+# 
+# # save plot
+# # save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_vert.eps"),
+# #           nuuk_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
+# 
+# # 2x3 grid (horizontal layout)
+# (nuuk_effectsize_plot_grid_hor <- plot_grid(effect_size_plot.BetNan, 
+#                                             effect_size_plot.EmpNig, 
+#                                             effect_size_plot.RhoGro, 
+#                                             effect_size_plot.SalGla, 
+#                                             effect_size_plot.VacUli,
+#                                             labels = c("a)", "b)", "c)", "d)", "e)"),
+#                                             label_size = 20,
+#                                             label_fontface = "plain",
+#                                             hjust = -2,
+#                                             ncol = 3))
+# 
+# # save plot
+# # save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_effect_size_panels_hor.eps"),
+# #           nuuk_effectsize_plot_grid_hor, base_height = 10, base_aspect_ratio = 1.5)
 ```
 
 ## Graphs
