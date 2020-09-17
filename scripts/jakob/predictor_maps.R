@@ -63,14 +63,14 @@ nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
 lookup_table <- data.frame(
   raster_names = unlist(lapply(raster_list, names)),
   pretty_names = c("Insolation",
-                   "Mean Precipitation June-July-August (mm)",
+                   "Cumulative Summer Precipitation (mm)",
                    "Mean Precipitation March-April-May (mm)",
-                   "Mean Temperature June-July-August (°C)",
+                   "Mean Summer Temperature (°C)",
                    "Annual Maximum Temperature (°C)",
                    "Annual Minimum Temperature (°C)",
-                   "Temperature Continentality",
-                   "Topographic Roughness Index",
-                   "Tasseled Cap Wetness Index"),
+                   "Annual Temperature Variability",
+                   "Terrain Ruggedness Index (TRI)",
+                   "Tasseled-cap Wetness Index (TCWS)"),
   scale_name = c("Oranges",
                  "Blues",
                  "Blues",
@@ -93,6 +93,7 @@ lookup_table <- data.frame(
   ),
   stringsAsFactors = F
 )
+
 
 # Write function to plot rasters
 plot_raster <- function(predictor_raster){
@@ -132,3 +133,37 @@ plot_raster <- function(predictor_raster){
 
 # Execute function
 lapply(raster_list, plot_raster)
+
+# Plot TRI seperately as it has some funny values
+predictor_raster <- raster_list[[8]]
+raster_plot <- levelplot(predictor_raster, 
+                         margin = F,
+                         main = lookup_table$pretty_names[lookup_table$raster_names == names(predictor_raster)],
+                         scales = list(draw = F),
+                         par.settings = rasterTheme(
+                           region = sequential_hcl(
+                             100, 
+                             lookup_table$scale_name[lookup_table$raster_names == names(predictor_raster)],
+                             rev = T)),
+                         at = seq(0,5,0.1))  + 
+  latticeExtra::layer(sp.points(nuuk_plots,
+                                pch = 21,
+                                cex = 1,
+                                lwd = 3,
+                                col = lookup_table$label_colour[lookup_table$raster_names == names(predictor_raster)]),
+                      data = list(predictor_raster = predictor_raster)) +
+  latticeExtra::layer(sp.pointLabel(nuuk_plots,
+                                    label = nuuk_plots$site,
+                                    cex = 1,
+                                    col = lookup_table$label_colour[lookup_table$raster_names == names(predictor_raster)]),
+                      data = list(predictor_raster = predictor_raster)) 
+# Export File
+png(paste0("figures/predictor_maps/",
+           names(predictor_raster),
+           ".png"), 
+    width = 8,
+    height = 8 * 0.82,
+    units = "in",
+    res = 300)
+print(raster_plot)
+dev.off()
