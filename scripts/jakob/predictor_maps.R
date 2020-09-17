@@ -94,9 +94,14 @@ lookup_table <- data.frame(
   stringsAsFactors = F
 )
 
+# Crop TRI raster before plotting
+raster_list[[8]] <- crop(raster_list[[8]], raster_list[[1]])
 
 # Write function to plot rasters
 plot_raster <- function(predictor_raster){
+ 
+  # Set random seed
+  set.seed(1)
   # Create plot
   raster_plot <- levelplot(predictor_raster, 
                            margin = F,
@@ -136,6 +141,7 @@ lapply(raster_list, plot_raster)
 
 # Plot TRI seperately as it has some funny values
 predictor_raster <- raster_list[[8]]
+set.seed(1)
 raster_plot <- levelplot(predictor_raster, 
                          margin = F,
                          main = lookup_table$pretty_names[lookup_table$raster_names == names(predictor_raster)],
