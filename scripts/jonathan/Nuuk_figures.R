@@ -819,7 +819,7 @@ interaction_plots_species <- function(species) {
                      y = cover), 
                  size = 2,
                  position = position_jitter(width=0, height=.01),
-                 alpha=0.5) +
+                 alpha = 0.5) +
       
       # draw line of predicted values
       geom_line(data = phats, 
@@ -839,12 +839,12 @@ interaction_plots_species <- function(species) {
       
       # define appearance
       ggtitle(paste0(species)) +
-      scale_colour_manual(values = c("orange","darkgreen")) +
-      scale_fill_manual(values = c("orange","darkgreen")) +
+      scale_colour_manual("soil\nmoisture", values = c("orange","darkgreen")) +
+      scale_fill_manual("soil\nmoisture", values = c("orange","darkgreen")) +
       labs(x = "mean summer temperature [°C]",
            y = "relative no. hits per plot") + 
       theme_cowplot(18) +
-      theme(plot.title = element_text(colour = "grey10", face = "italic", size = 15))
+      theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18))
     
     # labs(x = "predictor value") +
     # ggtitle(paste0(species, " cover ~ predictors")) +
@@ -855,42 +855,428 @@ interaction_plots_species <- function(species) {
     #       strip.background = element_blank(),
     #       strip.placement = "outside",
     #       panel.spacing.y = unit(1.5, "lines"))
+    
   
   return(int_plot)
 
 }
 
+interaction_plots_groups <- function(fgroup) {
+  
+  # # test
+  # species <- "Salix glauca"
+  
+  if(fgroup == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
+  if(fgroup == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
+  if(fgroup == "deciduous shrubs") model_coeff_output <- coeff.shrub_gradient.AllDec2
+  
+  
+  if(fgroup == "all shrubs") group_df <- AllShr.tot
+  if(fgroup == "evergreen shrubs") group_df <- AllEve.tot
+  if(fgroup == "deciduous shrubs") group_df <- AllDec.tot
+  
+  # define initial predictions df
+  phats <- as.data.frame(matrix(data = NA,
+                                nrow = 100, 
+                                ncol = length(model_coeff_output) + 2))
+  names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
+  
+  # extract predictions into phats data frame 
+  phat_predictor <- "phat_tempXmoist"
+  
+  predictor_min <- min(group_df$tempjjaC)
+  predictor_max <- max(group_df$tempjjaC)
+  
+  # assemble predicted and predictor values, for 100 rows (one predictor) at a time
+  phats <- model_coeff_output %>% 
+    
+    # filter for predicted values
+    filter(param %in% c(paste0(phat_predictor,
+                               "[", 
+                               rep(seq(from = 1, to = 100), times = 2),
+                               ",",
+                               rep(seq(from = 1, to = 2), each = 100), 
+                               "]"))) %>% 
+    
+    # add xhats column
+    mutate(xhats = rep(seq(from = predictor_min, 
+                           to = predictor_max,
+                           length.out = 100), times = 2)) %>% 
+    
+    # add column for back-centered and back-scaled values
+    mutate(tempjja = xhats * attr(scale(group_df$tempjja), 'scaled:scale') + attr(scale(group_df$tempjja), 'scaled:center'),
+           
+           # add column for low/high moisture level values
+           tcws = rep(c("low", "high"),
+                      each = 100))
+  
+  # graph
+  
+  int_plot <- ggplot() +
+    # tempjja is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
+    geom_point(data = group_df %>% group_by(site_alt_plotgroup_id) %>% summarise(tempjja = mean(tempjja), cover = mean(cover)), 
+               aes(x = tempjja, 
+                   y = cover), 
+               size = 2,
+               position = position_jitter(width=0, height=.01),
+               alpha = 0.5) +
+    
+    # draw line of predicted values
+    geom_line(data = phats, 
+              aes(x = tempjja, 
+                  y = exp(mean),
+                  colour = tcws), 
+              alpha = 1,
+              size = 3) + 
+    
+    # draw predicted 95% CI
+    geom_ribbon(data = phats,
+                aes(x = tempjja, 
+                    ymin = exp(l95), 
+                    ymax = exp(u95),
+                    fill = tcws),
+                alpha = 0.2) +
+    
+    # define appearance
+    ggtitle(paste0(fgroup)) +
+    scale_colour_manual("soil\nmoisture", values = c("orange","darkgreen")) +
+    scale_fill_manual("soil\nmoisture", values = c("orange","darkgreen")) +
+    labs(x = "mean summer temperature [°C]",
+         y = "relative no. hits per plot") + 
+    theme_cowplot(18) +
+    theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18))
+  
+  # labs(x = "predictor value") +
+  # ggtitle(paste0(species, " cover ~ predictors")) +
+  # theme_bw() +
+  # theme(legend.position = "none",
+  #       axis.title.x = element_blank(),
+  #       plot.title = element_text(hjust = 0.5),
+  #       strip.background = element_blank(),
+  #       strip.placement = "outside",
+  #       panel.spacing.y = unit(1.5, "lines"))
+  
+  return(int_plot)
+  
+}
+
 # >> load data ----
+
+# species
+# load model output data
 model_outputs_focal_species <- file.path("data", "model_outputs", "species", list.files(path = file.path("data", "model_outputs", "species"), pattern = "*2.Rdata"))
 for (model_output in model_outputs_focal_species){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+load(file = file.path("data", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+
+# groups
+# load model output data
+model_outputs_groups <- file.path("data", "model_outputs", "groups", list.files(path = file.path("data", "model_outputs", "groups"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_groups){
+  load(model_output)
+}
+# load input data
+load(file = file.path("data", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
 
 
 # >> plot graphs ----
+(int_plot_AllShr <- interaction_plots_groups(fgroup = "all shrubs"))
+(int_plot_AllEve <- interaction_plots_groups(fgroup = "evergreen shrubs"))
+(int_plot_AllDec <- interaction_plots_groups(fgroup = "deciduous shrubs"))
 (int_plot_BetNan <- interaction_plots_species(species = "Betula nana"))
 (int_plot_EmpNig <- interaction_plots_species(species = "Empetrum nigrum"))
 (int_plot_RhoGro <- interaction_plots_species(species = "Rhododendron groenlandicum"))
 (int_plot_SalGla <- interaction_plots_species(species = "Salix glauca"))
 (int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
 
+# extract legend
+legend_int_plot <- get_legend(int_plot_BetNan + theme(legend.box.margin = margin(t = 70, l = 70)))
+
 # 3x2 grid (vertical layout)
-(nuuk_interaction_plot_grid_ver <- plot_grid(int_plot_BetNan, 
-                                             int_plot_EmpNig, 
-                                             int_plot_RhoGro, 
-                                             int_plot_SalGla, 
-                                             int_plot_VacUli,
-                                             labels = c("a)", "b)", "c)", "d)", "e)"),
+(nuuk_interaction_plot_grid_ver <- plot_grid(int_plot_AllShr + theme(legend.position = "none", 
+                                                                         axis.title = element_blank()),
+                                                 int_plot_AllEve + theme(legend.position = "none", 
+                                                                         axis.title = element_blank()),
+                                                 int_plot_AllDec + theme(legend.position = "none", 
+                                                                         axis.title = element_blank()),
+                                                 int_plot_BetNan + theme(legend.position = "none", 
+                                                                         axis.title.x = element_blank(),
+                                                                         axis.title.y = element_text(margin = margin(r = 15))), 
+                                                 int_plot_EmpNig + theme(legend.position = "none", 
+                                                                         axis.title = element_blank()), 
+                                                 int_plot_RhoGro + theme(legend.position = "none", 
+                                                                         axis.title = element_blank()), 
+                                                 int_plot_SalGla + theme(legend.position = "none",
+                                                                         axis.title = element_blank()),
+                                                 int_plot_VacUli + theme(legend.position = "none",
+                                                                         axis.title.y = element_blank()),
+                                                 legend_int_plot,
+                                                 labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+                                                 label_size = 18,
+                                                 label_fontface = "plain",
+                                                 label_x = c(.1, .1, .1, .1, .1, .1, .1, .1),
+                                                 ncol = 3,
+                                                 axis = "lt",
+                                                 align = "hv"))
+
+# save plot
+save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
+          nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
+
+
+# ________________________________________ ----
+
+# 7) Effect size plots ----
+
+# for cases with only 'significant' effects
+model_plot_sig_function <- function(species, plot_width) {
+  
+  if(species == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
+  if(species == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
+  if(species == "deciduous shrubs") model_coeff_output <- coeff.shrub_gradient.AllDec2
+  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
+  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.EmpNig2
+  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.RhoGro2
+  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
+  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
+  
+  target_vars <- c("b.tempjja.x", "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
+                   "b.precipjja.x", "b.precipjja.x2",
+                   "b.sri",
+                   "b.tri",
+                   "b.tcws", 
+                   "b.shrub_cov",
+                   "b.gramin_cov",
+                   "b.compet")
+  solutions <- model_coeff_output
+  names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
+  solutions <- solutions %>% 
+    filter(variable %in% target_vars)
+  # solutions$variable <- factor(solutions$variable,
+  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
+  #                                          "b.tempcont.x", "b.tempcont.x2",
+  #                                          "b.precipjja.x", "b.precipjja.x2",
+  #                                          "b.sri",
+  #                                          "b.tri",
+  #                                          "b.twi",
+  #                                          "b.compet"))
+  min_value <- floor(min(solutions$l95))
+  max_value <- ceiling(max(solutions$u95))
+  solutions$sig <- "ns"
+  solutions$sig[solutions$l95 < 0 & solutions$u95 < 0] <- "sig"
+  solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
+  label_colour <- rep("black", nrow(solutions))
+  label_colour[solutions$sig == "sig"] <- theme_darkgreen
+  label_face <- rep("plain", nrow(solutions))
+  label_face[solutions$sig == "sig"] <- "bold"
+  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
+  title_string <- species
+  title_colour <- "grey10"
+  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
+  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
+  # if(response == "T1_mean") response <- "Soil"
+  # if(response == "T2_mean") response <- "Ground"
+  
+  
+  model_plot_sig <- ggplot(solutions, aes(x = variable, y = post.mean,
+                                          ymin = l95, ymax = u95,
+                                          colour = sig)) +
+    geom_point() +
+    geom_errorbar(width = .8) +
+    theme_cowplot(18) +
+    ylab("Effect Size (scaled)") +
+    xlab("") +
+    ggtitle(paste0(title_string)) +
+    scale_colour_manual(values = c("black", theme_darkgreen)) +
+    scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
+    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
+    #         "b.tempcont.x", "b.tempcont.x2",
+    #         "b.precipjja.x", "b.precipjja.x2",
+    #         "b.sri",
+    #         "b.tri",
+    #         "b.twi",
+    #         "b.compet"),
+    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
+    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
+    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+    #                             "solar radiation",
+  #                             "terrain ruggedness",
+  #                             "moisture availability",
+  #                             "competition")) +
+  annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
+          plot.title = element_text(colour = title_colour, face = "italic"),
+          legend.position = "none")
+  return(model_plot_sig)
+}
+
+# for cases with marginal 'significance'
+model_plot_marg_function <- function(species, plot_width) {
+  
+  if(species == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
+  if(species == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
+  if(species == "deciduous shrubs") model_coeff_output <- coeff.shrub_gradient.AllDec2
+  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
+  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.EmpNig2
+  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.RhoGro2
+  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
+  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
+  
+  target_vars <- c("b.tempjja.x", "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
+                   "b.precipjja.x", "b.precipjja.x2",
+                   "b.sri",
+                   "b.tri",
+                   "b.tcws", 
+                   "b.shrub_cov",
+                   "b.gramin_cov",
+                   "b.compet")
+  solutions <- model_coeff_output
+  names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
+  solutions <- solutions %>% 
+    filter(variable %in% target_vars)
+  # solutions$variable <- factor(solutions$variable,
+  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
+  #                                          "b.tempcont.x", "b.tempcont.x2",
+  #                                          "b.precipjja.x", "b.precipjja.x2",
+  #                                          "b.sri",
+  #                                          "b.tri",
+  #                                          "b.twi",
+  #                                          "b.compet"))
+  min_value <- floor(min(solutions$l95))
+  max_value <- ceiling(max(solutions$u95))
+  solutions$sig <- "ns"
+  solutions$sig[solutions$l95 < 0 & solutions$u95 < 0] <- "sig"
+  solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
+  solutions$sig[solutions$l90 < 0 & solutions$u90 < 0 & solutions$l95 < 0 & solutions$u95 > 0] <- "marg"
+  solutions$sig[solutions$l90 > 0 & solutions$u90 > 0 & solutions$l95 < 0 & solutions$u95 > 0] <- "marg"
+  label_colour <- rep("black", nrow(solutions))
+  label_colour[solutions$sig == "sig"] <- theme_darkgreen
+  label_colour[solutions$sig == "marg"] <- theme_purple
+  label_face <- rep("plain", nrow(solutions))
+  label_face[solutions$sig == "sig"] <- "bold"
+  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
+  title_string <- species
+  title_colour <- "grey10"
+  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
+  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
+  # if(response == "T1_mean") response <- "Soil"
+  # if(response == "T2_mean") response <- "Ground"
+  
+  
+  model_plot_marg <- ggplot(solutions, aes(x = variable, y = post.mean,
+                                           ymin = l95, ymax = u95,
+                                           colour = sig)) +
+    geom_point() +
+    geom_errorbar(width = .8) +
+    theme_cowplot(18) +
+    ylab("Effect Size (scaled)") +
+    xlab("") +
+    ggtitle(paste0(title_string)) + 
+    scale_colour_manual(values = c(theme_purple, "black", theme_darkgreen)) +
+    scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
+    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
+    #         "b.tempcont.x", "b.tempcont.x2",
+    #         "b.precipjja.x", "b.precipjja.x2",
+    #         "b.sri",
+    #         "b.tri",
+    #         "b.twi",
+    #         "b.compet"),
+    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
+    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
+    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+    #                             "solar radiation",
+  #                             "terrain ruggedness",
+  #                             "moisture availability",
+  #                             "competition")) +
+  annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
+          plot.title = element_text(colour = title_colour, face = "italic"),
+          legend.position = "none")
+  return(model_plot_marg)
+}
+
+# >> load data ----
+
+# species
+# load model output data
+model_outputs_focal_species <- file.path("data", "model_outputs", "species", list.files(path = file.path("data", "model_outputs", "species"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_focal_species){
+  load(model_output)
+}
+
+# groups
+# load model output data
+model_outputs_groups <- file.path("data", "model_outputs", "groups", list.files(path = file.path("data", "model_outputs", "groups"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_groups){
+  load(model_output)
+}
+
+
+# >> plot graphs ----
+(es_plot_AllShr <- model_plot_sig_function(species = "all shrubs", plot_width = 7.5))
+(es_plot_AllEve <- model_plot_sig_function(species = "evergreen shrubs", plot_width = 8.5))
+(es_plot_AllDec <- model_plot_marg_function(species = "deciduous shrubs", plot_width = 8.5))
+(es_plot_BetNan <- model_plot_marg_function(species = "Betula nana", plot_width = 9.5))
+(es_plot_EmpNig <- model_plot_sig_function(species = "Empetrum nigrum", plot_width = 9.5))
+(es_plot_RhoGro <- model_plot_marg_function(species = "Rhododendron groenlandicum", plot_width = 10.5))
+(es_plot_SalGla <- model_plot_marg_function(species = "Salix glauca", plot_width = 9.5))
+(es_plot_VacUli <- model_plot_marg_function(species = "Vaccinium uliginosum", plot_width = 9.5))
+
+# extract legend
+# legend_int_plot <- get_legend(int_plot_BetNan + theme(legend.box.margin = margin(t = 70, l = 70)))
+
+# 3x2 grid (vertical layout)
+(nuuk_effect_size_plot_grid_ver <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
+                                                                     axis.title.x = element_blank()),
+                                             es_plot_AllEve + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()),
+                                             es_plot_AllDec + theme(legend.position = "none", 
+                                                                     axis.title.x = element_blank()),
+                                             es_plot_BetNan + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             es_plot_EmpNig + theme(legend.position = "none", 
+                                                                     axis.title.x = element_blank()), 
+                                             es_plot_RhoGro + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             es_plot_SalGla + theme(legend.position = "none",
+                                                                     axis.title.x = element_blank()),
+                                             es_plot_VacUli + theme(legend.position = "none",
+                                                                     axis.title = element_blank()),
+                                             labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
                                              label_size = 20,
                                              label_fontface = "plain",
-                                             hjust = -2,
+                                             label_x = c(.05, .05, .05, .05, .05, .05, .05, .05),
+                                             ncol = 2,
+                                             axis = "lt",
+                                             align = "hv"))
+
+# save plot
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert.pdf"),
+          nuuk_effect_size_plot_grid_ver, base_height = 20, base_aspect_ratio = .6)
+
+
+# ________________________________________ ----
+
+
+# The Farm ----
+
+# 3x2 grid (vertical layout) ----
+(nuuk_interaction_plot_grid_ver <- plot_grid(int_plot_AllShr, 
+                                             int_plot_AllEve, 
+                                             int_plot_AllDec, 
+                                             labels = c("a)", "b)", "c)"),
+                                             label_size = 20,
+                                             label_fontface = "plain",
+                                             hjust = 0,
                                              ncol = 2))
 
 # save plot
-# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_betabinom_reduced_effect_size_panels_vert.eps"),
-#           nuuk_reduced_effectsize_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_groups_panels_vert.pdf"),
+#           nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 0.8)
 
 # ________________________----
 
