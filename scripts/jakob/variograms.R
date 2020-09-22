@@ -10,6 +10,9 @@ library(ggplot2)
 library(sf)
 library(dplyr)
 
+# set global raster options with process bar
+rasterOptions(progress = "text")
+
 # 
 # JJA (June, July, August) 
 # insolation ('insol.asc')
@@ -48,22 +51,29 @@ raster_list <- lapply(
   }
 )
 
-# add TRI and TCW to raster to list
-raster_list <- append(
-  raster_list,
-  setNames(
-    raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
-    "tri"))
+# # add TRI to raster to list
+# raster_list <- append(
+#   raster_list,
+  # setNames(
+  #   raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
+  #   "tri"))
+# add tcw raster to list
 raster_list <- append(
   raster_list,
   setNames(raster("O:/Nat_Ecoinformatics/C_Write/_Proj/Greenland_NormandVegDyn_au150176/NuukFjord/spatial_data_for_Nathalie_by_Jakob/nathalie_90m_grid_polar_stereo/landsatTCwet_nuuk.tif"),
            "tcws"))
+
+# # Crop TRI raster to same extent as other rasters
+# raster_list[[8]] <- crop(raster_list[[8]], raster_list[[1]])
 
 ### Define functions to calculate and fit variograms ----
 
 # Define function to calculuate a variogram 
 sample_variogram <- function(predictor_raster, thin = 10, bin_width = 90) { 
 
+  # Check whether the TRI raster is plotted if yes increase the thinning massively
+  if(names(predictor_raster) == "tri") thin <- 2000
+  
   # Convert raster to spdf
   predictor_spdf <- as(predictor_raster, "SpatialPixelsDataFrame" ) 
   
@@ -92,7 +102,7 @@ sample_variogram <- function(predictor_raster, thin = 10, bin_width = 90) {
 }
 
 # Prep parallel envrionment
-cl <- makeCluster(8)
+cl <- makeCluster(9)
 clusterEvalQ(cl, {
   library(gstat)
   library(raster)
@@ -106,14 +116,15 @@ stopCluster(cl)
 # Look up table for pretty names
 lookup_table <- data.frame(
   raster_names = unlist(lapply(raster_list, names)),
-  pretty_names = c("Insolation",
-                   "Mean Precipitation June-July-August (mm)",
-                   "Mean Precipitation March-April-May (mm)",
-                   "Mean Temperature June-July-August (°C)",
-                   "Annual Maximum Temperature (°C)",
-                   "Annual Minimum Temperature (°C)",
-                   "Temperature Continentality",
-                   "Landsat Tasseled Cap Wetness (90 m)"),
+  pretty_names =c("Insolation",
+                  "Cumulative Summer Precipitation (mm)",
+                  "Mean Precipitation March-April-May (mm)",
+                  "Mean Summer Temperature (°C)",
+                  "Annual Maximum Temperature (°C)",
+                  "Annual Minimum Temperature (°C)",
+                  "Annual Temperature Variability",
+                  # "Terrain Ruggedness Index (TRI)",
+                  "Tasseled-cap Wetness Index (TCWS)"),
   stringsAsFactors = F)
 
 # Plot Variograms
@@ -134,6 +145,38 @@ plot_variogram <- function(vario){
             base_height = 5)
 }
 lapply(vario_list, plot_variogram)
+
+## Variogram for TRI
+# This is needed seperately as the grain size for
+# the raster is different to the others
+
+# Load TRI raster
+predictor_raster <-   setNames(
+  raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
+  "tri")
+# Crop to common extent
+predictor_raster <- crop(predictor_raster, raster_list[[1]])
+
+# Sample raster that
+predictor_spdf <- sampleRandom(predictor_raster,
+                               1400000,
+                               sp = T)
+
+
+# Sample the variogram (this can take ages)
+vario <- variogram(tri ~  1, 
+                   predictor_spdf,
+                   width = 90,
+                   verbose = T) 
+
+# Change id colum
+vario$id <- names(predictor_raster)
+
+# Plot variogram using the variogram plotting function.
+plot_variogram(vario)
+
+# Save variogram 
+save(vario, file = "scripts/jakob/tri_vario.Rda")
 
 ## Variograms for SRI (a non-raster variable)
 nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
