@@ -127,11 +127,23 @@ lookup_table <- data.frame(
                   "Tasseled-cap Wetness Index (TCWS)"),
   stringsAsFactors = F)
 
+# Get distances between plots
+distances <- read.csv("data/nuuk_env_cover_plots.csv",
+                       stringsAsFactors = F) %>%
+  distinct(plot, lat, long, sri) %>%
+  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+  st_transform(crs = crs(projection_temp)) %>%
+  st_distance(nuuk_plots) %>% as.vector() %>% unique()
+ggplot(mapping = aes(xintercept = distances)) +geom_vline()
 # Plot Variograms
 plot_variogram <- function(vario){
   vario_plot <- ggplot(
     vario, 
     aes(x = dist / 1000, y = gamma)) + 
+    geom_vline(aes(xintercept = distances),
+               data = data.frame(distances = distances),
+               colour = "lightgrey",
+               alpha = 0.5) + 
     geom_point() +
     labs(x = "Distance (km)", 
          y = "Semivariance",
