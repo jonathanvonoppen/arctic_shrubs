@@ -215,14 +215,14 @@ save_plot("figures/variograms/sri.png",
 # Get distances between plots
 distances <- read.csv("data/nuuk_env_cover_plots.csv",
                       stringsAsFactors = F) %>%
+  distinct(plot, lat, long) %>%
   st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
   st_transform(crs = crs(projection_temp)) %>%
-  st_distance()
-
+  st_distance(.,.) 
 # remove duplicate values
-distances[upper.tri(distances)] <- NA
+distances[lower.tri(distances)] <- NA
 # convert to vector
-distances <- distances %>% na.omit() %>% as.vector
+distances <- distances %>% as.vector %>% na.omit()
 
 # Plot distance histogram
 plot_distance_histogram <- ggplot(mapping = aes(x = distances / 1000)) +
@@ -231,7 +231,7 @@ plot_distance_histogram <- ggplot(mapping = aes(x = distances / 1000)) +
        y = "Count") +
   geom_vline(xintercept = 40) +
   scale_x_continuous(limits = c(0,100), breaks = seq(0,100,10)) +
-  annotate("text", x = 42, y = 500, hjust = 0, label = "max. distance in variogram analysis") +
+  annotate("text", x = 42, y = 4000, hjust = 0, label = "max. distance in variogram analysis") +
   theme_cowplot(15)
 save_plot("figures/variograms/plot_pair_dist_hist.png",
           plot_distance_histogram,
