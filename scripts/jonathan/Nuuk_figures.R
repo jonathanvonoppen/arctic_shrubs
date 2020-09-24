@@ -1268,6 +1268,36 @@ traits_scores <- read.csv(file.path("data", "Tundra_species_PCA_scores.csv"),
                           sep = ",",
                           header = TRUE)
 
+# calculate average graminoid score
+traits_scores_gram <- traits_scores %>% 
+  
+  # filter for graminoid genera present in Greenland according to Bøcher et al. 1968
+  filter(str_starts(species, paste(c("Agrostis",
+                                     "Alopecurus",
+                                     "Anthoxanthum",
+                                     "Arctagrostis",
+                                     "Bromus",
+                                     "Calamagrostis",
+                                     "Colpodium",
+                                     "Carex",
+                                     "Deschampsia",
+                                     "Eriophorum",
+                                     "Festuca",
+                                     "Hierochloe",
+                                     "Juncus",
+                                     "Kobresia",
+                                     "Luzula",
+                                     "Nardus",
+                                     "Phleum",
+                                     "Poa"), collapse = "|"))) %>% 
+  summarise_if(is.numeric, mean) %>% 
+  
+  # remove meaningless "X" mean, add species "graminoid"
+  mutate(X = NA,
+         species = "graminoids mean")
+
+
+# filter for species and combine with graminoids
 traits_scores_nuuk <- traits_scores %>% 
   
   # filter for target species
@@ -1279,25 +1309,36 @@ traits_scores_nuuk <- traits_scores %>%
                         "Rhododendron tomentosum", "Ledum palustre", # formerly L. palustre
                         "Salix arctophila", 
                         "Salix glauca", 
-                        "Vaccinium uliginosum")) %>%
+                        "Vaccinium uliginosum")) %>% 
   
-  # rename Ledum palustre
+  # rename Ledum palustre and Salix glauca to sp.
   mutate(species = fct_recode(species,
                               "Rhododendron sp." = "Ledum palustre",
                               "Salix sp." = "Salix glauca")) %>% droplevels() %>% 
   
+  # add averaged graminoid species
+  bind_rows(traits_scores_gram) %>%
+  
   # add functional group column
   mutate(fgroup = ifelse(species %in% c("Betula nana", "Salix sp.", "Vaccinium uliginosum"), 
                          "deciduous", 
-                         "evergreen")) # %>% 
-  
-  # # add column to adjust vertical position of labels
-  # mutate(position = c(.1, .5, .4, .2, .7, .1, .8))
+                         ifelse(species %in% c("Cassiope tetragona", 
+                                               "Empetrum nigrum", 
+                                               "Phyllodoce caerulea", 
+                                               "Rhododendron sp."),
+                                "evergreen",
+                                ifelse(species == "graminoids mean",
+                                       "graminoid",
+                                       "other"))),
+         fgroup = factor(fgroup),
+         species = factor(species)) 
+
 
 # create labels for x axis
 library(grid)
 text_right <- textGrob("acquisitive", gp = gpar(fontsize = 13, fontface = "bold"))
 text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"))
+
 
 # plot PC1 scores
 (traits_scores_plot <- ggplot(data = traits_scores_nuuk,
@@ -1318,18 +1359,18 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
             hjust = 0,
             vjust = ifelse(traits_scores_nuuk$species == "Rhododendron sp.", 0.8, 0.375),
             colour = "grey30",
-            fontface = "italic") +
+            fontface = ifelse(traits_scores_nuuk$species == "graminoids mean", "plain", "italic")) +
     
   # add traits labels
   annotation_custom(text_right, 
-                    xmin = -0.8, xmax = -0.8, ymin = -0.4, ymax = -0.4) + 
+                    xmin = -0.4, xmax = -0.4, ymin = -0.4, ymax = -0.4) + 
   annotation_custom(text_left,
                     xmin = -3.55, xmax = -3.55, ymin = -0.4, ymax = -0.4) +
     
   # set appearance
   theme_classic() +
     
-  coord_cartesian(xlim = c(-3.7, -0.7), 
+  coord_cartesian(xlim = c(-3.7, -0.3), 
                   ylim = c(0, 1.2), 
                   clip = "off") +
     
@@ -1341,12 +1382,14 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
         plot.margin = unit(c(0, 0.5, 1, 0.5), "cm"))
 
 )
-  
+
+
 # save plot
 save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores.pdf"),
           traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
 
 
+# ________________________________________ ----
 # ________________________________________ ----
 
 
