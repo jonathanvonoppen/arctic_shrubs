@@ -34,6 +34,81 @@ theme_purple <- "#8757B3"
 
 # 1) Mini-review of literature on drivers of shrub vegetation ----
 
+# >> load data
+lit_raw <- read.csv(file.path("data", "shrub_drivers_lit_review_records.csv"),
+                sep = ",",
+                header = TRUE)
+
+# clean data
+lit <- lit_raw %>% 
+  
+  rename_all(tolower) %>% 
+  
+  # drop unnecessary columns
+  select(-c(starts_with("book"),
+            starts_with("conference"),
+            starts_with("funding"),
+            starts_with("journal"),
+            starts_with("publisher"),
+            contains("keywords"),
+            contains("addresses"),
+            contains("cited"),
+            contains("count"),
+            contains("abbreviation"),
+            contains("number"),
+            contains(".id"),
+            contains("access"),
+            ends_with("status"),
+            ends_with("page"),
+            "author.full.names",
+            "group.authors",
+            "language",
+            "document.type",
+            "orcids",
+            "issn",
+            "eissn",
+            "isbn",
+            "publication.date",
+            "volume",
+            "issue",
+            "supplement",
+            "special.issue",
+            "meeting.abstract",
+            "wos.categories",
+            "research.areas")) %>% 
+  
+  # replace dots and spaces in variable names with underscores
+  janitor::clean_names() %>% 
+  
+  # calculate and add number of drivers
+  left_join(lit_raw %>% 
+              select(study_id, drivers) %>% 
+              filter(!(drivers == "")) %>%
+              mutate(n_drivers = lengths(str_split(drivers, ";"))),
+            by = c("study_id", "drivers")) %>% 
+  
+  # filter for species-level, empirical studies
+  filter(study_level == "species") %>% 
+  filter(str_detect(study_type, "empirical")) %>% 
+  
+  # reorder columns
+  select(study_id,
+         source,
+         publication_type,
+         authors,
+         publication_year,
+         source_title,
+         article_title,
+         abstract,
+         doi,
+         date_of_export,
+         study_type:drivers,
+         n_drivers,
+         driver_regime:comment)
+  
+
+
+
 # >> import data ####
 lit <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/Data/MiniReview/200716_tundra_shrub_drivers.csv", header = T)
 
