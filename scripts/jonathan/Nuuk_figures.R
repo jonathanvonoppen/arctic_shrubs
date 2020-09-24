@@ -756,7 +756,7 @@ prediction_plots_groups(fgroup = "deciduous shrub")
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
-# 6) Species: interaction plots temp X moisture ----
+# 6) Interaction plots temp X moisture ----
 
 interaction_plots_species <- function(species) {
   
@@ -1257,6 +1257,94 @@ for (model_output in model_outputs_groups){
 # save plot
 save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert.pdf"),
           nuuk_effect_size_plot_grid_ver, base_height = 20, base_aspect_ratio = .6)
+
+
+# ________________________________________ ----
+
+# 8) Tundra species traits PCA scores ----
+# -> Thomas et al. 2019 GEB, https://doi.org/10.1111/geb.12783
+
+traits_scores <- read.csv(file.path("data", "Tundra_species_PCA_scores.csv"),
+                          sep = ",",
+                          header = TRUE)
+
+traits_scores_nuuk <- traits_scores %>% 
+  
+  # filter for target species
+  filter(species %in% c("Betula nana", 
+                        "Cassiope tetragona", 
+                        "Empetrum nigrum", 
+                        "Phyllodoce caerulea", 
+                        "Rhododendron groenlandicum", # formerly Ledum palustre subsp. groenlandicum
+                        "Rhododendron tomentosum", "Ledum palustre", # formerly L. palustre
+                        "Salix arctophila", 
+                        "Salix glauca", 
+                        "Vaccinium uliginosum")) %>%
+  
+  # rename Ledum palustre
+  mutate(species = fct_recode(species,
+                              "Rhododendron sp." = "Ledum palustre",
+                              "Salix sp." = "Salix glauca")) %>% droplevels() %>% 
+  
+  # add functional group column
+  mutate(fgroup = ifelse(species %in% c("Betula nana", "Salix sp.", "Vaccinium uliginosum"), 
+                         "deciduous", 
+                         "evergreen")) # %>% 
+  
+  # # add column to adjust vertical position of labels
+  # mutate(position = c(.1, .5, .4, .2, .7, .1, .8))
+
+# create labels for x axis
+library(grid)
+text_right <- textGrob("acquisitive", gp = gpar(fontsize = 13, fontface = "bold"))
+text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"))
+
+# plot PC1 scores
+(traits_scores_plot <- ggplot(data = traits_scores_nuuk,
+                              aes(x = PC1,
+                                  y = 0,
+                                  colour = fgroup)) +
+  # plot scores
+  geom_point(aes(colour = PC1),
+             shape = 18,
+             size = 4) +
+    
+  scale_color_gradientn(colours = c(theme_red, theme_darkblue)) +
+    
+  # add species names
+  geom_text(aes(label = species,
+                angle = 90,
+                y = .1),
+            hjust = 0,
+            vjust = ifelse(traits_scores_nuuk$species == "Rhododendron sp.", 0.8, 0.375),
+            colour = "grey30",
+            fontface = "italic") +
+    
+  # add traits labels
+  annotation_custom(text_right, 
+                    xmin = -0.8, xmax = -0.8, ymin = -0.4, ymax = -0.4) + 
+  annotation_custom(text_left,
+                    xmin = -3.55, xmax = -3.55, ymin = -0.4, ymax = -0.4) +
+    
+  # set appearance
+  theme_classic() +
+    
+  coord_cartesian(xlim = c(-3.7, -0.7), 
+                  ylim = c(0, 1.2), 
+                  clip = "off") +
+    
+  theme(axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none",
+        plot.margin = unit(c(0, 0.5, 1, 0.5), "cm"))
+
+)
+  
+# save plot
+save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores.pdf"),
+          traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
 
 
 # ________________________________________ ----
