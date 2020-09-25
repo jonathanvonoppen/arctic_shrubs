@@ -356,9 +356,9 @@ prediction_plots_species <- function(species) {
   if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
   
   # define initial predictions df
-  n_params <- model_coeff_output %>% filter(str_starts(param, "b\\.")) %>% nrow()
+  # n_params <- model_coeff_output %>% filter(str_starts(param, "b\\.")) %>% nrow()
   phats_long <- as.data.frame(matrix(data = NA, 
-                                     nrow = n_params + 100 * length(predictor_phats), 
+                                     nrow = 100 * length(predictor_phats), 
                                      ncol = length(model_coeff_output) + 2))
   names(phats_long)[1:length(model_coeff_output)] <- names(model_coeff_output)
   
@@ -369,11 +369,11 @@ prediction_plots_species <- function(species) {
     predictor_min <- min(species_df[, paste0(predictor, "C")])
     predictor_max <- max(species_df[, paste0(predictor, "C")])
     
-    # paste in parameter estimates of model output
-    phats_long[1 : n_params, 1 : length(model_coeff_output)] <- model_coeff_output[1 : n_params, ]
+    # # paste in parameter estimates of model output
+    # phats_long[1 : n_params, 1 : length(model_coeff_output)] <- model_coeff_output[1 : n_params, ]
     
     # assemble predicted and predictor values, for 100 rows (one predictor) at a time
-    phats_long[(n_params + 100 * match(phat_predictor, predictor_phats) -99) : (n_params + 100 * match(phat_predictor, predictor_phats)),] <- model_coeff_output %>% 
+    phats_long[(100 * match(phat_predictor, predictor_phats) -99) : (100 * match(phat_predictor, predictor_phats)),] <- model_coeff_output %>% 
       
       # filter for predicted values
       filter(param %in% c(paste0(phat_predictor, "[", seq(from = 1, to = 100), "]"))) %>% 
@@ -386,7 +386,6 @@ prediction_plots_species <- function(species) {
       # add column for back-centered and back-scaled values
       mutate(pred_values = xhats * attr(scale(species_df[, predictor]), 'scaled:scale') + attr(scale(species_df[, predictor]), 'scaled:center'))
     
-
   }
   
   
@@ -398,20 +397,30 @@ prediction_plots_species <- function(species) {
     mutate(pred_id = factor(str_remove(str_remove(param, "phat_"), "\\[\\d+\\]"),
                             levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "compet", "shrub_cover", "graminoid_cover"))) %>% 
     
-    # Jakob: come in here
     # add significance level column
-    mutate(sig = factor(
-      ifelse(
-        # return row of model output with parameter estimates
-        model_coeff_output %>% 
-          filter(param == paste0("b.", pred_id, ".x")|param == paste0("b.", pred_id, ".x2")) %>% 
-          # return only last row (= linear term if quadratic excluded, otherwise quadratic term)
-          top_n(-1) %>% 
-          pull(l95) < 0 && 
-          ,
-        )
-      
-    ))
+    mutate(sig = "ns") 
+    
+  param_lookup <- data.frame(coeffs = c("b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", "b.sri", "b.tri", "b.tcws", "b.compet", "b.shrub_cov", "b.gramin_cov"),
+                             phats = c("tempjja", "tempjja", "tempcont", "tempcont", "precipjja", "precipjja", "sri", "tri", "tcws", "compet", "shrub_cover", "graminoid_cover"))
+  
+  lapply(param_lookup$coeffs[param_lookup$coeffs %in% as.character(model_coeff_output$param)], function(coefficient){
+    model_coeff_output_sub <- model_coeff_output %>% filter(as.character(param) == coefficient)
+    
+    if ((model_coeff_output_sub$l95 < 0 & model_coeff_output_sub$u95 < 0) | 
+        (model_coeff_output_sub$l95 > 0 & model_coeff_output_sub$u95 > 0)) {
+      sig <- "sig"
+    } else if ((model_coeff_output_sub$l90 < 0 & model_coeff_output_sub$u90 < 0) | 
+               (model_coeff_output_sub$l90 > 0 & model_coeff_output_sub$u90 > 0)) {
+      sig <- "marg"
+    } else {
+      sig <- "ns"
+    }
+    
+    phats_long$sig[as.character(phats_long$pred_id) == param_lookup$phats[param_lookup$coeffs == coefficient]] <<- sig
+    
+  })
+  
+  phats_long$sig <- ordered(phats_long$sig, levels = c("ns", "sig", "marg"))
   
   # >> facet solution (simple) ----
   
@@ -431,16 +440,7 @@ prediction_plots_species <- function(species) {
     # reduce to plotgroup level
     group_by(site_alt_plotgroup_id, pred_id) %>% 
     summarise(pred_value = mean(pred_value), 
-              cover = mean(cover)) %>% ungroup() %>% 
-    # rename predictors
-    mutate(pred_id = fct_recode(pred_id,
-                                "summer temperature [°C]" = "tempjja",
-                                "annual temperature variability [°C]" = "tempcont",
-                                "cumulative summer precipitation [mm]" = "precipjja"),
-           pred_id = fct_relevel(pred_id,
-                                 "summer temperature [°C]",
-                                 "annual temperature variability [°C]",
-                                 "cumulative summer precipitation [mm]"))
+              cover = mean(cover)) %>% ungroup() 
   
   # ... and on plot level for topo & compet vars
   point_data_plot <- species_df %>% 
@@ -454,49 +454,66 @@ prediction_plots_species <- function(species) {
                  names_to = "pred_id",
                  values_to = "pred_value") %>%
     # filter for climate vars
-    filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) %>% 
-    # rename predictors
-    mutate(pred_id = fct_recode(pred_id,
-                                "Solar Radiation Index" = "sri",
-                                "Terrain Ruggedness Index" = "tri",
-                                "Tasseled-cap Wetness Index" = "tcws",
-                                "overgrowing competition" = "compet",
-                                "cover of other shrub species" = "shrub_cover",
-                                "cover of graminoids" = "graminoid_cover"),
-           pred_id = fct_relevel(pred_id,
-                                 "Solar Radiation Index",
-                                 "Terrain Ruggedness Index",
-                                 "Tasseled-cap Wetness Index",
-                                 "overgrowing competition",
-                                 "cover of other shrub species",
-                                 "cover of graminoids"))
-  
-  # rename factor levels in predictions dataset
-  phats_long <- phats_long %>% 
-    
-    # rename predictors
-    mutate(pred_id = fct_recode(pred_id,
-                                "summer temperature [°C]" = "tempjja",
-                                "annual temperature variability [°C]" = "tempcont",
-                                "cumulative summer precipitation [mm]" = "precipjja",
-                                "Solar Radiation Index" = "sri",
-                                "Terrain Ruggedness Index" = "tri",
-                                "Tasseled-cap Wetness Index" = "tcws",
-                                "overgrowing competition" = "compet",
-                                "cover of other shrub species" = "shrub_cover",
-                                "cover of graminoids" = "graminoid_cover"),
-           pred_id = fct_relevel(pred_id,
-                                 "summer temperature [°C]",
-                                 "annual temperature variability [°C]",
-                                 "cumulative summer precipitation [mm]",
-                                 "Solar Radiation Index",
-                                 "Terrain Ruggedness Index",
-                                 "Tasseled-cap Wetness Index",
-                                 "overgrowing competition",
-                                 "cover of other shrub species",
-                                 "cover of graminoids"))
+    filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) 
+
   
   # compile plot
+  plot_predictor <- function(predictor_id) {
+  
+    predictor_id <- as.character(predictor_id)
+    
+    phats_long <- phats_long %>% filter(as.character(pred_id) == predictor_id) %>% 
+      
+      # rename predictors
+      mutate(pred_id = fct_recode(pred_id,
+                                  "summer temperature [°C]" = "tempjja",
+                                  "annual temperature variability [°C]" = "tempcont",
+                                  "cumulative summer precipitation [mm]" = "precipjja",
+                                  "Solar Radiation Index" = "sri",
+                                  "Terrain Ruggedness Index" = "tri",
+                                  "Tasseled-cap Wetness Index" = "tcws",
+                                  "overgrowing competition" = "compet",
+                                  "cover of other shrub species" = "shrub_cover",
+                                  "cover of graminoids" = "graminoid_cover"),
+             pred_id = fct_relevel(pred_id,
+                                   "summer temperature [°C]",
+                                   "annual temperature variability [°C]",
+                                   "cumulative summer precipitation [mm]",
+                                   "Solar Radiation Index",
+                                   "Terrain Ruggedness Index",
+                                   "Tasseled-cap Wetness Index",
+                                   "overgrowing competition",
+                                   "cover of other shrub species",
+                                   "cover of graminoids"))
+    
+    point_data_pg <- point_data_pg %>% filter(as.character(pred_id) == predictor_id) %>% 
+      # rename predictors
+      mutate(pred_id = fct_recode(pred_id,
+                                  "summer temperature [°C]" = "tempjja",
+                                  "annual temperature variability [°C]" = "tempcont",
+                                  "cumulative summer precipitation [mm]" = "precipjja"),
+             pred_id = fct_relevel(pred_id,
+                                   "summer temperature [°C]",
+                                   "annual temperature variability [°C]",
+                                   "cumulative summer precipitation [mm]"))
+    
+    point_data_plot <- point_data_plot %>% filter(as.character(pred_id) == predictor_id) %>% 
+      # rename predictors
+      mutate(pred_id = fct_recode(pred_id,
+                                  "Solar Radiation Index" = "sri",
+                                  "Terrain Ruggedness Index" = "tri",
+                                  "Tasseled-cap Wetness Index" = "tcws",
+                                  "overgrowing competition" = "compet",
+                                  "cover of other shrub species" = "shrub_cover",
+                                  "cover of graminoids" = "graminoid_cover"),
+             pred_id = fct_relevel(pred_id,
+                                   "Solar Radiation Index",
+                                   "Terrain Ruggedness Index",
+                                   "Tasseled-cap Wetness Index",
+                                   "overgrowing competition",
+                                   "cover of other shrub species",
+                                   "cover of graminoids"))
+    
   pred_plot <- ggplot(data = phats_long,
                       aes(group = pred_id)) +
     
@@ -518,8 +535,8 @@ prediction_plots_species <- function(species) {
     
     # draw line of predicted values
     geom_line(aes(x = pred_value,
-                  y = plogis(mean)), 
-              colour = "orange",
+                  y = plogis(mean)),
+              colour =  c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))],
               alpha = 1,
               size = 2) + 
     
@@ -527,25 +544,35 @@ prediction_plots_species <- function(species) {
     geom_ribbon(aes(x = pred_value,
                     ymin = plogis(l95), 
                     ymax = plogis(u95)),
-                fill = "orange",
+                fill =  c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))],
                 alpha = 0.2) +
     
     # make facets for predictors
-    facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
+    # facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
     
     scale_y_continuous("relative no. pin hits per plot group",
                        limits = c(0, max(species_df %>% 
                                            pull(cover)))) +
     
-    labs(x = "predictor value") +
-    ggtitle(paste0(species, " cover ~ predictors")) +
+    # scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
+    # scale_fill_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
+    # 
+    labs(x = unique(phats_long$pred_id)) +
+    #ggtitle(paste0(species, " cover ~ predictors")) +
     theme_bw() +
-    theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          plot.title = element_text(hjust = 0.5),
-          strip.background = element_blank(),
-          strip.placement = "outside",
-          panel.spacing.y = unit(1.5, "lines"))
+    theme(legend.position = "none"
+          #axis.title.x = element_blank()
+          # plot.title = element_text(hjust = 0.5),
+          # strip.background = element_blank(),
+          # strip.placement = "outside",
+          # panel.spacing.y = unit(1.5, "lines")
+          )
+  }
+  
+  plot_list <- lapply(unique(param_lookup$phats[param_lookup$phats %in% as.character(phats_long$pred_id)]),
+                      plot_predictor)
+  
+  pred_plot <- plot_grid(plotlist = plot_list)
   
   return(pred_plot)
   
@@ -1109,7 +1136,7 @@ save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf")
 # 7) Effect size plots ----
 
 # for cases with only 'significant' effects
-model_plot_sig_function <- function(species, plot_width) {
+effectsize_plot <- function(species, plot_width) {
   
   if(species == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
   if(species == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
@@ -1133,103 +1160,17 @@ model_plot_sig_function <- function(species, plot_width) {
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
   solutions <- solutions %>% 
     filter(variable %in% target_vars)
-  # Jakob: attempt to reorder factor levels below
-  # solutions$variable <- factor(solutions$variable,
-  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
-  #                                          "b.tempcont.x", "b.tempcont.x2",
-  #                                          "b.precipjja.x", "b.precipjja.x2",
-  #                                          "b.sri",
-  #                                          "b.tri",
-  #                                          "b.tcws",
-  #                                          "b.compet",
-  #                                          "b.shrub_cov",
-  #                                          "b.gramin_cov"))
-  min_value <- floor(min(solutions$l95))
-  max_value <- ceiling(max(solutions$u95))
-  solutions$sig <- "ns"
-  solutions$sig[solutions$l95 < 0 & solutions$u95 < 0] <- "sig"
-  solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
-  label_colour <- rep("black", nrow(solutions))
-  label_colour[solutions$sig == "sig"] <- theme_darkgreen
-  label_face <- rep("plain", nrow(solutions))
-  label_face[solutions$sig == "sig"] <- "bold"
-  title_string <- species
-  title_colour <- "grey10"
-  
-  
-  model_plot_sig <- ggplot(solutions, aes(x = variable, y = post.mean,
-                                          ymin = l95, ymax = u95,
-                                          colour = sig)) +
-    geom_point() +
-    geom_errorbar(width = .8) +
-    theme_cowplot(18) +
-    ylab("Effect Size (scaled)") +
-    xlab("") +
-    ggtitle(paste0(title_string)) +
-    scale_colour_manual(values = c("black", theme_darkgreen)) +
-    scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
-    # Jakob: attempt to reorder factor levels below
-    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
-    #         "b.tempcont.x", "b.tempcont.x2",
-    #         "b.precipjja.x", "b.precipjja.x2",
-    #         "b.sri",
-    #         "b.tri",
-    #         "b.tcws",
-    #         "b.compet",
-    #         "b.shrub_cov",
-    #         "b.gramin_cov"),
-    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
-  #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
-  #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
-  #                             "solar radiation",
-  #                             "terrain ruggedness",
-  #                             "moisture availability",
-  #                             "competition",
-  #                             "other shrub cover",
-  #                             "graminoid cover")) +
-  annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
-          plot.title = element_text(colour = title_colour, face = "italic"),
-          legend.position = "none")
-  return(model_plot_sig)
-}
-
-# for cases with marginal 'significance'
-model_plot_marg_function <- function(species, plot_width) {
-  
-  if(species == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
-  if(species == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
-  if(species == "deciduous shrubs") model_coeff_output <- coeff.shrub_gradient.AllDec2
-  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
-  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.EmpNig2
-  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.RhoGro2
-  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
-  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
-  
-  target_vars <- c("b.tempjja.x", "b.tempjja.x2",
-                   "b.tempcont.x", "b.tempcont.x2",
-                   "b.precipjja.x", "b.precipjja.x2",
-                   "b.sri",
-                   "b.tri",
-                   "b.tcws", 
-                   "b.shrub_cov",
-                   "b.gramin_cov",
-                   "b.compet")
-  solutions <- model_coeff_output
-  names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
-  solutions <- solutions %>% 
-    filter(variable %in% target_vars)
-  # Jakob: attempt to reorder factor levels below
-  # solutions$variable <- factor(solutions$variable,
-  #                               levels = c("b.tempjja.x", "b.tempjja.x2",
-  #                                          "b.tempcont.x", "b.tempcont.x2",
-  #                                          "b.precipjja.x", "b.precipjja.x2",
-  #                                          "b.sri",
-  #                                          "b.tri",
-  #                                          "b.tcws",
-  #                                          "b.compet",
-  #                                          "b.shrub_cov",
-  #                                          "b.gramin_cov"))
+  solutions$variable <- fct_relevel(solutions$variable,
+                                    "b.tempjja.x", "b.tempjja.x2",
+                                    "b.tempcont.x", "b.tempcont.x2",
+                                    "b.precipjja.x", "b.precipjja.x2",
+                                    "b.sri",
+                                    "b.tri",
+                                    "b.tcws",
+                                    "b.compet",
+                                    "b.shrub_cov",
+                                    "b.gramin_cov")
+  solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
   solutions$sig <- "ns"
@@ -1237,6 +1178,7 @@ model_plot_marg_function <- function(species, plot_width) {
   solutions$sig[solutions$l95 > 0 & solutions$u95 > 0] <- "sig"
   solutions$sig[solutions$l90 < 0 & solutions$u90 < 0 & solutions$l95 < 0 & solutions$u95 > 0] <- "marg"
   solutions$sig[solutions$l90 > 0 & solutions$u90 > 0 & solutions$l95 < 0 & solutions$u95 > 0] <- "marg"
+  solutions$sig <- ordered(solutions$sig, levels = c("ns", "sig", "marg"))
   label_colour <- rep("black", nrow(solutions))
   label_colour[solutions$sig == "sig"] <- theme_darkgreen
   label_colour[solutions$sig == "marg"] <- theme_purple
@@ -1244,45 +1186,35 @@ model_plot_marg_function <- function(species, plot_width) {
   label_face[solutions$sig == "sig"] <- "bold"
   title_string <- species
   title_colour <- "grey10"
-
   
   
-  model_plot_marg <- ggplot(solutions, aes(x = variable, y = post.mean,
-                                           ymin = l95, ymax = u95,
-                                           colour = sig)) +
+  model_plot <- ggplot(solutions, aes(x = variable, y = post.mean,
+                                      ymin = l95, ymax = u95,
+                                      colour = sig)) +
     geom_point() +
     geom_errorbar(width = .8) +
     theme_cowplot(18) +
     ylab("Effect Size (scaled)") +
     xlab("") +
-    ggtitle(paste0(title_string)) + 
-    scale_colour_manual(values = c(theme_purple, "black", theme_darkgreen)) +
+    ggtitle(paste0(title_string)) +
+    scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)) +
     scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
-    # Jakob: attempt to reorder factor levels below
-    # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
-    #         "b.tempcont.x", "b.tempcont.x2",
-    #         "b.precipjja.x", "b.precipjja.x2",
-    #         "b.sri",
-    #         "b.tri",
-    #         "b.tcws",
-    #         "b.compet",
-    #         "b.shrub_cov",
-    #         "b.gramin_cov"),
-    #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
-    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
-    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
-    #                             "solar radiation",
-  #                             "terrain ruggedness",
-  #                             "moisture availability",
-  #                             "competition",
-  #                             "other shrub cover",
-  #                             "graminoid cover")) +
-  annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
+    scale_x_discrete(labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
+                                "temperature variability", bquote(.("temperature") *" "* variability^2),
+                                "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+                                "solar radiation",
+                                "terrain ruggedness",
+                                "moisture availability",
+                                "competition",
+                                "other shrub cover",
+                                "graminoid cover")) +
+    annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
           plot.title = element_text(colour = title_colour, face = "italic"),
           legend.position = "none")
-  return(model_plot_marg)
+  return(model_plot)
 }
+
 
 # >> load data ----
 
@@ -1302,14 +1234,14 @@ for (model_output in model_outputs_groups){
 
 
 # >> plot graphs ----
-(es_plot_AllShr <- model_plot_sig_function(species = "all shrubs", plot_width = 7.5))
-(es_plot_AllEve <- model_plot_sig_function(species = "evergreen shrubs", plot_width = 8.5))
-(es_plot_AllDec <- model_plot_marg_function(species = "deciduous shrubs", plot_width = 8.5))
-(es_plot_BetNan <- model_plot_marg_function(species = "Betula nana", plot_width = 9.5))
-(es_plot_EmpNig <- model_plot_sig_function(species = "Empetrum nigrum", plot_width = 9.5))
-(es_plot_RhoGro <- model_plot_marg_function(species = "Rhododendron groenlandicum", plot_width = 10.5))
-(es_plot_SalGla <- model_plot_marg_function(species = "Salix glauca", plot_width = 9.5))
-(es_plot_VacUli <- model_plot_marg_function(species = "Vaccinium uliginosum", plot_width = 9.5))
+(es_plot_AllShr <- effectsize_plot(species = "all shrubs", plot_width = 7.5))
+(es_plot_AllEve <- effectsize_plot(species = "evergreen shrubs", plot_width = 8.5))
+(es_plot_AllDec <- effectsize_plot(species = "deciduous shrubs", plot_width = 8.5))
+(es_plot_BetNan <- effectsize_plot(species = "Betula nana", plot_width = 9.5))
+(es_plot_EmpNig <- effectsize_plot(species = "Empetrum nigrum", plot_width = 9.5))
+(es_plot_RhoGro <- effectsize_plot(species = "Rhododendron groenlandicum", plot_width = 10.5))
+(es_plot_SalGla <- effectsize_plot(species = "Salix glauca", plot_width = 9.5))
+(es_plot_VacUli <- effectsize_plot(species = "Vaccinium uliginosum", plot_width = 9.5))
 
 # extract legend
 # legend_int_plot <- get_legend(int_plot_BetNan + theme(legend.box.margin = margin(t = 70, l = 70)))
@@ -1340,8 +1272,8 @@ for (model_output in model_outputs_groups){
                                              align = "hv"))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert.pdf"),
-          nuuk_effect_size_plot_grid_ver, base_height = 20, base_aspect_ratio = .6)
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels.pdf"),
+          nuuk_effect_size_plot_grid_ver, base_height = 22, base_aspect_ratio = .6)
 
 
 # ________________________________________ ----
