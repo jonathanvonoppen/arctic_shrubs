@@ -356,8 +356,9 @@ prediction_plots_species <- function(species) {
   if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
   
   # define initial predictions df
+  n_params <- model_coeff_output %>% filter(str_starts(param, "b\\.")) %>% nrow()
   phats_long <- as.data.frame(matrix(data = NA, 
-                                     nrow = 100 * length(predictor_phats), 
+                                     nrow = n_params + 100 * length(predictor_phats), 
                                      ncol = length(model_coeff_output) + 2))
   names(phats_long)[1:length(model_coeff_output)] <- names(model_coeff_output)
   
@@ -368,8 +369,11 @@ prediction_plots_species <- function(species) {
     predictor_min <- min(species_df[, paste0(predictor, "C")])
     predictor_max <- max(species_df[, paste0(predictor, "C")])
     
+    # paste in parameter estimates of model output
+    phats_long[1 : n_params, 1 : length(model_coeff_output)] <- model_coeff_output[1 : n_params, ]
+    
     # assemble predicted and predictor values, for 100 rows (one predictor) at a time
-    phats_long[(100 * match(phat_predictor, predictor_phats) -99) : (100 * match(phat_predictor, predictor_phats)),] <- model_coeff_output %>% 
+    phats_long[(n_params + 100 * match(phat_predictor, predictor_phats) -99) : (n_params + 100 * match(phat_predictor, predictor_phats)),] <- model_coeff_output %>% 
       
       # filter for predicted values
       filter(param %in% c(paste0(phat_predictor, "[", seq(from = 1, to = 100), "]"))) %>% 
@@ -392,7 +396,22 @@ prediction_plots_species <- function(species) {
            pred_value = V10) %>% 
     # extract predictor strings from param column
     mutate(pred_id = factor(str_remove(str_remove(param, "phat_"), "\\[\\d+\\]"),
-                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "compet", "shrub_cover", "graminoid_cover")))
+                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "compet", "shrub_cover", "graminoid_cover"))) %>% 
+    
+    # Jakob: come in here
+    # add significance level column
+    mutate(sig = factor(
+      ifelse(
+        # return row of model output with parameter estimates
+        model_coeff_output %>% 
+          filter(param == paste0("b.", pred_id, ".x")|param == paste0("b.", pred_id, ".x2")) %>% 
+          # return only last row (= linear term if quadratic excluded, otherwise quadratic term)
+          top_n(-1) %>% 
+          pull(l95) < 0 && 
+          ,
+        )
+      
+    ))
   
   # >> facet solution (simple) ----
   
@@ -1114,14 +1133,17 @@ model_plot_sig_function <- function(species, plot_width) {
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
   solutions <- solutions %>% 
     filter(variable %in% target_vars)
+  # Jakob: attempt to reorder factor levels below
   # solutions$variable <- factor(solutions$variable,
   #                               levels = c("b.tempjja.x", "b.tempjja.x2",
   #                                          "b.tempcont.x", "b.tempcont.x2",
   #                                          "b.precipjja.x", "b.precipjja.x2",
   #                                          "b.sri",
   #                                          "b.tri",
-  #                                          "b.twi",
-  #                                          "b.compet"))
+  #                                          "b.tcws",
+  #                                          "b.compet",
+  #                                          "b.shrub_cov",
+  #                                          "b.gramin_cov"))
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
   solutions$sig <- "ns"
@@ -1131,13 +1153,8 @@ model_plot_sig_function <- function(species, plot_width) {
   label_colour[solutions$sig == "sig"] <- theme_darkgreen
   label_face <- rep("plain", nrow(solutions))
   label_face[solutions$sig == "sig"] <- "bold"
-  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
   title_string <- species
   title_colour <- "grey10"
-  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
-  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
-  # if(response == "T1_mean") response <- "Soil"
-  # if(response == "T2_mean") response <- "Ground"
   
   
   model_plot_sig <- ggplot(solutions, aes(x = variable, y = post.mean,
@@ -1151,20 +1168,25 @@ model_plot_sig_function <- function(species, plot_width) {
     ggtitle(paste0(title_string)) +
     scale_colour_manual(values = c("black", theme_darkgreen)) +
     scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
+    # Jakob: attempt to reorder factor levels below
     # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
     #         "b.tempcont.x", "b.tempcont.x2",
     #         "b.precipjja.x", "b.precipjja.x2",
     #         "b.sri",
     #         "b.tri",
-    #         "b.twi",
-    #         "b.compet"),
+    #         "b.tcws",
+    #         "b.compet",
+    #         "b.shrub_cov",
+    #         "b.gramin_cov"),
     #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
-    #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
-    #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
-    #                             "solar radiation",
+  #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
+  #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+  #                             "solar radiation",
   #                             "terrain ruggedness",
   #                             "moisture availability",
-  #                             "competition")) +
+  #                             "competition",
+  #                             "other shrub cover",
+  #                             "graminoid cover")) +
   annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
           plot.title = element_text(colour = title_colour, face = "italic"),
@@ -1197,14 +1219,17 @@ model_plot_marg_function <- function(species, plot_width) {
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
   solutions <- solutions %>% 
     filter(variable %in% target_vars)
+  # Jakob: attempt to reorder factor levels below
   # solutions$variable <- factor(solutions$variable,
   #                               levels = c("b.tempjja.x", "b.tempjja.x2",
   #                                          "b.tempcont.x", "b.tempcont.x2",
   #                                          "b.precipjja.x", "b.precipjja.x2",
   #                                          "b.sri",
   #                                          "b.tri",
-  #                                          "b.twi",
-  #                                          "b.compet"))
+  #                                          "b.tcws",
+  #                                          "b.compet",
+  #                                          "b.shrub_cov",
+  #                                          "b.gramin_cov"))
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
   solutions$sig <- "ns"
@@ -1217,13 +1242,9 @@ model_plot_marg_function <- function(species, plot_width) {
   label_colour[solutions$sig == "marg"] <- theme_purple
   label_face <- rep("plain", nrow(solutions))
   label_face[solutions$sig == "sig"] <- "bold"
-  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
   title_string <- species
   title_colour <- "grey10"
-  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
-  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
-  # if(response == "T1_mean") response <- "Soil"
-  # if(response == "T2_mean") response <- "Ground"
+
   
   
   model_plot_marg <- ggplot(solutions, aes(x = variable, y = post.mean,
@@ -1237,20 +1258,25 @@ model_plot_marg_function <- function(species, plot_width) {
     ggtitle(paste0(title_string)) + 
     scale_colour_manual(values = c(theme_purple, "black", theme_darkgreen)) +
     scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
+    # Jakob: attempt to reorder factor levels below
     # scale_x_discrete(limits = c("b.tempjja.x", "b.tempjja.x2",
     #         "b.tempcont.x", "b.tempcont.x2",
     #         "b.precipjja.x", "b.precipjja.x2",
     #         "b.sri",
     #         "b.tri",
-    #         "b.twi",
-    #         "b.compet"),
+    #         "b.tcws",
+    #         "b.compet",
+    #         "b.shrub_cov",
+    #         "b.gramin_cov"),
     #                  labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
     #                             "temperature variability", bquote(.("temperature") *" "* variability^2),
     #                             "summer precipitation", bquote(.("summer") *" "* precipitation^2),
     #                             "solar radiation",
   #                             "terrain ruggedness",
   #                             "moisture availability",
-  #                             "competition")) +
+  #                             "competition",
+  #                             "other shrub cover",
+  #                             "graminoid cover")) +
   annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
           plot.title = element_text(colour = title_colour, face = "italic"),
