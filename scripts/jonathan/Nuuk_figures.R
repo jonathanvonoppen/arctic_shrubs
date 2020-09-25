@@ -382,16 +382,9 @@ prediction_plots_species <- function(species) {
       # add column for back-centered and back-scaled values
       mutate(pred_values = xhats * attr(scale(species_df[, predictor]), 'scaled:scale') + attr(scale(species_df[, predictor]), 'scaled:center'))
     
-    # # back-center and back-scale predictor values (xhats), for rows 1:100, 101:200 a.s.o.
-    # phats_long$xhats[(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)] <- phats_long$xhats[(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)]*attr(scale(species_df[, predictor]), 'scaled:scale') + attr(scale(species_df[, predictor]), 'scaled:center') 
+
   }
-  # [(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)]
   
-  # # pivot data frame to long format
-  # phats_long <- phats %>% 
-  #   pivot_longer(cols = c(str_remove(predictor_phats, "phat_")),
-  #                names_to = "predictor",
-  #                values_to = "phat")
   
   phats_long <- phats_long %>% 
     # rename added columns
@@ -598,7 +591,7 @@ for (model_output in model_outputs_species){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+load(file = file.path("data", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
 
 
 # >> plot graphs ----
@@ -662,17 +655,8 @@ prediction_plots_groups <- function(fgroup) {
       # add column for back-centered and back-scaled values
       mutate(pred_values = xhats * attr(scale(group_df[, predictor]), 'scaled:scale') + attr(scale(group_df[, predictor]), 'scaled:center'))
     
-    # # back-center and back-scale predictor values (xhats), for rows 1:100, 101:200 a.s.o.
-    # phats_long$xhats[(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)] <- phats_long$xhats[(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)]*attr(scale(group_df[, predictor]), 'scaled:scale') + attr(scale(group_df[, predictor]), 'scaled:center') 
   }
-  # [(100 * match(phat_predictor, predictor_phats) -99) : 100 * match(phat_predictor, predictor_phats)]
-  
-  # # pivot data frame to long format
-  # phats_long <- phats %>% 
-  #   pivot_longer(cols = c(str_remove(predictor_phats, "phat_")),
-  #                names_to = "predictor",
-  #                values_to = "phat")
-  
+
   phats_long <- phats_long %>% 
     # rename added columns
     rename(xhat = V9,
@@ -819,7 +803,7 @@ for (model_output in model_outputs_groups){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+load(file = file.path("data", "model_input_data", "shrub_gradient_groups.datasets.Rdata"))
 
 
 # >> plot graphs ----
