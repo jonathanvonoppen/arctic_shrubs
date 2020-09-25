@@ -244,7 +244,7 @@ theme_purple <- "#8757B3"
 
 This dataset is a new one containing predictors extracted from downscaled CHELSA climate data.
 
-Analyses conducted on fusion table at **plot $\times$ taxon level** (as we are explicitly interested in plot-level variation of predictors, esp. slope, solar radiation, terrain ruggedness, topographical wetness, and competition): 3726 observations for 38 variables
+Analyses conducted on fusion table at **plot $\times$ taxon level** (as we are explicitly interested in plot-level variation of predictors, esp. slope, solar radiation, terrain ruggedness, topographical wetness, and competition): 4968 observations for 66 variables
 
 ```{r}
 env_cov_bio <- read.csv("../data/nuuk_env_cover_plots.csv", header = T) %>% 
@@ -265,12 +265,14 @@ including predictors
 * Information on site, plot, plot group, sampling location (lat, lon, altitude), sampling year 
 * downscaled CHELSA predictors, averaged over a 30-year period (*[...]_ts_30*) 
 * solar radiation index (SRI, following [Keating et al. 2007](http://www.bioone.org/doi/abs/10.2193/2006-359)), slope (erosion measure), Terrain Ruggedness Index (TRI, following [Riley et al. 1999](http://download.osgeo.org/qgis/doc/reference-docs/Terrain_Ruggedness_Index.pdf)), Normalised Difference Wetness Index (NDWI, [Gao 1996](https://www.sciencedirect.com/science/article/pii/S0034425796000673)), Tasseled Cap Wetness Index (TCWI, [Crist & Ciccone 1984](https://ieeexplore.ieee.org/document/4157507)), SAGA Topographic Wetness Index (TWI, see [Conrad et al. 2015](https://gmd.copernicus.org/articles/8/1991/2015/) and the [index documentation](http://www.saga-gis.org/saga_tool_doc/2.2.2/ta_hydrology_15.html))
-* taxon (see above for levels)
+* cover of other shrub species (only used in species models)
+* cover of graminoids
 * competition pressure in the community (as summed abundance of taller-growing shrub species within a plot, averaged within plot groups)
+* taxon (see below for levels)
 
 and response variable 
 
-* cover (as relative no. hits per plot for each species)
+* cover (as relative no. hits per plot for each species/group)
 ```{r}
 env_cov_bio_sub <- env_cov_bio %>% 
   select(site_alt_plotgroup_id, plot, site, site_alt_id, year, long, lat, alt,  # plot info / metadata
@@ -296,6 +298,8 @@ We'll go with TCWS for now, as it is perhaps the most evidence-based moisture pr
 Predictors don't always vary between plots within plotgroups - perhaps due to several falling into the same CHELSA grid cell.
 
 Example: plots within site 1, altitude 20, plot group 1: plot P146 is slightly off and therefore has different climate variables than the other ones
+
+Therefore plotgroup-scale (climatic) predictors will have to be averaged before using in models!
 
 ```{r}
 env_cov_bio %>% filter(taxon == "Betula nana" & site_alt_plotgroup_id == "1_20_1") %>% 
@@ -379,6 +383,7 @@ env_cov_bio_sub <- env_cov_bio_sub %>%
   rename(tempjja = tempjja_ts_30,
          tempcont = tempcont_ts_30,
          precipjja = precipjja_ts_30)
+str(env_cov_bio_sub)
 ```
 
 ### b) raw data plots
@@ -1032,13 +1037,13 @@ coeff.shrub_gradient.AllShr <- coeff.shrub_gradient.AllShr %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.AllShr, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllShr.Rdata"))
+# save(coeff.shrub_gradient.AllShr, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllShr.Rdata"))
 
-(effect_size_plot.AllShr <- model_plot_sig_function(coeff.shrub_gradient.AllShr, title_string = "all shrubs", plot_width = 11))
+(effect_size_plot.AllShr <- model_plot_sig_function(coeff.shrub_gradient.AllShr, title_string = "all shrubs", plot_width = 10.5))
 ```
 
-* **evaluation (sig)**
-* other remarks (n.s.)
+* **positive response to soil moisture, negative response to graminoid cover (sig.)**
+* slightly positive response to solar radiation (n.s.)
 
 <br>
 
@@ -1191,6 +1196,11 @@ save(coeff.shrub_gradient.AllShr2, file = file.path("..", "data", "model_outputs
 (effect_size_plot.AllShr2 <- model_plot_sig_function(coeff.shrub_gradient.AllShr2, title_string = "all shrubs", plot_width = 7.5))
 ```
 
+* **positive response to soil moisture, negative response to graminoid cover (sig.)**
+* positive response to solar radiation (n.s.)
+
+<br>
+
 ### *Evergreen shrubs*
 ```{r}
 # run model
@@ -1236,13 +1246,13 @@ coeff.shrub_gradient.AllEve <- coeff.shrub_gradient.AllEve %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.AllEve, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllEve.Rdata"))
+# save(coeff.shrub_gradient.AllEve, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllEve.Rdata"))
 
-(effect_size_plot.AllEve <- model_plot_sig_function(coeff.shrub_gradient.AllEve, title_string = "evergreen shrubs", plot_width = 11))
+(effect_size_plot.AllEve <- model_plot_sig_function(coeff.shrub_gradient.AllEve, title_string = "evergreen shrubs", plot_width = 10.5))
 ```
 
-* **evaluation (sig)**
-* other remarks (n.s.)
+* **unimodal response to temperature, positive response to soil moisture, negative response to graminoid cover (sig.)**
+* slightly positive response to solar radiation (n.s.)
 
 <br>
 
@@ -1394,6 +1404,10 @@ coeff.shrub_gradient.AllEve2 <- coeff.shrub_gradient.AllEve2 %>%
 
 (effect_size_plot.AllEve2 <- model_plot_sig_function(coeff.shrub_gradient.AllEve2, title_string = "evergreen shrubs", plot_width = 8.5))
 ```
+* **unimodal response to temperature, positive response to soil moisture, negative response to graminoid cover & temperature variability (sig.)**
+* slightly positive response to solar radiation (n.s.)
+
+<br>
 
 ### *Deciduous shrubs*
 ```{r}
@@ -1442,11 +1456,12 @@ coeff.shrub_gradient.AllDec <- coeff.shrub_gradient.AllDec %>%
 
 # save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "model_outputs", "groups", "outdated", "model_output_AllDec.Rdata"))
 
-(effect_size_plot.AllDec <- model_plot_marg_function(coeff.shrub_gradient.AllDec, title_string = "deciduous shrubs", plot_width = 11))
+(effect_size_plot.AllDec <- model_plot_marg_function(coeff.shrub_gradient.AllDec, title_string = "deciduous shrubs", plot_width = 10.5))
 ```
 
-* **evaluation (sig)**
-* other remarks (n.s.)
+* **positive/unimodal response to temperature variability, negative response to graminoid cover (sig.)**
+* *positive response to solar radiation (m.s.)*
+* slightly positive response to temperature, negative response to terrain heterogeneity (n.s.)
 
 <br>
 
@@ -1593,10 +1608,15 @@ coeff.shrub_gradient.AllDec2 <- coeff.shrub_gradient.AllDec2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.AllDec2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllDec2.Rdata"))
+# save(coeff.shrub_gradient.AllDec2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllDec2.Rdata"))
 
-(effect_size_plot.AllDec2 <- model_plot_sig_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 8.5))
+(effect_size_plot.AllDec2 <- model_plot_marg_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 8.5))
 ```
+* **positive/unimodal response to temperature variability, positive response to soil moisture, negative response to graminoid cover (sig.)**
+* *positive response to solar radiation (m.s.)*
+* slightly positive response to temperature, negative response to terrain heterogeneity (n.s.)
+
+<br>
 
 ### Species
 ### > species: assembling data for model input in lists
@@ -2254,12 +2274,11 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
 
 # save(coeff.shrub_gradient.BetNan, file = file.path("..", "data", "model_outputs", "species", "outdated", "model_output_BetNan.Rdata"))
 # load(file.path("..", "data", "model_outputs", "species", "outdated", "model_output_BetNan.Rdata"))
-
-(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 12.5))
+print(coeff.shrub_gradient.BetNan)
+(effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 12.5))
 ```
 
-* **unimodal response to temperature variability (sig)**
-* slightly negative response to competition & precipitation (linear) (n.s.)
+* **negative response to graminoid cover (sig.)** and *other shrub cover (m.s.)*
 
 <br>
 
@@ -2439,8 +2458,7 @@ coeff.shrub_gradient.BetNan2 <- coeff.shrub_gradient.BetNan2 %>%
 
 ```
 
-* *unimodal response to temperature variability (m.s.)*
-* slightly negative response to competition & precipitation (linear) (n.s.)
+* **positive response to temperature variability, negative response to graminoid cover (sig.)**; *negative response to other shrub cover (m.s.)*
 
 <br>
 
@@ -2488,12 +2506,13 @@ coeff.shrub_gradient.CasTet <- coeff.shrub_gradient.CasTet %>%
          u90 = q95,
          u95 = "97.5%",
          Rhat) %>% print
-
+print(coeff.shrub_gradient.CasTet)
 # save(coeff.shrub_gradient.CasTet, file = file.path("..", "data", "model_outputs", "species", "model_output_CasTet.Rdata"))
 
 ```
 
-* **not converging**: really large R-hat values (only 16 non-zero values)
+* **not converging**: really large R-hat values (~ 6.8) (only 16 non-zero values across plot groups)
+
 <br>
 
 ### *Empetrum nigrum*
@@ -2548,9 +2567,9 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
 
 ```
 
-* **positive response to precipitation (linear, sig.)**
-* *unimodal response to temperature (m.s.)*
-* slightly positive response to competition, SRI and TWI (n.s.)
+* **positive response to other shrub cover, precipitation (linear) & soil moisture, negative response to competition (sig.)**
+* negative response to graminoid cover, terrain heterogeneity (n.s.)
+
 <br>
 
 As the quadratic terms for temperature variability and precipitation were not significant, they were removed from the model before re-running:
@@ -2725,12 +2744,12 @@ coeff.shrub_gradient.EmpNig2 <- coeff.shrub_gradient.EmpNig2 %>%
 # load(file.path("..", "data", "model_outputs", "species", "model_output_EmpNig2.Rdata"))
 
 # effect size plot
-(effect_size_plot.EmpNig2 <- model_plot_sig_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 10.5))
+(effect_size_plot.EmpNig2 <- model_plot_sig_function(coeff.shrub_gradient.EmpNig2, title_string = "Empetrum nigrum", plot_width = 9.5))
 
 ```
 
-* **unimodal response to temperature, positive response to precipitation (linear) (sig.)**, *negative response to temp. variability (m.s.)*
-* positive response to competition, TWI (n.s.)
+* **positive response to other shrub cover, precipitation (linear) & soil moisture, negative response to competition & temperature variability (sig.)**
+* negative response to graminoid cover, terrain heterogeneity (n.s.)
 
 <br>
 
@@ -2782,7 +2801,8 @@ coeff.shrub_gradient.PhyCae <- coeff.shrub_gradient.PhyCae %>%
 
 ```
 
-* **not converged** (only 10 non-zero values)
+* **not converged** large R-hat values (~ 1.4) (only 10 non-zero values across plot groups)
+
 <br>
 
 ### *Rhododendron groenlandicum*
@@ -2833,13 +2853,13 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
 # load(file.path("..", "data", "model_outputs", "species", "outdated", "model_output_RhoGro.Rdata"))
 
 # effect size plot
-(effect_size_plot.RhoGro <- model_plot_sig_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum", plot_width = 11.5))
+(effect_size_plot.RhoGro <- model_plot_marg_function(coeff.shrub_gradient.RhoGro, title_string = "Rhododendron groenlandicum", plot_width = 12.5))
 
 ```
 
-* **unimodal response to temperature & linear to precipitation (sig.)** 
-* slightly positive response to SRI, temp. variation (n.s.)
-* slightly negative responst to TWI (n.s.)
+* **positive response to other shrub cover (sig.), unimodal response to temperature (m.s.)** 
+* slightly positive response to solar radiation, temperature variability (n.s.)
+* slightly negative response to graminoid cover & predipitation (n.s.)
 * large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
 
 <br>
@@ -3022,8 +3042,8 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
 
 ```
 
-* **unimodal response to temperature and negative response to precipitation (linear), positive response to temperature variability (sig.)**
-* positive response to SRI (n.s.)
+* **positive response to temperature variability & other shrub cover (sig.), unimodal response to temperature and negative response to precipitation (linear) (m.s.) **
+* positive response to solar radiation (n.s.)
 * large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
 
 <br>
@@ -3076,7 +3096,8 @@ coeff.shrub_gradient.RhoTom <- coeff.shrub_gradient.RhoTom %>%
 
 ```
 
-* **not converging**: relatively large R-hat values, large variation in parameter estimates (only 13 non-zero values)
+* **not converging**: large R-hat values (~ 1.3), large variation in parameter estimates (only 13 non-zero values)
+
 <br>
 
 ### *Salix arctophila*
@@ -3127,7 +3148,8 @@ coeff.shrub_gradient.SalArc <- coeff.shrub_gradient.SalArc %>%
 
 ```
 
-* **not converging well**: relatively large R-hat values, quite some variation in parameter estimates (only 13 non-zero values)
+* **not converging well**: relatively large R-hat values (~ 1.09), quite some variation in parameter estimates (only 13 non-zero values across plot groups)
+
 <br>
 
 ### *Salix glauca*
@@ -3178,12 +3200,12 @@ coeff.shrub_gradient.SalGla <- coeff.shrub_gradient.SalGla %>%
 # load(file.path("..", "data", "model_outputs", "species", "outdated", "model_output_SalGla.Rdata"))
 
 # effect size plot
-(effect_size_plot.SalGla <- model_plot_sig_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
+(effect_size_plot.SalGla <- model_plot_marg_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
 
 ```
 
-* **positive response to competition (sig.)**
-* slightly negative response to temperature & SRI (n.s.)
+* **positive response to competition (sig.), negative response to other shrub cover (m.s.)**
+* slightly negative response to temperature & solar radiation (n.s.)
 
 <br>
 
@@ -3359,12 +3381,12 @@ coeff.shrub_gradient.SalGla2 <- coeff.shrub_gradient.SalGla2 %>%
 # load(file.path("..", "data", "model_outputs", "species", "model_output_SalGla2.Rdata"))
 
 # effect size plot
-(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 10))
+(effect_size_plot.SalGla2 <- model_plot_marg_function(coeff.shrub_gradient.SalGla2, title_string = "Salix glauca", plot_width = 9.5))
 
 ```
 
-* **positive response to temperature variability (linear) and competition (sig.)**
-* positive response to TRI, negative response to SRI (n.s.)
+* **positive response to competition (sig.) and temperature variability (linear, m.s.); negative response to other shrub cover (m.s.)**
+* positive response to soil moisture, negative response to solar radiation (n.s.)
 
 <br>
 
@@ -3421,12 +3443,11 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
 
 ```
 
-* **unimodal response to temperature (sig.)**, *TWI, competition (m.s.)*
-* positive response to SRI (n.s.)
+* **positive response to soil moisture (sig.)**, *precipitation, temperature (m.s.); negative response to competition (m.s.)*
 
 <br>
 
-As the quadratic terms for temperature variability and precipitation were not significant, they were removed from the model before re-running:
+As the quadratic terms for all climate variables were not significant, they were removed from the model before re-running:
 ```{r}
 # new model object with terms removed
 write("
@@ -3594,19 +3615,236 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "model_outputs", "model_output_VacUli2.Rdata"))
+# save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "model_outputs", "model_output_VacUli2.Rdata"))
 
 # effect size plot
-(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 10.5))
+(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 9.5))
 
 ```
 
-* **unimodal response to temperature (sig.)**, *TWI (m.s.)*
-* negative response to competition, positive response to SRI (n.s.)
+* **positive response to soil moisture (sig.)**, *precipitation, temperature (m.s.)*
+* negative response to competition & terrain heterogeneity, positive response to solar radiation (n.s.)
 
 <br>
 
-### > combine all plots 
+## ----------
+
+## Save / load workspace image
+```{r}
+# save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed_graphs.RData"))
+
+# load ws for further analyses/plotting etc)
+# load(file.path("data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
+```
+
+## ----------
+
+## 'The Farm' (= unused code relicts)
+
+### Trial: *Betula nana*
+The dataset was then ready to be split up into the species of interest. As a first trial, I focused on *Betula nana*:
+```{r, eval = FALSE, echo = FALSE}
+# complete Betula nana data
+BetNan.tot <- filter(env_cov_bio_sub, taxon == "Betula nana")
+# discrete cover values
+BetNan.dis <- filter(BetNan.tot, cover_discrete == 1) # contains only zeros as responses
+# continuous cover values
+BetNan.cont <- filter(BetNan.tot, cover_discrete == 0)
+```
+
+### > assembling data for model input in a list
+
+JAGS needs data input in list format, so I provided all relevant variables as follows:
+```{r, eval = FALSE, echo = FALSE}
+# Compile data into list ####
+shrub_gradient_jags.BetNan.data <- list(
+  
+  # plot level predictors, for discrete...
+  cov.dis = BetNan.dis$cover,
+  plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
+  # isocline.dis = BetNan.dis$site_alt.NUM,
+  # inclin_down.dis = BetNan.dis$inclin_downC,
+  sri.dis = BetNan.dis$sriC,
+  tri.dis = BetNan.dis$triC,
+  twi.dis = BetNan.dis$twiC,
+  compet.dis = BetNan.dis$competC,
+  N_discrete = nrow(BetNan.dis),
+  
+  # ...and continuous part of the data
+  cov.cont = BetNan.cont$cover,
+  plotgroup.cont = BetNan.cont$plotgroup.NUM, #AB added this
+  # isocline.cont = BetNan.cont$site_alt.NUM,
+  # inclin_down.cont = BetNan.cont$inclin_downC,
+  sri.cont = BetNan.cont$sriC,
+  tri.cont = BetNan.cont$triC,
+  twi.cont = BetNan.cont$twiC,
+  compet.cont = BetNan.cont$competC,
+  N_cont = nrow(BetNan.cont),
+  
+  # plot group level predictors
+  tempjja.tot = BetNan.tot$tempjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
+  # tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  # tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
+  precipjja.tot = BetNan.tot$precipjjaC[!duplicated(BetNan.tot$plotgroup.NUM)],
+  # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
+  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id))
+  
+  # # site/alt level predictors
+  # alt.tot = BetNan.tot$altC[!duplicated(BetNan.tot$site_alt.NUM)],
+  # N_isoclines = length(unique(BetNan.tot$site_alt_id))
+)
+str(shrub_gradient_jags.BetNan.data)
+```
+
+### > specifying model
+```{r, eval = FALSE, echo = FALSE}
+write("
+  
+  model{
+    
+    # priors
+      
+      intercept ~ dnorm(0, 0.0001)
+      
+      b.compet ~ dnorm(0, 0.0001)
+      b.sri ~ dnorm(0, 0.0001)
+      # b.inclin_down ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
+
+      sigma.plotgroup ~ dunif(0,100)
+      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
+      
+      # sigma.isocline ~ dunif(0,100)
+      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
+      # 
+      # b.alt.x ~ dnorm(0, 0.001)
+      # b.alt.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempmax.x ~ dnorm(0, 0.001)
+      # b.tempmax.x2 ~ dnorm(0, 0.001)
+      # b.tempmin.x ~ dnorm(0, 0.001)
+      # b.tempmin.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.precipjja.x ~ dnorm(0, 0.001)
+      b.precipjja.x2 ~ dnorm(0, 0.001)
+      # b.precipjfmam.x ~ dnorm(0, 0.001)
+      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
+      
+      phi ~ dgamma(0.1, 0.1)
+      
+      
+    # LIKELIHOOD for discrete part
+
+      for (i in 1:N_discrete){ 
+        cov.dis[i] ~ dbern(mu[i])
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
+                        # b_isocline[isocline.dis[i]] +
+                        b.compet * compet.dis[i] + 
+                        # b.inclin_down * inclin_down.dis[i] +
+                        b.twi * twi.dis[i] + 
+                        b.sri * sri.dis[i] +
+                        b.tri * tri.dis[i]
+      }
+      
+      
+    # LIKELIHOOD for continuous part
+
+      for (j in 1:N_cont){
+        cov.cont[j] ~ dbeta(p[j], q[j])
+        p[j] <- mu2[j] * phi
+        q[j] <- (1 - mu2[j]) * phi
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
+                        # b_isocline[isocline.cont[j]] +
+                        b.compet * compet.cont[j] +
+                        # b.inclin_down * inclin_down.cont[j] +
+                        b.twi * twi.cont[j] + 
+                        b.sri * sri.cont[j] +
+                        b.tri * tri.cont[j]
+      }
+
+
+      for (k in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
+        mu.plotgroup[k] <- intercept + 
+                    
+                    # plot group level predictors, linear and quadratic term
+                    b.tempjja.x * tempjja.tot[k] + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempmax.x * tempmax.tot[k] + 
+                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
+                    # b.tempmin.x * tempmin.tot[k] + 
+                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
+                    b.tempcont.x * tempcont.tot[k] + 
+                    b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] + 
+                    b.precipjja.x2 * (precipjja.tot[k]^2) # +
+                    # b.precipjfmam.x * precipjfmam.tot[k] + 
+                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
+      }
+      
+      
+      # for (l in 1:N_isoclines){ #length of total isoclines
+      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
+      #   mu.isocline[l] <- intercept + 
+      #   
+      #               # isocline-level predictor
+      #               b.alt.x * alt.tot[l]
+      # }
+
+    
+      }
+  ", file.path("..", "models", "shrub_gradient.BetNan.jags"))
+```
+
+...and the parameters to be monitored:
+```{r, eval = FALSE, echo = FALSE}
+params <- c("intercept",
+            # "b.alt.x",
+            "b.tempjja.x", "b.tempjja.x2",
+            # "b.tempmax.x", "b.tempmax.x2",
+            # "b.tempmin.x", "b.tempmin.x2",
+            "b.tempcont.x", "b.tempcont.x2",
+            "b.precipjja.x", "b.precipjja.x2",
+            # "b.precipjfmam.x", "b.precipjfmam.x2",
+            "b.compet", 
+            # "b.inclin_down", 
+            "b.sri",
+            "b.tri",
+            "b.twi",
+            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
+            "b_isocline[1]","b_isocline[2]","b_isocline[21]",
+            "sigma.plotgroup","phi")
+```
+
+### > run & evaluate model
+```{r, eval = FALSE, echo = FALSE}
+# run model
+model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
+                                        inits = NULL,                       # JAGS to create initial values
+                                        params,                             # parameters to be saved
+                                        model.file = file.path("..", "models", "shrub_gradient.BetNan.jags"), 
+                                        n.chains = 3,                       # no. Markov chains
+                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
+                                        n.thin = 2,                         # thinning rate
+                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
+                                        working.directory = NULL, 
+                                        progress.bar = "text") 
+
+plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
+```
+
+Notes at first glance:
+
+* quadratic fit better for temperature variables, linear fit better for precipitation variables
+* tbc
+
+As the model converges well, we can proceed to apply it to all of the species.
+
+## Combine all plots 
 ```{r, eval = FALSE}
 # reduced models (insig. quadratic terms removed)
 model_outputs_focal_species <- file.path("..", "data", "model_outputs", list.files(path = file.path("..", "data", "model_outputs"), pattern = "*2.Rdata"))
@@ -4258,219 +4496,4 @@ pred_plot.compet.SalGla +
               alpha = 0.3, 
               fill = "green")
 ```
-## ----------
 
-## Save / load workspace image
-```{r}
-# save.image(file = file.path("..", "data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed_graphs.RData"))
-
-# load ws for further analyses/plotting etc)
-# load(file.path("data", "processed", "nuuk_shrub_drivers_output_nonsigx2removed.RData"))
-```
-
-## ----------
-
-## 'The Farm'
-
-### Trial: *Betula nana*
-The dataset was then ready to be split up into the species of interest. As a first trial, I focused on *Betula nana*:
-```{r, eval = FALSE, echo = FALSE}
-# complete Betula nana data
-BetNan.tot <- filter(env_cov_bio_sub, taxon == "Betula nana")
-# discrete cover values
-BetNan.dis <- filter(BetNan.tot, cover_discrete == 1) # contains only zeros as responses
-# continuous cover values
-BetNan.cont <- filter(BetNan.tot, cover_discrete == 0)
-```
-
-### > assembling data for model input in a list
-
-JAGS needs data input in list format, so I provided all relevant variables as follows:
-```{r, eval = FALSE, echo = FALSE}
-# Compile data into list ####
-shrub_gradient_jags.BetNan.data <- list(
-  
-  # plot level predictors, for discrete...
-  cov.dis = BetNan.dis$cover,
-  plotgroup.dis = BetNan.dis$plotgroup.NUM, #AB added this
-  # isocline.dis = BetNan.dis$site_alt.NUM,
-  # inclin_down.dis = BetNan.dis$inclin_downC,
-  sri.dis = BetNan.dis$sriC,
-  tri.dis = BetNan.dis$triC,
-  twi.dis = BetNan.dis$twiC,
-  compet.dis = BetNan.dis$competC,
-  N_discrete = nrow(BetNan.dis),
-  
-  # ...and continuous part of the data
-  cov.cont = BetNan.cont$cover,
-  plotgroup.cont = BetNan.cont$plotgroup.NUM, #AB added this
-  # isocline.cont = BetNan.cont$site_alt.NUM,
-  # inclin_down.cont = BetNan.cont$inclin_downC,
-  sri.cont = BetNan.cont$sriC,
-  tri.cont = BetNan.cont$triC,
-  twi.cont = BetNan.cont$twiC,
-  compet.cont = BetNan.cont$competC,
-  N_cont = nrow(BetNan.cont),
-  
-  # plot group level predictors
-  tempjja.tot = BetNan.tot$tempjja_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)], # one value per tXpg
-  # tempmax.tot = BetNan.tot$tempmax_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  # tempmin.tot = BetNan.tot$tempmin_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  tempcont.tot = BetNan.tot$tempcont_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)],
-  precipjja.tot = BetNan.tot$precipjjaC[!duplicated(BetNan.tot$plotgroup.NUM)],
-  # precipjfmam.tot = BetNan.tot$precipjfmam_ts_30C[!duplicated(BetNan.tot$plotgroup.NUM)]
-  N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id))
-  
-  # # site/alt level predictors
-  # alt.tot = BetNan.tot$altC[!duplicated(BetNan.tot$site_alt.NUM)],
-  # N_isoclines = length(unique(BetNan.tot$site_alt_id))
-)
-str(shrub_gradient_jags.BetNan.data)
-```
-
-### > specifying model
-```{r, eval = FALSE, echo = FALSE}
-write("
-  
-  model{
-    
-    # priors
-      
-      intercept ~ dnorm(0, 0.0001)
-      
-      b.compet ~ dnorm(0, 0.0001)
-      b.sri ~ dnorm(0, 0.0001)
-      # b.inclin_down ~ dnorm(0, 0.0001)
-      b.tri ~ dnorm(0, 0.0001)
-      b.twi ~ dnorm(0, 0.0001)
-
-      sigma.plotgroup ~ dunif(0,100)
-      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
-      
-      # sigma.isocline ~ dunif(0,100)
-      # tau.isocline <- 1/(sigma.isocline * sigma.isocline)
-      # 
-      # b.alt.x ~ dnorm(0, 0.001)
-      # b.alt.x2 ~ dnorm(0, 0.001)
-      b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
-      # b.tempmax.x ~ dnorm(0, 0.001)
-      # b.tempmax.x2 ~ dnorm(0, 0.001)
-      # b.tempmin.x ~ dnorm(0, 0.001)
-      # b.tempmin.x2 ~ dnorm(0, 0.001)
-      b.tempcont.x ~ dnorm(0, 0.001)
-      b.tempcont.x2 ~ dnorm(0, 0.001)
-      b.precipjja.x ~ dnorm(0, 0.001)
-      b.precipjja.x2 ~ dnorm(0, 0.001)
-      # b.precipjfmam.x ~ dnorm(0, 0.001)
-      # b.precipjfmam.x2 ~ dnorm(0, 0.001)
-      
-      phi ~ dgamma(0.1, 0.1)
-      
-      
-    # LIKELIHOOD for discrete part
-
-      for (i in 1:N_discrete){ 
-        cov.dis[i] ~ dbern(mu[i])
-        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.dis[i]] +
-                        b.compet * compet.dis[i] + 
-                        # b.inclin_down * inclin_down.dis[i] +
-                        b.twi * twi.dis[i] + 
-                        b.sri * sri.dis[i] +
-                        b.tri * tri.dis[i]
-      }
-      
-      
-    # LIKELIHOOD for continuous part
-
-      for (j in 1:N_cont){
-        cov.cont[j] ~ dbeta(p[j], q[j])
-        p[j] <- mu2[j] * phi
-        q[j] <- (1 - mu2[j]) * phi
-        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + #AB added this, ~= random effect of plot group
-                        # b_isocline[isocline.cont[j]] +
-                        b.compet * compet.cont[j] +
-                        # b.inclin_down * inclin_down.cont[j] +
-                        b.twi * twi.cont[j] + 
-                        b.sri * sri.cont[j] +
-                        b.tri * tri.cont[j]
-      }
-
-
-      for (k in 1:N_plotgroups){ # length of total plotgroups
-        b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
-        mu.plotgroup[k] <- intercept + 
-                    
-                    # plot group level predictors, linear and quadratic term
-                    b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
-                    # b.tempmax.x * tempmax.tot[k] + 
-                    # b.tempmax.x2 * (tempmax.tot[k]^2) +
-                    # b.tempmin.x * tempmin.tot[k] + 
-                    # b.tempmin.x2 * (tempmin.tot[k]^2) +
-                    b.tempcont.x * tempcont.tot[k] + 
-                    b.tempcont.x2 * (tempcont.tot[k]^2) +
-                    b.precipjja.x * precipjja.tot[k] + 
-                    b.precipjja.x2 * (precipjja.tot[k]^2) # +
-                    # b.precipjfmam.x * precipjfmam.tot[k] + 
-                    # b.precipjfmam.x2 * (precipjfmam.tot[k]^2)
-      }
-      
-      
-      # for (l in 1:N_isoclines){ #length of total isoclines
-      #   b_isocline[l] ~ dnorm(mu.isocline[l],tau.isocline)
-      #   mu.isocline[l] <- intercept + 
-      #   
-      #               # isocline-level predictor
-      #               b.alt.x * alt.tot[l]
-      # }
-
-    
-      }
-  ", file.path("..", "models", "shrub_gradient.BetNan.jags"))
-```
-
-...and the parameters to be monitored:
-```{r, eval = FALSE, echo = FALSE}
-params <- c("intercept",
-            # "b.alt.x",
-            "b.tempjja.x", "b.tempjja.x2",
-            # "b.tempmax.x", "b.tempmax.x2",
-            # "b.tempmin.x", "b.tempmin.x2",
-            "b.tempcont.x", "b.tempcont.x2",
-            "b.precipjja.x", "b.precipjja.x2",
-            # "b.precipjfmam.x", "b.precipjfmam.x2",
-            "b.compet", 
-            # "b.inclin_down", 
-            "b.sri",
-            "b.tri",
-            "b.twi",
-            "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
-            "b_isocline[1]","b_isocline[2]","b_isocline[21]",
-            "sigma.plotgroup","phi")
-```
-
-### > run & evaluate model
-```{r, eval = FALSE, echo = FALSE}
-# run model
-model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
-                                        inits = NULL,                       # JAGS to create initial values
-                                        params,                             # parameters to be saved
-                                        model.file = file.path("..", "models", "shrub_gradient.BetNan.jags"), 
-                                        n.chains = 3,                       # no. Markov chains
-                                        n.iter = 8000, n.burnin = 6000,     # no. iterations & burn-in fraction per chain
-                                        n.thin = 2,                         # thinning rate
-                                        DIC = FALSE,                        # do not compute deviance, pD, and DIC
-                                        working.directory = NULL, 
-                                        progress.bar = "text") 
-
-plot(model_out.shrub_gradient.BetNan) #check convergence, etc.
-```
-
-Notes at first glance:
-
-* quadratic fit better for temperature variables, linear fit better for precipitation variables
-* tbc
-
-As the model converges well, we can proceed to apply it to all of the species.
