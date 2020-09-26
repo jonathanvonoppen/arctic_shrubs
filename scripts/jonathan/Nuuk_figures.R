@@ -356,7 +356,6 @@ prediction_plots_species <- function(species) {
   if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
   
   # define initial predictions df
-  # n_params <- model_coeff_output %>% filter(str_starts(param, "b\\.")) %>% nrow()
   phats_long <- as.data.frame(matrix(data = NA, 
                                      nrow = 100 * length(predictor_phats), 
                                      ncol = length(model_coeff_output) + 2))
@@ -369,10 +368,6 @@ prediction_plots_species <- function(species) {
     predictor_min <- min(species_df[, paste0(predictor, "C")])
     predictor_max <- max(species_df[, paste0(predictor, "C")])
     
-    # # paste in parameter estimates of model output
-    # phats_long[1 : n_params, 1 : length(model_coeff_output)] <- model_coeff_output[1 : n_params, ]
-    
-    # assemble predicted and predictor values, for 100 rows (one predictor) at a time
     phats_long[(100 * match(phat_predictor, predictor_phats) -99) : (100 * match(phat_predictor, predictor_phats)),] <- model_coeff_output %>% 
       
       # filter for predicted values
@@ -422,8 +417,6 @@ prediction_plots_species <- function(species) {
   
   phats_long$sig <- ordered(phats_long$sig, levels = c("ns", "sig", "marg"))
   
-  # >> facet solution (simple) ----
-  
   # data for point plots: on plotgroup level for climate vars...
   point_data_pg <- species_df %>% 
     # select necessary columns
@@ -457,7 +450,7 @@ prediction_plots_species <- function(species) {
     filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) 
 
   
-  # compile plot
+  # plotting function
   plot_predictor <- function(predictor_id) {
   
     predictor_id <- as.character(predictor_id)
@@ -514,7 +507,8 @@ prediction_plots_species <- function(species) {
                                    "cover of other shrub species",
                                    "cover of graminoids"))
     
-  pred_plot <- ggplot(data = phats_long,
+    # >> compile plot ----
+    pred_plot <- ggplot(data = phats_long,
                       aes(group = pred_id)) +
     
     # plotgroup level
@@ -547,23 +541,19 @@ prediction_plots_species <- function(species) {
                 fill =  c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))],
                 alpha = 0.2) +
     
-    # make facets for predictors
-    # facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
-    
-    coord_cartesian(ylim = c(0, 
+    # set y axis limits so ribbons are not cut off
+      coord_cartesian(ylim = c(0, 
                              ifelse(predictor_id == "tempjja" | predictor_id == "tempcont" | predictor_id == "precipjja",
                                     max(point_data_pg %>% 
                                           pull(cover)),
                                     max(species_df %>% 
                                           pull(cover))))) +
     
-    # scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
-    # scale_fill_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
-    # 
     labs(x = unique(phats_long$pred_id)) +
     guides(colour = guide_legend(nrow = 1),
            fill = FALSE) +
-    #ggtitle(paste0(species, " cover ~ predictors")) +
+    
+    # define appearance
     theme_bw() +
     theme(axis.title.y = element_blank(),
           axis.text.y = element_text(size = 13),
@@ -573,11 +563,6 @@ prediction_plots_species <- function(species) {
                                      margin = margin(t = 4)),
           plot.margin = unit(c(2, 1, 1, 1), "lines"),
           legend.position = ifelse(predictor_id == "tempjja", c(0.5, 0.9), "none")
-          #axis.title.x = element_blank()
-          # plot.title = element_text(hjust = 0.5),
-          # strip.background = element_blank(),
-          # strip.placement = "outside",
-          # panel.spacing.y = unit(1.5, "lines")
           )
   }
   
@@ -763,8 +748,6 @@ prediction_plots_groups <- function(fgroup) {
   
   phats_long$sig <- ordered(phats_long$sig, levels = c("ns", "sig", "marg"))
   
-  # >> facet solution (simple) ----
-  
   # data for point plots: on plotgroup level for climate vars...
   point_data_pg <- group_df %>% 
     # select necessary columns
@@ -798,7 +781,7 @@ prediction_plots_groups <- function(fgroup) {
     filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) 
   
   
-  # compile plot
+  # plotting function
   plot_predictor <- function(predictor_id) {
     
     predictor_id <- as.character(predictor_id)
@@ -847,6 +830,7 @@ prediction_plots_groups <- function(fgroup) {
                                    "Tasseled-cap Wetness Index",
                                    "cover of graminoids"))
     
+    # >> compile plot ----
     pred_plot <- ggplot(data = phats_long,
                         aes(group = pred_id)) +
       
@@ -880,9 +864,7 @@ prediction_plots_groups <- function(fgroup) {
                   fill =  c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))],
                   alpha = 0.2) +
       
-      # make facets for predictors
-      # facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
-      
+      # set y axis limits so ribbons are not cut off
       coord_cartesian(ylim = c(0, 
                                ifelse(predictor_id == "tempjja" | predictor_id == "tempcont" | predictor_id == "precipjja",
                                       max(point_data_pg %>% 
@@ -890,13 +872,10 @@ prediction_plots_groups <- function(fgroup) {
                                       max(group_df %>% 
                                             pull(cover))))) +
       
-      # scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
-      # scale_fill_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
-      # 
+      # define appearance
       labs(x = unique(phats_long$pred_id)) +
       guides(colour = guide_legend(nrow = 1),
              fill = FALSE) +
-      #ggtitle(paste0(species, " cover ~ predictors")) +
       theme_bw() +
       theme(axis.title.y = element_blank(),
             axis.text.y = element_text(size = 13),
@@ -906,12 +885,7 @@ prediction_plots_groups <- function(fgroup) {
                                        margin = margin(t = 4)),
             plot.margin = unit(c(2, 1, 1, 1), "lines"),
             legend.position = ifelse(predictor_id == "tempjja", c(0.5, 0.9), "none")
-            #axis.title.x = element_blank()
-            # plot.title = element_text(hjust = 0.5),
-            # strip.background = element_blank(),
-            # strip.placement = "outside",
-            # panel.spacing.y = unit(1.5, "lines")
-      )
+            )
   }
   
   # compile all plots
@@ -986,12 +960,12 @@ load(file = file.path("data", "model_input_data", "shrub_gradient_group.datasets
 
 # save plots
 prediction_plots_path <- file.path("figures", "prediction_plots")
-save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllShr.pdf"),
-          nuuk_prediction_plot_AllShr, base_height = 15, base_aspect_ratio = 1)
-save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllEve.pdf"),
-          nuuk_prediction_plot_AllEve, base_height = 15, base_aspect_ratio = 1)
-save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllDec.pdf"),
-          nuuk_prediction_plot_AllDec, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllShr.pdf"),
+#           nuuk_prediction_plot_AllShr, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllEve.pdf"),
+#           nuuk_prediction_plot_AllEve, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllDec.pdf"),
+#           nuuk_prediction_plot_AllDec, base_height = 15, base_aspect_ratio = 1)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -1094,18 +1068,8 @@ interaction_plots_species <- function(species) {
       theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
             axis.title = element_blank(),
             legend.position = "none")
+
     
-    # labs(x = "predictor value") +
-    # ggtitle(paste0(species, " cover ~ predictors")) +
-    # theme_bw() +
-    # theme(legend.position = "none",
-    #       axis.title.x = element_blank(),
-    #       plot.title = element_text(hjust = 0.5),
-    #       strip.background = element_blank(),
-    #       strip.placement = "outside",
-    #       panel.spacing.y = unit(1.5, "lines"))
-    
-  
   return(int_plot)
 
 }
@@ -1203,15 +1167,6 @@ interaction_plots_groups <- function(fgroup) {
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank())
   
-  # labs(x = "predictor value") +
-  # ggtitle(paste0(species, " cover ~ predictors")) +
-  # theme_bw() +
-  # theme(legend.position = "none",
-  #       axis.title.x = element_blank(),
-  #       plot.title = element_text(hjust = 0.5),
-  #       strip.background = element_blank(),
-  #       strip.placement = "outside",
-  #       panel.spacing.y = unit(1.5, "lines"))
   
   return(int_plot)
   
@@ -1293,8 +1248,8 @@ ylabel <- ggdraw() +
                                              rel_heights = c(1, 0.05)))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
-          nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
+#           nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
 
 
 # ________________________________________ ----
@@ -1438,8 +1393,8 @@ for (model_output in model_outputs_groups){
                                              align = "hv"))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels.pdf"),
-          nuuk_effect_size_plot_grid_ver, base_height = 22, base_aspect_ratio = .6)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels.pdf"),
+#           nuuk_effect_size_plot_grid_ver, base_height = 22, base_aspect_ratio = .6)
 
 
 # ________________________________________ ----
@@ -1568,8 +1523,8 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
 
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores.pdf"),
-          traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores.pdf"),
+#           traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
 
 
 # ________________________________________ ----
