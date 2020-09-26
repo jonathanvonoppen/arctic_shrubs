@@ -1077,14 +1077,23 @@ interaction_plots_species <- function(species) {
                       fill = tcws),
                   alpha = 0.2) +
       
+      # set y range limits so ribbons are not cut off
+      coord_cartesian(ylim = c(0, 
+                               max(species_df %>% 
+                                     group_by(site_alt_plotgroup_id) %>% 
+                                     summarise(tempjja = mean(tempjja), cover = mean(cover)) %>% 
+                                     pull(cover)))) +
+      
       # define appearance
       ggtitle(paste0(species)) +
       scale_colour_manual("soil\nmoisture", values = c("orange","darkgreen")) +
       scale_fill_manual("soil\nmoisture", values = c("orange","darkgreen")) +
-      labs(x = "mean summer temperature [°C]",
-           y = "relative no. hits per plot") + 
+      # labs(x = "mean summer temperature [°C]",
+      #      y = "relative no. hits per plot") + 
       theme_cowplot(18) +
-      theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18))
+      theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
+            axis.title = element_blank(),
+            legend.position = "none")
     
     # labs(x = "predictor value") +
     # ggtitle(paste0(species, " cover ~ predictors")) +
@@ -1104,7 +1113,7 @@ interaction_plots_species <- function(species) {
 interaction_plots_groups <- function(fgroup) {
   
   # # test
-  # species <- "Salix glauca"
+  # fgroup <- "all shrubs"
   
   if(fgroup == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
   if(fgroup == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
@@ -1177,14 +1186,22 @@ interaction_plots_groups <- function(fgroup) {
                     fill = tcws),
                 alpha = 0.2) +
     
+    # set y range limits so ribbons are not cut off
+    coord_cartesian(ylim = c(0, 
+                             max(group_df %>% 
+                                   group_by(site_alt_plotgroup_id) %>% 
+                                   summarise(tempjja = mean(tempjja), cover = mean(cover)) %>% 
+                                   pull(cover)))) +
+    
     # define appearance
     ggtitle(paste0(fgroup)) +
     scale_colour_manual("soil\nmoisture", values = c("orange","darkgreen")) +
     scale_fill_manual("soil\nmoisture", values = c("orange","darkgreen")) +
-    labs(x = "mean summer temperature [°C]",
-         y = "relative no. hits per plot") + 
+    # labs(x = "mean summer temperature [°C]",
+    #      y = "relative no. hits per plot") + 
     theme_cowplot(18) +
-    theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18))
+    theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
+          axis.title = element_blank())
   
   # labs(x = "predictor value") +
   # ggtitle(paste0(species, " cover ~ predictors")) +
@@ -1232,34 +1249,48 @@ load(file = file.path("data", "model_input_data", "shrub_gradient_group.datasets
 (int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
 
 # extract legend
-legend_int_plot <- get_legend(int_plot_BetNan + theme(legend.box.margin = margin(t = 70, l = 70)))
+legend_int_plot <- get_legend(int_plot_AllShr + theme(legend.box.margin = margin(t = 70, l = 70)))
 
-# 3x2 grid (vertical layout)
-(nuuk_interaction_plot_grid_ver <- plot_grid(int_plot_AllShr + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()),
-                                             int_plot_AllEve + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()),
-                                             int_plot_AllDec + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()),
-                                             int_plot_BetNan + theme(legend.position = "none", 
-                                                                     axis.title.x = element_blank(),
-                                                                     axis.title.y = element_text(margin = margin(r = 15))), 
-                                             int_plot_EmpNig + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()), 
-                                             int_plot_RhoGro + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()), 
-                                             int_plot_SalGla + theme(legend.position = "none",
-                                                                     axis.title = element_blank()),
-                                             int_plot_VacUli + theme(legend.position = "none",
-                                                                     axis.title.y = element_blank()),
+# make x- and y-axis label
+xlabel <- ggdraw() +
+  draw_label("mean summer temperature [°C]",
+             hjust = 0.5,
+             size = 20,
+             fontface = "bold")
+
+ylabel <- ggdraw() +
+  draw_label("cover per plot group",
+             vjust = 0,
+             angle = 90,
+             size = 20,
+             fontface = "bold")
+
+# combine plot and ylabel
+(nuuk_interactions_row <- plot_grid(ylabel,
+                                   plot_grid(int_plot_AllShr + theme(legend.position = "none"),
+                                             int_plot_AllEve + theme(legend.position = "none"),
+                                             int_plot_AllDec + theme(legend.position = "none"),
+                                             int_plot_BetNan, 
+                                             int_plot_EmpNig, 
+                                             int_plot_RhoGro, 
+                                             int_plot_SalGla,
+                                             int_plot_VacUli,
                                              legend_int_plot,
                                              labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
                                              label_size = 18,
-                                             label_fontface = "plain",
-                                             label_x = c(.1, .1, .1, .1, .1, .1, .1, .1),
+                                             label_fontface = "bold",
+                                             label_x = c(rep(0.02, 8)),
                                              ncol = 3,
                                              axis = "lt",
-                                             align = "hv"))
+                                             align = "hv"),
+                                   rel_widths = c(.03, 1)
+                                   ))
+
+# add xlabel
+(nuuk_interaction_plot_grid_ver <- plot_grid(nuuk_interactions_row,
+                                             xlabel,
+                                             ncol = 1,
+                                             rel_heights = c(1, 0.05)))
 
 # save plot
 save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
