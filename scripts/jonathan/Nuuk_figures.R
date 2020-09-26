@@ -550,17 +550,29 @@ prediction_plots_species <- function(species) {
     # make facets for predictors
     # facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
     
-    scale_y_continuous("relative no. pin hits per plot group",
-                       limits = c(0, max(species_df %>% 
-                                           pull(cover)))) +
+    coord_cartesian(ylim = c(0, 
+                             ifelse(predictor_id == "tempjja" | predictor_id == "tempcont" | predictor_id == "precipjja",
+                                    max(point_data_pg %>% 
+                                          pull(cover)),
+                                    max(species_df %>% 
+                                          pull(cover))))) +
     
     # scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
     # scale_fill_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
     # 
     labs(x = unique(phats_long$pred_id)) +
+    guides(colour = guide_legend(nrow = 1),
+           fill = FALSE) +
     #ggtitle(paste0(species, " cover ~ predictors")) +
     theme_bw() +
-    theme(legend.position = "none"
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(size = 13),
+          axis.title.x = element_text(size = rel(1.6), 
+                                      margin = margin(t = 5)),
+          axis.text.x = element_text(size = 13,
+                                     margin = margin(t = 4)),
+          plot.margin = unit(c(2, 1, 1, 1), "lines"),
+          legend.position = ifelse(predictor_id == "tempjja", c(0.5, 0.9), "none")
           #axis.title.x = element_blank()
           # plot.title = element_text(hjust = 0.5),
           # strip.background = element_blank(),
@@ -569,64 +581,58 @@ prediction_plots_species <- function(species) {
           )
   }
   
+# compile all plots
   plot_list <- lapply(unique(param_lookup$phats[param_lookup$phats %in% as.character(phats_long$pred_id)]),
                       plot_predictor)
   
-  pred_plot <- plot_grid(plotlist = plot_list)
+# make title and y-axis label
+  title <- ggdraw() +
+    draw_label(paste0(species, " cover ~ predictors"),
+               hjust = 0.5,
+               size = 20)
+  
+  ylabel_plotgroup <- ggdraw() +
+    draw_label("cover per plot group",
+               vjust = 0,
+               angle = 90,
+               size = 20,
+               fontface = "bold")
+  
+  ylabel_plot <- ggdraw() +
+    draw_label("cover per plot",
+               vjust = 0,
+               angle = 90,
+               size = 20,
+               fontface = "bold")
+  
+  # combine ylabels
+  ylabel <- plot_grid(ylabel_plotgroup,
+                      ylabel_plot,
+                      ncol = 1,
+                      rel_heights = c(0.5, 1))
+  
+# combine axis label and plots
+  pred_plots_row <- plot_grid(ylabel,
+                              plot_grid(plotlist = plot_list,
+                                        labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)", "i)"),
+                                        label_size = 18,
+                                        label_fontface = "bold",
+                                        label_x = c(rep(0.02, 9)),
+                                        ncol = 3,
+                                        axis = "lt",
+                                        align = "hv"),
+                              rel_widths = c(.03, 1)
+                              )
+  
+# add title
+  pred_plot <- plot_grid(title,
+                         pred_plots_row,
+                         ncol = 1,
+                         rel_heights = c(0.1, 1))
+  
   
   return(pred_plot)
-  
-  
-  # # >> list solution (complicated) ----
-  # predictors <- levels(phats_long$pred_id)
-  # 
-  # prediction_plots_list <- list()
-  # 
-  # for (predictor in predictors){
-  #   
-  #   if(predictor == "compet") predictor_label <- "abundance of taller species"
-  #   if(predictor == "sri") predictor_label <- "Solar Radiation Index"
-  #   if(predictor == "tri") predictor_label <- "Topographic Ruggedness Index"
-  #   if(predictor == "twi") predictor_label <- "SAGA Wetness Index"
-  #   if(predictor == "tempjja") predictor_label <- "mean summer temperature [°C]"
-  #   if(predictor == "tempcont") predictor_label <- "annual temperature variability [°C]"
-  #   if(predictor == "precipjja") predictor_label <- "mean summer precipitation [mm]"
-  #   
-  #   
-  #   # GRAPH
-  #   prediction_plots_list[predictor] <- ggplot() +
-  #     # tempcont is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
-  #     geom_point(data = species_df %>% group_by(site_alt_plotgroup_id) %>% summarise(pg_mean = mean(!!ensym(predictor)), cover = mean(cover)), 
-  #                aes(x = pg_mean, 
-  #                    y = cover), 
-  #                size = 2,
-  #                position = position_jitter(width=0, height=.01),
-  #                alpha=0.5) +
-  #     
-  #     # draw line of predicted values
-  #     geom_line(data = phats_long %>% filter(pred_id == predictor), 
-  #               aes(x = pred_value, 
-  #                   y = plogis(mean)), 
-  #               colour = "orange",
-  #               alpha = 1,
-  #               size = 3) + 
-  #     
-  #     # draw predicted 95% CI
-  #     geom_ribbon(data = phats_long %>% filter(pred_id == predictor),
-  #                 aes(x = pred_value, 
-  #                     ymin = plogis(l95), 
-  #                     ymax = plogis(u95)),
-  #                 fill = "orange",
-  #                 alpha = 0.2) +
-  #     
-  #     # define appearance
-  #     labs(x = predictor_label,
-  #          y = "rel. no. hits per plot") + 
-  #     theme_bw()
-  #   
-  # }
-  # 
-  # # combine graphs
+
 }
 
 
@@ -641,15 +647,36 @@ load(file = file.path("data", "model_input_data", "shrub_gradient_species.datase
 
 
 # >> plot graphs ----
-prediction_plots_species(species = "Betula nana")
-prediction_plots_species(species = "Cassiope tetragona")
-prediction_plots_species(species = "Empetrum nigrum")
-prediction_plots_species(species = "Phyllodoce caerulea")
-prediction_plots_species(species = "Rhododendron groenlandicum")
-prediction_plots_species(species = "Rhododendron tomentosum")     # prediction curves / CIs out of y range
-prediction_plots_species(species = "Salix arctophila")
-prediction_plots_species(species = "Salix glauca")
-prediction_plots_species(species = "Vaccinium uliginosum")
+(nuuk_prediction_plot_BetNan <- prediction_plots_species(species = "Betula nana"))
+(nuuk_prediction_plot_CasTet <- prediction_plots_species(species = "Cassiope tetragona"))
+(nuuk_prediction_plot_EmpNig <- prediction_plots_species(species = "Empetrum nigrum"))
+(nuuk_prediction_plot_PhyCae <- prediction_plots_species(species = "Phyllodoce caerulea"))
+(nuuk_prediction_plot_RhoGro <- prediction_plots_species(species = "Rhododendron groenlandicum"))
+(nuuk_prediction_plot_RhoTom <- prediction_plots_species(species = "Rhododendron tomentosum"))     
+(nuuk_prediction_plot_SalArc <- prediction_plots_species(species = "Salix arctophila"))
+(nuuk_prediction_plot_SalGla <- prediction_plots_species(species = "Salix glauca"))
+(nuuk_prediction_plot_VacUli <- prediction_plots_species(species = "Vaccinium uliginosum"))
+
+# save plots
+prediction_plots_path <- file.path("figures", "prediction_plots")
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_BetNan.pdf"),
+#           nuuk_prediction_plot_BetNan, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_CasTet.pdf"),
+#           nuuk_prediction_plot_CasTet, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_EmpNig.pdf"),
+#           nuuk_prediction_plot_EmpNig, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_PhyCae.pdf"),
+#           nuuk_prediction_plot_PhyCae, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_RhoGro.pdf"),
+#           nuuk_prediction_plot_RhoGro, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_RhoTom.pdf"),
+#           nuuk_prediction_plot_RhoTom, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_SalArc.pdf"),
+#           nuuk_prediction_plot_SalArc, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_SalGla.pdf"),
+#           nuuk_prediction_plot_SalGla, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_VacUli.pdf"),
+#           nuuk_prediction_plot_VacUli, base_height = 15, base_aspect_ratio = 1)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -709,7 +736,32 @@ prediction_plots_groups <- function(fgroup) {
            pred_value = V10) %>% 
     # extract predictor strings from param column
     mutate(pred_id = factor(str_remove(str_remove(param, "phat_"), "\\[\\d+\\]"),
-                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "graminoid_cover")))
+                            levels = c("tempjja", "tempcont", "precipjja", "sri", "tri", "tcws", "graminoid_cover"))) %>% 
+    
+    # add significance level column
+    mutate(sig = "ns") 
+  
+  param_lookup <- data.frame(coeffs = c("b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", "b.sri", "b.tri", "b.tcws", "b.compet", "b.shrub_cov", "b.gramin_cov"),
+                             phats = c("tempjja", "tempjja", "tempcont", "tempcont", "precipjja", "precipjja", "sri", "tri", "tcws", "compet", "shrub_cover", "graminoid_cover"))
+  
+  lapply(param_lookup$coeffs[param_lookup$coeffs %in% as.character(model_coeff_output$param)], function(coefficient){
+    model_coeff_output_sub <- model_coeff_output %>% filter(as.character(param) == coefficient)
+    
+    if ((model_coeff_output_sub$l95 < 0 & model_coeff_output_sub$u95 < 0) | 
+        (model_coeff_output_sub$l95 > 0 & model_coeff_output_sub$u95 > 0)) {
+      sig <- "sig"
+    } else if ((model_coeff_output_sub$l90 < 0 & model_coeff_output_sub$u90 < 0) | 
+               (model_coeff_output_sub$l90 > 0 & model_coeff_output_sub$u90 > 0)) {
+      sig <- "marg"
+    } else {
+      sig <- "ns"
+    }
+    
+    phats_long$sig[as.character(phats_long$pred_id) == param_lookup$phats[param_lookup$coeffs == coefficient]] <<- sig
+    
+  })
+  
+  phats_long$sig <- ordered(phats_long$sig, levels = c("ns", "sig", "marg"))
   
   # >> facet solution (simple) ----
   
@@ -729,16 +781,7 @@ prediction_plots_groups <- function(fgroup) {
     # reduce to plotgroup level
     group_by(site_alt_plotgroup_id, pred_id) %>% 
     summarise(pred_value = mean(pred_value), 
-              cover = mean(cover)) %>% ungroup() %>% 
-    # rename predictors
-    mutate(pred_id = fct_recode(pred_id,
-                                "summer temperature [°C]" = "tempjja",
-                                "annual temperature variability [°C]" = "tempcont",
-                                "cumulative summer precipitation [mm]" = "precipjja"),
-           pred_id = fct_relevel(pred_id,
-                                 "summer temperature [°C]",
-                                 "annual temperature variability [°C]",
-                                 "cumulative summer precipitation [mm]"))
+              cover = mean(cover)) %>% ungroup() 
   
   # ... and on plot level for topo & compet vars
   point_data_plot <- group_df %>% 
@@ -752,90 +795,174 @@ prediction_plots_groups <- function(fgroup) {
                  names_to = "pred_id",
                  values_to = "pred_value") %>%
     # filter for climate vars
-    filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) %>% 
-    # rename predictors
-    mutate(pred_id = fct_recode(pred_id,
-                                "Solar Radiation Index" = "sri",
-                                "Terrain Ruggedness Index" = "tri",
-                                "Tasseled-cap Wetness Index" = "tcws",
-                                "cover of graminoids" = "graminoid_cover"),
-           pred_id = fct_relevel(pred_id,
-                                 "Solar Radiation Index",
-                                 "Terrain Ruggedness Index",
-                                 "Tasseled-cap Wetness Index",
-                                 "cover of graminoids"))
+    filter(!(pred_id %in% c("tempjja", "tempcont", "precipjja"))) 
   
-  # rename factor levels in predictions dataset
-  phats_long <- phats_long %>% 
-    
-    # rename predictors
-    mutate(pred_id = fct_recode(pred_id,
-                                "summer temperature [°C]" = "tempjja",
-                                "annual temperature variability [°C]" = "tempcont",
-                                "cumulative summer precipitation [mm]" = "precipjja",
-                                "Solar Radiation Index" = "sri",
-                                "Terrain Ruggedness Index" = "tri",
-                                "Tasseled-cap Wetness Index" = "tcws",
-                                "cover of graminoids" = "graminoid_cover"),
-           pred_id = fct_relevel(pred_id,
-                                 "summer temperature [°C]",
-                                 "annual temperature variability [°C]",
-                                 "cumulative summer precipitation [mm]",
-                                 "Solar Radiation Index",
-                                 "Terrain Ruggedness Index",
-                                 "Tasseled-cap Wetness Index",
-                                 "cover of graminoids"))
   
   # compile plot
-  pred_plot <- ggplot(data = phats_long,
-                      aes(group = pred_id)) +
+  plot_predictor <- function(predictor_id) {
     
-    # plotgroup level
-    geom_point(data = point_data_pg,
-               aes(x = pred_value,
-                   y = cover),
-               size = 2,
-               position = position_jitter(width=0, height=.01),
-               alpha=0.5) +
+    predictor_id <- as.character(predictor_id)
     
-    # plot level
-    geom_point(data = point_data_plot,
-               aes(x = pred_value,
-                   y = cover),
-               size = 2,
-               position = position_jitter(width=0, height=.01),
-               alpha=0.5) + 
+    phats_long <- phats_long %>% filter(as.character(pred_id) == predictor_id) %>% 
+      
+      # rename predictors
+      mutate(pred_id = fct_recode(pred_id,
+                                  "summer temperature [°C]" = "tempjja",
+                                  "annual temperature variability [°C]" = "tempcont",
+                                  "cumulative summer precipitation [mm]" = "precipjja",
+                                  "Solar Radiation Index" = "sri",
+                                  "Terrain Ruggedness Index" = "tri",
+                                  "Tasseled-cap Wetness Index" = "tcws",
+                                  "cover of graminoids" = "graminoid_cover"),
+             pred_id = fct_relevel(pred_id,
+                                   "summer temperature [°C]",
+                                   "annual temperature variability [°C]",
+                                   "cumulative summer precipitation [mm]",
+                                   "Solar Radiation Index",
+                                   "Terrain Ruggedness Index",
+                                   "Tasseled-cap Wetness Index",
+                                   "cover of graminoids"))
     
-    # draw line of predicted values
-    geom_line(aes(x = pred_value,
-                  y = exp(mean)), 
-              colour = "orange",
-              alpha = 1,
-              size = 2) + 
+    point_data_pg <- point_data_pg %>% filter(as.character(pred_id) == predictor_id) %>% 
+      # rename predictors
+      mutate(pred_id = fct_recode(pred_id,
+                                  "summer temperature [°C]" = "tempjja",
+                                  "annual temperature variability [°C]" = "tempcont",
+                                  "cumulative summer precipitation [mm]" = "precipjja"),
+             pred_id = fct_relevel(pred_id,
+                                   "summer temperature [°C]",
+                                   "annual temperature variability [°C]",
+                                   "cumulative summer precipitation [mm]"))
     
-    # draw predicted 95% CI
-    geom_ribbon(aes(x = pred_value,
-                    ymin = exp(l95), 
-                    ymax = exp(u95)),
-                fill = "orange",
-                alpha = 0.2) +
+    point_data_plot <- point_data_plot %>% filter(as.character(pred_id) == predictor_id) %>% 
+      # rename predictors
+      mutate(pred_id = fct_recode(pred_id,
+                                  "Solar Radiation Index" = "sri",
+                                  "Terrain Ruggedness Index" = "tri",
+                                  "Tasseled-cap Wetness Index" = "tcws",
+                                  "cover of graminoids" = "graminoid_cover"),
+             pred_id = fct_relevel(pred_id,
+                                   "Solar Radiation Index",
+                                   "Terrain Ruggedness Index",
+                                   "Tasseled-cap Wetness Index",
+                                   "cover of graminoids"))
     
-    # make facets for predictors
-    facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
-    
-    scale_y_continuous("relative no. pin hits per plot group",
-                       limits = c(0, max(group_df %>% 
-                                           pull(cover)))) +
-    
-    labs(x = "predictor value") +
-    ggtitle(paste0(fgroup, " cover ~ predictors")) +
-    theme_bw() +
-    theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          plot.title = element_text(hjust = 0.5),
-          strip.background = element_blank(),
-          strip.placement = "outside",
-          panel.spacing.y = unit(1.5, "lines"))
+    pred_plot <- ggplot(data = phats_long,
+                        aes(group = pred_id)) +
+      
+      # plotgroup level
+      geom_point(data = point_data_pg,
+                 aes(x = pred_value,
+                     y = cover),
+                 size = 2,
+                 position = position_jitter(width=0, height=.01),
+                 alpha=0.5) +
+      
+      # plot level
+      geom_point(data = point_data_plot,
+                 aes(x = pred_value,
+                     y = cover),
+                 size = 2,
+                 position = position_jitter(width=0, height=.01),
+                 alpha=0.5) + 
+      
+      # draw line of predicted values
+      geom_line(aes(x = pred_value,
+                    y = plogis(mean)),
+                colour =  c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))],
+                alpha = 1,
+                size = 2) + 
+      
+      # draw predicted 95% CI
+      geom_ribbon(aes(x = pred_value,
+                      ymin = plogis(l95), 
+                      ymax = plogis(u95)),
+                  fill =  c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))],
+                  alpha = 0.2) +
+      
+      # make facets for predictors
+      # facet_wrap(~pred_id, strip.position = "bottom", scales = "free_x", ncol = 3) +
+      
+      coord_cartesian(ylim = c(0, 
+                               ifelse(predictor_id == "tempjja" | predictor_id == "tempcont" | predictor_id == "precipjja",
+                                      max(point_data_pg %>% 
+                                            pull(cover)),
+                                      max(group_df %>% 
+                                            pull(cover))))) +
+      
+      # scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
+      # scale_fill_manual(values = c("black", theme_darkgreen, theme_purple)[as.numeric(unique(phats_long$sig))]) +
+      # 
+      labs(x = unique(phats_long$pred_id)) +
+      guides(colour = guide_legend(nrow = 1),
+             fill = FALSE) +
+      #ggtitle(paste0(species, " cover ~ predictors")) +
+      theme_bw() +
+      theme(axis.title.y = element_blank(),
+            axis.text.y = element_text(size = 13),
+            axis.title.x = element_text(size = rel(1.6), 
+                                        margin = margin(t = 5)),
+            axis.text.x = element_text(size = 13,
+                                       margin = margin(t = 4)),
+            plot.margin = unit(c(2, 1, 1, 1), "lines"),
+            legend.position = ifelse(predictor_id == "tempjja", c(0.5, 0.9), "none")
+            #axis.title.x = element_blank()
+            # plot.title = element_text(hjust = 0.5),
+            # strip.background = element_blank(),
+            # strip.placement = "outside",
+            # panel.spacing.y = unit(1.5, "lines")
+      )
+  }
+  
+  # compile all plots
+  plot_list <- lapply(unique(param_lookup$phats[param_lookup$phats %in% as.character(phats_long$pred_id)]),
+                      plot_predictor)
+  
+  # make title and y-axis label
+  title <- ggdraw() +
+    draw_label(paste0(fgroup, " cover ~ predictors"),
+               hjust = 0.5,
+               size = 20)
+  
+  ylabel_plotgroup <- ggdraw() +
+    draw_label("cover per plot group",
+               vjust = 0,
+               angle = 90,
+               size = 20,
+               fontface = "bold")
+  
+  ylabel_plot <- ggdraw() +
+    draw_label("cover per plot",
+               vjust = 0,
+               angle = 90,
+               size = 20,
+               fontface = "bold")
+  
+  # combine ylabels
+  ylabel <- plot_grid(ylabel_plotgroup,
+                      ylabel_plot,
+                      ncol = 1,
+                      rel_heights = c(0.5, 1))
+  
+  # combine axis label and plots
+  pred_plots_row <- plot_grid(ylabel,
+                              plot_grid(plotlist = plot_list,
+                                        labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)"),
+                                        label_size = 18,
+                                        label_fontface = "bold",
+                                        label_x = c(rep(0.02, 7)),
+                                        ncol = 3,
+                                        axis = "lt",
+                                        align = "hv"),
+                              rel_widths = c(.03, 1)
+  )
+  
+  # add title
+  pred_plot <- plot_grid(title,
+                         pred_plots_row,
+                         ncol = 1,
+                         rel_heights = c(0.1, 1))
+  
   
   return(pred_plot)
   
@@ -849,14 +976,22 @@ for (model_output in model_outputs_groups){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "model_input_data", "shrub_gradient_groups.datasets.Rdata"))
+load(file = file.path("data", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
 
 
 # >> plot graphs ----
-prediction_plots_groups(fgroup = "all shrub")
-prediction_plots_groups(fgroup = "evergreen shrub")
-prediction_plots_groups(fgroup = "deciduous shrub")
+(nuuk_prediction_plot_AllShr <- prediction_plots_groups(fgroup = "all shrub"))
+(nuuk_prediction_plot_AllEve <- prediction_plots_groups(fgroup = "evergreen shrub"))
+(nuuk_prediction_plot_AllDec <- prediction_plots_groups(fgroup = "deciduous shrub"))
 
+# save plots
+prediction_plots_path <- file.path("figures", "prediction_plots")
+save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllShr.pdf"),
+          nuuk_prediction_plot_AllShr, base_height = 15, base_aspect_ratio = 1)
+save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllEve.pdf"),
+          nuuk_prediction_plot_AllEve, base_height = 15, base_aspect_ratio = 1)
+save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllDec.pdf"),
+          nuuk_prediction_plot_AllDec, base_height = 15, base_aspect_ratio = 1)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -1101,30 +1236,30 @@ legend_int_plot <- get_legend(int_plot_BetNan + theme(legend.box.margin = margin
 
 # 3x2 grid (vertical layout)
 (nuuk_interaction_plot_grid_ver <- plot_grid(int_plot_AllShr + theme(legend.position = "none", 
-                                                                         axis.title = element_blank()),
-                                                 int_plot_AllEve + theme(legend.position = "none", 
-                                                                         axis.title = element_blank()),
-                                                 int_plot_AllDec + theme(legend.position = "none", 
-                                                                         axis.title = element_blank()),
-                                                 int_plot_BetNan + theme(legend.position = "none", 
-                                                                         axis.title.x = element_blank(),
-                                                                         axis.title.y = element_text(margin = margin(r = 15))), 
-                                                 int_plot_EmpNig + theme(legend.position = "none", 
-                                                                         axis.title = element_blank()), 
-                                                 int_plot_RhoGro + theme(legend.position = "none", 
-                                                                         axis.title = element_blank()), 
-                                                 int_plot_SalGla + theme(legend.position = "none",
-                                                                         axis.title = element_blank()),
-                                                 int_plot_VacUli + theme(legend.position = "none",
-                                                                         axis.title.y = element_blank()),
-                                                 legend_int_plot,
-                                                 labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
-                                                 label_size = 18,
-                                                 label_fontface = "plain",
-                                                 label_x = c(.1, .1, .1, .1, .1, .1, .1, .1),
-                                                 ncol = 3,
-                                                 axis = "lt",
-                                                 align = "hv"))
+                                                                     axis.title = element_blank()),
+                                             int_plot_AllEve + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()),
+                                             int_plot_AllDec + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()),
+                                             int_plot_BetNan + theme(legend.position = "none", 
+                                                                     axis.title.x = element_blank(),
+                                                                     axis.title.y = element_text(margin = margin(r = 15))), 
+                                             int_plot_EmpNig + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             int_plot_RhoGro + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             int_plot_SalGla + theme(legend.position = "none",
+                                                                     axis.title = element_blank()),
+                                             int_plot_VacUli + theme(legend.position = "none",
+                                                                     axis.title.y = element_blank()),
+                                             legend_int_plot,
+                                             labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+                                             label_size = 18,
+                                             label_fontface = "plain",
+                                             label_x = c(.1, .1, .1, .1, .1, .1, .1, .1),
+                                             ncol = 3,
+                                             axis = "lt",
+                                             align = "hv"))
 
 # save plot
 save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
@@ -1279,7 +1414,7 @@ save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prett
 # ________________________________________ ----
 
 # 8) Tundra species traits PCA scores ----
-# -> Thomas et al. 2019 GEB, https://doi.org/10.1111/geb.12783
+# scores extracted by Anne D. Bjorkman from Thomas et al. 2019 GEB, https://doi.org/10.1111/geb.12783
 
 traits_scores <- read.csv(file.path("data", "Tundra_species_PCA_scores.csv"),
                           sep = ",",
