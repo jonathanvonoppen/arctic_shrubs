@@ -1032,7 +1032,7 @@ interaction_plots_species <- function(species) {
                  aes(x = tempjja, 
                      y = cover), 
                  size = 2,
-                 position = position_jitter(width=0, height=.01),
+                 position = position_jitter(width=0, height=.001),
                  alpha = 0.5) +
       
       # draw line of predicted values
@@ -1060,10 +1060,8 @@ interaction_plots_species <- function(species) {
       
       # define appearance
       ggtitle(paste0(species)) +
-      scale_colour_manual("soil\nmoisture", values = c("orange","darkgreen")) +
-      scale_fill_manual("soil\nmoisture", values = c("orange","darkgreen")) +
-      # labs(x = "mean summer temperature [°C]",
-      #      y = "relative no. hits per plot") + 
+      scale_colour_manual("soil\nmoisture", values = c("dodgerblue4", "orange1")) +
+      scale_fill_manual("soil\nmoisture", values = c("dodgerblue4", "orange1")) +
       theme_cowplot(18) +
       theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
             axis.title = element_blank(),
@@ -1131,7 +1129,7 @@ interaction_plots_groups <- function(fgroup) {
                aes(x = tempjja, 
                    y = cover), 
                size = 2,
-               position = position_jitter(width=0, height=.01),
+               position = position_jitter(width=0, height=.001),
                alpha = 0.5) +
     
     # draw line of predicted values
@@ -1159,10 +1157,8 @@ interaction_plots_groups <- function(fgroup) {
     
     # define appearance
     ggtitle(paste0(fgroup)) +
-    scale_colour_manual("soil\nmoisture", values = c("orange","darkgreen")) +
-    scale_fill_manual("soil\nmoisture", values = c("orange","darkgreen")) +
-    # labs(x = "mean summer temperature [°C]",
-    #      y = "relative no. hits per plot") + 
+    scale_colour_manual("soil\nmoisture", values = c("dodgerblue4", "orange1")) +
+    scale_fill_manual("soil\nmoisture", values = c("dodgerblue4", "orange1")) +
     theme_cowplot(18) +
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank())
