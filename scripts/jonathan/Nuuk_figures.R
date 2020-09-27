@@ -1287,6 +1287,20 @@ effectsize_plot <- function(species, plot_width) {
                                     "b.compet",
                                     "b.shrub_cov",
                                     "b.gramin_cov")
+  # comment next bit ou if solved the labelling issue for discrete axis in the plotting code below
+  solutions$variable <- fct_recode(solutions$variable,
+                                   "summer temperature" = "b.tempjja.x",
+                                   "summer temperature ^2" = "b.tempjja.x2",
+                                   "temperature variability" = "b.tempcont.x",
+                                   "temperature variability ^2" = "b.tempcont.x2",
+                                   "summer precipitation" = "b.precipjja.x", 
+                                   "summer precipitation ^2" = "b.precipjja.x2",
+                                   "solar radiation" = "b.sri",
+                                   "terrain ruggedness" = "b.tri",
+                                   "moisture availability" = "b.tcws",
+                                   "competition" = "b.compet",
+                                   " other shrub cover" = "b.shrub_cov",
+                                   "graminoid cover" = "b.gramin_cov")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
@@ -1301,6 +1315,7 @@ effectsize_plot <- function(species, plot_width) {
   label_colour[solutions$sig == "marg"] <- theme_purple
   label_face <- rep("plain", nrow(solutions))
   label_face[solutions$sig == "sig"] <- "bold"
+  label_face[solutions$sig == "marg"] <- "bold"
   title_string <- species
   title_colour <- "grey10"
   
@@ -1316,15 +1331,27 @@ effectsize_plot <- function(species, plot_width) {
     ggtitle(paste0(title_string)) +
     scale_colour_manual(values = c("black", theme_darkgreen, theme_purple)) +
     scale_y_continuous(limits = c(min_value, max_value), breaks = seq(min_value,max_value,0.5)) +
-    scale_x_discrete(labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
-                                "temperature variability", bquote(.("temperature") *" "* variability^2),
-                                "summer precipitation", bquote(.("summer") *" "* precipitation^2),
-                                "solar radiation",
-                                "terrain ruggedness",
-                                "moisture availability",
-                                "competition",
-                                "other shrub cover",
-                                "graminoid cover")) +
+    # if including limits, it's not unused variable names are not dropped
+    # scale_x_discrete(
+    #   limits = c("b.tempjja.x", "b.tempjja.x2",
+    #              "b.tempcont.x", "b.tempcont.x2",
+    #              "b.precipjja.x", "b.precipjja.x2",
+    #              "b.sri",
+    #              "b.tri",
+    #              "b.tcws",
+    #              "b.compet",
+    #              "b.shrub_cov",
+    #              "b.gramin_cov"),
+    # # if specifying labels like below, the same labels are used irrespective of which are plotted
+    #   labels = c("summer temperature", bquote(.("summer") *" "* temperature^2),
+    #              "temperature variability", bquote(.("temperature") *" "* variability^2),
+    #              "summer precipitation", bquote(.("summer") *" "* precipitation^2),
+    #              "solar radiation",
+    #              "terrain ruggedness",
+    #              "moisture availability",
+    #              "competition",
+    #              "other shrub cover",
+    #              "graminoid cover")) +
     annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
           plot.title = element_text(colour = title_colour, face = "italic"),
