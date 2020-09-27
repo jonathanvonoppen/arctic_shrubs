@@ -262,50 +262,50 @@ preds_plot_data <- env_cov_bio %>%
   
   # rename predictors
   mutate(predictor = fct_recode(predictor,
-                                "summer\ntemperature [°C]" = "tempjja_ts_30",
-                                "yearly maximum\ntemperature [°C]" = "tempmax_ts_30",
-                                "yearly minimum\ntemperature [°C]" = "tempmin_ts_30",
-                                "annual temperature\nvariability [°C]" = "tempcont_ts_30",
-                                "cumulative summer\nprecipitation [mm]" = "precipjja_ts_30",
-                                "cumulative winter-spring\nprecipitation [mm]" = "precipjfmam_ts_30",
-                                "cumulative spring\nprecipitation [mm]" = "precipmam_ts_30",
+                                "mean\nsummer\ntemperature [°C]" = "tempjja_ts_30",
+                                "maximum\nsummer\ntemperature [°C]" = "tempmax_ts_30",
+                                "minimum\nwinter\ntemperature [°C]" = "tempmin_ts_30",
+                                "annual\ntemperature\nvariability [°C]" = "tempcont_ts_30",
+                                "cumulative\nsummer\nprecipitation [mm]" = "precipjja_ts_30",
+                                "cumulative\nwinter-spring\nprecipitation [mm]" = "precipjfmam_ts_30",
+                                "cumulative\nspring\nprecipitation [mm]" = "precipmam_ts_30",
                                 "slope angle [°]" = "inclin_down",
-                                "Solar Radiation\nIndex" = "sri",
-                                "Terrain Ruggedness\nIndex" = "tri",
+                                "Solar\nRadiation\nIndex" = "sri",
+                                "Terrain\nRuggedness\nIndex" = "tri",
                                 # "Topographic Wetness\nIndex" = "twi",
-                                "Tasseled-cap Wetness\nIndex" = "tcws",
+                                "Tasseled-cap\nWetness\nIndex" = "tcws",
                                 "overgrowing\ncompetition" = "compet",
-                                "total shrub cover" = "shrub_cover",
-                                "graminoid cover" = "graminoid_cover"),
+                                "total\nshrub cover" = "shrub_cover",
+                                "graminoid\ncover" = "graminoid_cover"),
          predictor = fct_relevel(predictor,
-                                 "summer\ntemperature [°C]",
-                                 "yearly maximum\ntemperature [°C]",
-                                 "yearly minimum\ntemperature [°C]",
-                                 "annual temperature\nvariability [°C]",
-                                 "cumulative summer\nprecipitation [mm]",
-                                 "cumulative winter-spring\nprecipitation [mm]",
-                                 "cumulative spring\nprecipitation [mm]",
+                                 "mean\nsummer\ntemperature [°C]",
+                                 "maximum\nsummer\ntemperature [°C]",
+                                 "minimum\nwinter\ntemperature [°C]",
+                                 "annual\ntemperature\nvariability [°C]",
+                                 "cumulative\nsummer\nprecipitation [mm]",
+                                 "cumulative\nwinter-spring\nprecipitation [mm]",
+                                 "cumulative\nspring\nprecipitation [mm]",
                                  "slope angle [°]",
-                                 "Solar Radiation\nIndex",
-                                 "Terrain Ruggedness\nIndex",
+                                 "Solar\nRadiation\nIndex",
+                                 "Terrain\nRuggedness\nIndex",
                                  # "Topographic Wetness\nIndex",
-                                 "Tasseled-cap Wetness\nIndex",
+                                 "Tasseled-cap\nWetness\nIndex",
                                  "overgrowing\ncompetition",
-                                 "total shrub cover",
-                                 "graminoid cover")) %>% 
+                                 "total\nshrub cover",
+                                 "graminoid\ncover")) %>% 
   
   # group by site & isocline 
   group_by(site, site_alt_id)
 
 
 # >> plot (climatic predictors) ----
-predictors_set_clim_long <- c("summer\ntemperature [°C]",
-                              "yearly maximum\ntemperature [°C]",
-                              "yearly minimum\ntemperature [°C]",
-                              "annual temperature\nvariability [°C]",
-                              "cumulative summer\nprecipitation [mm]",
-                              "cumulative winter-spring\nprecipitation [mm]",
-                              "cumulative spring\nprecipitation [mm]")
+predictors_set_clim_long <- c("mean\nsummer\ntemperature [°C]",
+                              "maximum\nsummer\ntemperature [°C]",
+                              "minimum\nwinter\ntemperature [°C]",
+                              "annual\ntemperature\nvariability [°C]",
+                              "cumulative\nsummer\nprecipitation [mm]",
+                              "cumulative\nwinter-spring\nprecipitation [mm]",
+                              "cumulative\nspring\nprecipitation [mm]")
 
 (nuuk_preds_clim_gradient_plot <- ggplot(preds_plot_data %>% 
                                            filter(predictor %in% predictors_set_clim_long),
@@ -323,9 +323,14 @@ predictors_set_clim_long <- c("summer\ntemperature [°C]",
     # scale_fill_manual() +
     theme_bw() +
     xlab("site / isocline") +
-    theme(strip.text.y = element_text(face = "italic"),
+    theme(strip.text.y = element_text(face = "italic",
+                                      size = 14),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
-          axis.title = element_text(size = rel(1.2))))
+          axis.text.y = element_text(size = 12),
+          axis.title = element_text(size = rel(1.5),
+                                    face = "bold"),
+          legend.title = element_text(size = 15),
+          legend.text = element_text(size = 14)))
 
 # save plot
 # save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_clim_gradient.eps"),
@@ -334,13 +339,13 @@ predictors_set_clim_long <- c("summer\ntemperature [°C]",
 
 # >> plot (environmental predictors) ----
 predictors_set_env_long <- c("slope angle [°]",
-                             "Solar Radiation\nIndex",
+                             "Solar\nRadiation\nIndex",
                              "Terrain Ruggedness\nIndex",
                              # "Topographic Wetness\nIndex",
-                             "Tasseled-cap Wetness\nIndex",
+                             "Tasseled-cap\nWetness\nIndex",
                              "overgrowing\ncompetition",
-                             "total shrub cover",
-                             "graminoid cover")
+                             "total\nshrub cover",
+                             "graminoid\ncover")
 
 (nuuk_preds_env_gradient_plot <- ggplot(preds_plot_data %>% 
                                           filter(predictor %in% predictors_set_env_long),
@@ -358,9 +363,14 @@ predictors_set_env_long <- c("slope angle [°]",
     # scale_fill_manual() +
     theme_bw() +
     xlab("site / isocline") +
-    theme(strip.text.y = element_text(face = "italic"),
+    theme(strip.text.y = element_text(face = "italic",
+                                      size = 14),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
-          axis.title = element_text(size = rel(1.2))))
+          axis.text.y = element_text(size = 12),
+          axis.title = element_text(size = rel(1.5),
+                                    face = "bold"),
+          legend.title = element_text(size = 15),
+          legend.text = element_text(size = 14)))
 
 # save plot
 # save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_env_gradient.eps"),
@@ -368,14 +378,14 @@ predictors_set_env_long <- c("slope angle [°]",
 
 
 # >> plot (final set of predictors) ----
-predictors_set_final_long <- c("summer\ntemperature [°C]",
-                               "annual temperature\nvariability [°C]",
-                               "cumulative summer\nprecipitation [mm]",
-                               "Solar Radiation\nIndex",
-                               "Terrain Ruggedness\nIndex",
-                               "Tasseled-cap Wetness\nIndex",
-                               "total shrub cover",
-                               "graminoid cover",
+predictors_set_final_long <- c("mean\nsummer\ntemperature [°C]",
+                               "annual\ntemperature\nvariability [°C]",
+                               "cumulative\nsummer\nprecipitation [mm]",
+                               "Solar\nRadiation\nIndex",
+                               "Terrain\nRuggedness\nIndex",
+                               "Tasseled-cap\nWetness\nIndex",
+                               "total\nshrub cover",
+                               "graminoid\ncover",
                                "overgrowing\ncompetition")
 
 (nuuk_preds_final_gradient_plot <- ggplot(preds_plot_data %>% 
@@ -394,13 +404,18 @@ predictors_set_final_long <- c("summer\ntemperature [°C]",
     # scale_fill_manual() +
     theme_bw() +
     xlab("site / isocline") +
-    theme(strip.text.y = element_text(face = "italic"),
+    theme(strip.text.y = element_text(face = "italic",
+                                      size = 14),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
-          axis.title = element_text(size = rel(1.2))))
+          axis.text.y = element_text(size = 12),
+          axis.title = element_text(size = rel(1.5),
+                                    face = "bold"),
+          legend.title = element_text(size = 15),
+          legend.text = element_text(size = 14)))
 
 # save plot
 # save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_final_gradient.eps"),
-#           nuuk_preds_final_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+#           nuuk_preds_final_gradient_plot, base_height = 16, base_aspect_ratio = 0.8)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
