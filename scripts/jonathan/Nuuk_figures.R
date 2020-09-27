@@ -171,158 +171,240 @@ driver_count <- ggplot(n_levels %>% filter(group == "drivers")) +
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
-# 2) Predictors across the gradients ----
+# 2) Species abundance along the gradient ----
 
-# >> import data ####
-pred_gradient_data <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F) %>% 
-  
-  # convert grouping columns to factors
-  mutate_at(vars(c(site_alt_plotgroup_id, site_alt_id, site, alt, plotgroup, plot, year)), ~as.factor(.)) %>% 
-  mutate(alt = factor(alt, levels = c("20", "100", "200", "300", "400", "500"))) %>% 
-  
-  # reduce to plot level for env predictors
-  distinct(plot, .keep_all = TRUE)
+# >> load data ----
 
-# reduce to plotgroup level for clim predictors
-pred_gradient_data_clim <- pred_gradient_data %>% 
-  distinct(site_alt_plotgroup_id, .keep_all = TRUE)
+env_cov_bio <- read.csv(file.path("data", "nuuk_env_cover_plots.csv"), 
+                        header = T)
 
-# create vector with predictors
-predictor_set_tot <- c("tempjja_ts_30",
-                       "precipjja_ts_30",
-                       "tempcont_ts_30",
-                       "sri",
-                       "tri",
-                       "twi_90m")
+# >> compile plot ----
 
-predictor_set_clim <- c("tempjja_ts_30",
-                        "precipjja_ts_30",
-                        "tempcont_ts_30")
+(nuuk_spec_abundance_plot <- ggplot(env_cov_bio %>% 
+                                      
+                                      # make site a factor
+                                      mutate(site = as.factor(site)) %>% 
+                                      mutate(site_alt_id = factor(site_alt_id, 
+                                                                  levels = c(paste(rep(1, 3), c("20", "100", "200"), 
+                                                                                   sep = "_"),
+                                                                             paste(rep(2, 3), c("20", "100", "200"), 
+                                                                                   sep = "_"),
+                                                                             paste(rep(3, 5), c("20", "100", "200", "300", "400"), 
+                                                                                   sep = "_"),
+                                                                             paste(rep(4, 6), c("20", "100", "200", "300", "400", "500"), 
+                                                                                   sep = "_"),
+                                                                             paste(rep(5, 6), c("20", "100", "200", "300", "400", "500"), 
+                                                                                   sep = "_")))) %>% 
+                                      # group by site and isocline
+                                      group_by(site, site_alt_id), 
+                                    
+                                    aes(x = site_alt_id, 
+                                        y = cover, 
+                                        fill = site)) + 
+    
+    # draw boxplots of cover
+    geom_boxplot() + 
+    
+    # split by taxon
+    facet_grid(rows = vars(taxon)) +
+    
+    # scale_fill_manual() +
+    theme_bw() +
+    xlab("site / isocline") +
+    theme(strip.text.y = element_text(face = "italic"),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+          axis.title = element_text(size = rel(1.2))))
 
-predictor_set_env <- c("sri",
-                       "tri",
-                       "twi_90m")
-
-# >> plot ####
-
-# summer temperature
-(plot_tempjja_grad <- ggplot(data = pred_gradient_data_clim,
-                             aes(x = site,
-                                 y = tempjja_ts_30,
-                                 fill = alt)) +
-   geom_boxplot() +
-   labs(x = "site",
-        y = "mean JJA temperature") +
-   theme_bw())
-
-# summer precipitation
-(plot_precipjja_grad <- ggplot(data = pred_gradient_data_clim,
-                               aes(x = site,
-                                   y = precipjja_ts_30,
-                                   fill = alt)) +
-    geom_boxplot() +
-    labs(x = "site",
-         y = "mean JJA precipitation") +
-    theme_bw())
-
-# temperature variability
-(plot_tempcont_grad <- ggplot(data = pred_gradient_data_clim,
-                              aes(x = site,
-                                  y = tempcont_ts_30,
-                                  fill = alt)) +
-    geom_boxplot() +
-    labs(x = "site",
-         y = "mean annual temperature variability") +
-    theme_bw())
-
-# solar radiation
-(plot_sri_grad <- ggplot(data = pred_gradient_data,
-                         aes(x = site,
-                             y = sri,
-                             fill = alt)) +
-    geom_boxplot() +
-    labs(x = "site",
-         y = "mean Solar Radiation Index") +
-    theme_bw())
-
-# terrain ruggedness
-(plot_tri_grad <- ggplot(data = pred_gradient_data,
-                         aes(x = site,
-                             y = tri,
-                             fill = alt)) +
-    geom_boxplot() +
-    labs(x = "site",
-         y = "mean Terrain Ruggedness Index") +
-    theme_bw())
-
-# topographic wetness
-(plot_twi_grad <- ggplot(data = pred_gradient_data,
-                         aes(x = site,
-                             y = twi_90m,
-                             fill = alt)) +
-    geom_boxplot() +
-    labs(x = "site",
-         y = "mean Topographic Wetness Index") +
-    theme_bw())
+# save plot
+# save_plot(file.path("..", "figures", "nuuk_shrub_drivers_species_abundance_gradient.eps"),
+#           nuuk_spec_abundance_plot, base_height = 18, base_aspect_ratio = 0.8)
 
 
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
 
-# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
-# 3) Cover against predictors for each species ----
-# >> import data ####
-env_cov_bio <- read.csv("data/Nuuk_env_cover_plots.csv", header = T, stringsAsFactors = F)
+### 3) Predictor patterns along the gradient ----
 
-# >> prepare data ####
-env_cov_bio.long <- env_cov_bio %>% 
-  select(taxon,
-         tempjja_ts_30,
-         tempcont_ts_30,
-         precipjja_ts_30,
-         sri,
-         tri,
-         twi_90m,
+# >> load data ----
+
+env_cov_bio <- read.csv(file.path("data", "nuuk_env_cover_plots.csv"), 
+                        header = T)
+
+# >> data compilation ----
+predictors_set <- env_cov_bio %>% 
+  select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
+         inclin_down, sri, tri, tcws,      # environmental data
          compet,
-         cover) %>% 
+         shrub_cover,
+         graminoid_cover) %>% 
+  names()
+
+preds_plot_data <- env_cov_bio %>% 
+  
+  # convert site, isocline & plotgroup to factors
+  mutate(site = as.factor(site)) %>% 
+  mutate(site_alt_id = factor(site_alt_id, levels = c(paste(rep(1, 3), c("20", "100", "200"), sep = "_"),
+                                                      paste(rep(2, 3), c("20", "100", "200"), sep = "_"),
+                                                      paste(rep(3, 5), c("20", "100", "200", "300", "400"), sep = "_"),
+                                                      paste(rep(4, 6), c("20", "100", "200", "300", "400", "500"), sep = "_"),
+                                                      paste(rep(5, 6), c("20", "100", "200", "300", "400", "500"), sep = "_")))) %>% 
+  mutate(plotgroup = as.factor(plotgroup)) %>% 
+  
+  select(site, site_alt_id, predictors_set) %>% 
+  
   # pivot to long format
-  pivot_longer(cols = c(tempjja_ts_30,
-                        tempcont_ts_30,
-                        precipjja_ts_30,
-                        sri,
-                        tri,
-                        twi_90m,
-                        compet),
+  pivot_longer(cols = predictors_set,
                names_to = "predictor",
-               values_to = "pred_value")
-
-# >> build function ####
-pred.plot.grid <- function(df){
+               values_to = "value") %>% 
   
-  taxa <- df %>% pull(taxon) %>% unique() %>% as.character()
+  # convert predictor col to factor
+  mutate(predictor = as.factor(predictor)) %>% 
   
-  for(taxon_nr in 1:length(taxa)){
-    plot <- ggplot(data = df %>% filter(taxon == taxa[taxon_nr]), 
-                   aes(y = cover, group = taxon)) +
-      geom_point(aes(x = pred_value), colour = "darkgrey") +
-      geom_smooth(aes(x = pred_value), method = "lm", colour = "darkgreen", se = TRUE, na.rm = TRUE) +
-      geom_smooth(aes(x = pred_value), method = "lm", formula = y ~ poly(x, 2), colour = "darkorange", se = TRUE, na.rm = TRUE) +
-      facet_wrap(~predictor, scales = "free", ncol = 4) +
-      scale_y_continuous("relative no. pin hits per plot group",
-                         limits = c(0, max(df %>% 
-                                             filter(taxon == taxa[taxon_nr]) %>% 
-                                             pull(cover)))) +
-      labs(x = "predictor value") +
-      ggtitle(paste0(taxa[taxon_nr], " cover ~ predictors")) +
-      theme_bw() +
-      theme(legend.position = "none")
-    print(plot)
-  }
-}
+  # rename predictors
+  mutate(predictor = fct_recode(predictor,
+                                "summer\ntemperature [°C]" = "tempjja_ts_30",
+                                "yearly maximum\ntemperature [°C]" = "tempmax_ts_30",
+                                "yearly minimum\ntemperature [°C]" = "tempmin_ts_30",
+                                "annual temperature\nvariability [°C]" = "tempcont_ts_30",
+                                "cumulative summer\nprecipitation [mm]" = "precipjja_ts_30",
+                                "cumulative winter-spring\nprecipitation [mm]" = "precipjfmam_ts_30",
+                                "cumulative spring\nprecipitation [mm]" = "precipmam_ts_30",
+                                "slope angle [°]" = "inclin_down",
+                                "Solar Radiation\nIndex" = "sri",
+                                "Terrain Ruggedness\nIndex" = "tri",
+                                # "Topographic Wetness\nIndex" = "twi",
+                                "Tasseled-cap Wetness\nIndex" = "tcws",
+                                "overgrowing\ncompetition" = "compet",
+                                "total shrub cover" = "shrub_cover",
+                                "graminoid cover" = "graminoid_cover"),
+         predictor = fct_relevel(predictor,
+                                 "summer\ntemperature [°C]",
+                                 "yearly maximum\ntemperature [°C]",
+                                 "yearly minimum\ntemperature [°C]",
+                                 "annual temperature\nvariability [°C]",
+                                 "cumulative summer\nprecipitation [mm]",
+                                 "cumulative winter-spring\nprecipitation [mm]",
+                                 "cumulative spring\nprecipitation [mm]",
+                                 "slope angle [°]",
+                                 "Solar Radiation\nIndex",
+                                 "Terrain Ruggedness\nIndex",
+                                 # "Topographic Wetness\nIndex",
+                                 "Tasseled-cap Wetness\nIndex",
+                                 "overgrowing\ncompetition",
+                                 "total shrub cover",
+                                 "graminoid cover")) %>% 
+  
+  # group by site & isocline 
+  group_by(site, site_alt_id)
 
-# >> plot ####
-pred.plot.grid(env_cov_bio.long)
+
+# >> plot (climatic predictors) ----
+predictors_set_clim_long <- c("summer\ntemperature [°C]",
+                              "yearly maximum\ntemperature [°C]",
+                              "yearly minimum\ntemperature [°C]",
+                              "annual temperature\nvariability [°C]",
+                              "cumulative summer\nprecipitation [mm]",
+                              "cumulative winter-spring\nprecipitation [mm]",
+                              "cumulative spring\nprecipitation [mm]")
+
+(nuuk_preds_clim_gradient_plot <- ggplot(preds_plot_data %>% 
+                                           filter(predictor %in% predictors_set_clim_long),
+                                         
+                                         aes(x = site_alt_id, 
+                                             y = value, 
+                                             fill = site)) + 
+    
+    # draw boxplots of values
+    geom_boxplot() + 
+    
+    # split by taxon
+    facet_grid(rows = vars(predictor), scales = "free_y") +
+    
+    # scale_fill_manual() +
+    theme_bw() +
+    xlab("site / isocline") +
+    theme(strip.text.y = element_text(face = "italic"),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+          axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_clim_gradient.eps"),
+#           nuuk_preds_clim_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+
+
+# >> plot (environmental predictors) ----
+predictors_set_env_long <- c("slope angle [°]",
+                             "Solar Radiation\nIndex",
+                             "Terrain Ruggedness\nIndex",
+                             # "Topographic Wetness\nIndex",
+                             "Tasseled-cap Wetness\nIndex",
+                             "overgrowing\ncompetition",
+                             "total shrub cover",
+                             "graminoid cover")
+
+(nuuk_preds_env_gradient_plot <- ggplot(preds_plot_data %>% 
+                                          filter(predictor %in% predictors_set_env_long),
+                                        
+                                        aes(x = site_alt_id, 
+                                            y = value, 
+                                            fill = site)) + 
+    
+    # draw boxplots of values
+    geom_boxplot() + 
+    
+    # split by taxon
+    facet_grid(rows = vars(predictor), scales = "free_y") +
+    
+    # scale_fill_manual() +
+    theme_bw() +
+    xlab("site / isocline") +
+    theme(strip.text.y = element_text(face = "italic"),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+          axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_env_gradient.eps"),
+#           nuuk_preds_env_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+
+
+# >> plot (final set of predictors) ----
+predictors_set_final_long <- c("summer\ntemperature [°C]",
+                               "annual temperature\nvariability [°C]",
+                               "cumulative summer\nprecipitation [mm]",
+                               "Solar Radiation\nIndex",
+                               "Terrain Ruggedness\nIndex",
+                               "Tasseled-cap Wetness\nIndex",
+                               "total shrub cover",
+                               "graminoid cover",
+                               "overgrowing\ncompetition")
+
+(nuuk_preds_final_gradient_plot <- ggplot(preds_plot_data %>% 
+                                            filter(predictor %in% predictors_set_final_long),
+                                          
+                                          aes(x = site_alt_id, 
+                                              y = value, 
+                                              fill = site)) + 
+    
+    # draw boxplots of values
+    geom_boxplot() + 
+    
+    # split by taxon
+    facet_grid(rows = vars(predictor), scales = "free_y") +
+    
+    # scale_fill_manual() +
+    theme_bw() +
+    xlab("site / isocline") +
+    theme(strip.text.y = element_text(face = "italic"),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+          axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_final_gradient.eps"),
+#           nuuk_preds_final_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
+
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
+
 
 # 4) Species: cover and predictions for all predictors ----
 
@@ -1246,8 +1328,8 @@ ylabel <- ggdraw() +
                                              rel_heights = c(1, 0.05)))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
-          nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
+#           nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
 
 
 # ________________________________________ ----
