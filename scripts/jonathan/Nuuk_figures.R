@@ -34,12 +34,12 @@ theme_purple <- "#8757B3"
 
 # 1) Mini-review of literature on drivers of shrub vegetation ----
 
-# >> load data
+# >> load data ----
 lit_raw <- read.csv(file.path("data", "shrub_drivers_lit_review_records.csv"),
                 sep = ",",
                 header = TRUE)
 
-# clean data
+# >> clean data ----
 lit <- lit_raw %>% 
   
   rename_all(tolower) %>% 
@@ -87,9 +87,25 @@ lit <- lit_raw %>%
               mutate(n_drivers = lengths(str_split(drivers, ";"))),
             by = c("study_id", "drivers")) %>% 
   
-  # filter for species-level, empirical studies
-  filter(study_level == "species") %>% 
-  filter(str_detect(study_type, "empirical")) %>% 
+  # filter for species-level, empirical studies, study location above 60°N
+  filter(study_level == "species",
+         str_detect(study_type, "empirical"),
+         lat > 60 | 
+           location == "circumpolar" | 
+           location == "Northern Fennoscandia" | 
+           location == "Abisko, SE; Svalbard, NO; Zackenberg, GL; Fountainemore, IT; Alaska, US") %>% 
+  
+  # study ID #169 driver_regime is missing -> drivers temp & soil N -> insert "abiotic"
+  mutate(driver_regime = case_when(study_id == 169 ~ "abiotic",
+                                   TRUE ~ as.character(driver_regime)),
+         driver_regime = factor(driver_regime)) %>% 
+  
+  # recode driver regime "biotic; abiotic" level
+  mutate(driver_regime = fct_recode(driver_regime,
+                                    "abiotic & biotic" = "biotic; abiotic"),
+         n_species = fct_relevel(n_species,
+                                 as.character(c(1:25)),
+                                 "unknown")) %>% 
   
   # reorder columns
   select(study_id,
@@ -106,68 +122,87 @@ lit <- lit_raw %>%
          n_drivers,
          driver_regime:comment)
   
+# >> summarise data ----
 
+# lit_stat <- lit %>% 
+  
+  # 
 
+# >> compile plot ----
 
-# >> import data ####
-lit <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/Data/MiniReview/200716_tundra_shrub_drivers.csv", header = T)
+(driver_count <- ggplot(data = lit,
+                       aes(x = n_drivers,
+                           fill = driver_regime)) +
+  
+   # draw bars
+   geom_bar(stat = "count", 
+            width = .9) +
+   
+   # change y axis range
+   scale_y_continuous(limits = c(0, 37), 
+                      breaks = c(10, 20, 30)) +
+  
+   # change axis labels
+   labs(x = "number of drivers included",
+        y = "number of published studies (n = 79)",
+        fill = "driver regime") +
+   
+   # adjust appearance
+   scale_fill_manual(values = c("steelblue3", "#64bd54", "#ffc16a")) +
+   theme_bw() +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         plot.margin = margin(t = 1, unit = "cm"),
+         legend.position = c(0.8, 0.8),
+         legend.title = element_text(size = 20),
+         legend.text = element_text(size = 18),
+         axis.text = element_text(size = 18),
+         axis.title = element_text(size = 20),
+         axis.ticks = element_line(size = 1.5),
+         axis.line = element_line(size = 1.5)))
 
-# >> format data ####
-colnames(lit) <- lit %>% 
-  colnames %>% 
-  str_replace_all("\\.", "_")
-lit <- lit %>% 
-  rename(species = Shrub_species, 
-         drivers =  Controlling_factor, 
-         origin = Factor_origin, 
-         response = Shrub_expansion_response_measured, 
-         study_type = Study_type, 
-         location = Location,
-         year = Year_of_study, 
-         reference = Reference, 
-         comment = Comment)
-
-# >> summarise studies ####
-n_levels <- lit %>% 
-  group_by(reference) %>% 
-  summarise_at(vars(species, drivers), n_distinct) %>% 
-  pivot_longer(-reference, names_to = "group", values_to = "freq")
-n_levels$group <- factor(n_levels$group, levels = c("species","drivers"))
-# levels(n_levels$group)[levels(n_levels$group) == "species"] <- "no. species studied"
-# levels(n_levels$group)[levels(n_levels$group) == "drivers"] <- "no. drivers studied"
-
-
-# >> plot ####
-species_count <- ggplot(n_levels %>% filter(group == "species")) +
-  geom_bar(aes(x = freq), stat = "count", width = .9) +
-  #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
-  scale_y_continuous(limits = c(0,12), breaks = c(3,6,9,12)) +
-  labs(x = "number of taxa studied",
+(species_count <- ggplot(data = lit,
+                        aes(x = n_species)) +
+  
+  # draw bars
+  geom_bar(stat = "count", 
+           width = .9,
+           fill = "#b86969") +
+  scale_y_continuous(limits = c(0, 37), 
+                     breaks = c(10, 20, 30)) +
+  labs(x = "number of taxa included",
        y = "number of published studies") +
+  
+  # adjust appearance
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        axis.text = element_text(size = 32),
-        axis.title = element_text(size = 40),
+        plot.margin = margin(t = 1, l = 1, unit = "cm"),
+        axis.text = element_text(size = 18),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_blank(),
         axis.ticks = element_line(size = 1.5),
-        axis.line = element_line(size = 1.5))
+        axis.line = element_line(size = 1.5)))
 
-driver_count <- ggplot(n_levels %>% filter(group == "drivers")) +
-  geom_bar(aes(x = freq), stat = "count", width = .9) +
-  #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
-  scale_y_continuous(limits = c(0,14), breaks = c(3,6,9,12)) +
-  labs(x = "number of drivers studied",
-       y = "number of published studies") +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        axis.text = element_text(size = 32),
-        axis.title = element_text(size = 40),
-        axis.ticks = element_line(size = 1.5),
-        axis.line = element_line(size = 1.5))
 
-(driver_count / species_count) + 
-  plot_annotation(tag_levels = "a", 
-                  tag_suffix = ")") &
-  theme(plot.tag = element_text(size = 40))
+# >> combine plots ----
+
+(nuuk_lit_plot <- plot_grid(driver_count,
+                       species_count,
+                       labels = c("a)", "b)"),
+                       label_size = 20,
+                       label_fontface = "bold",
+                       label_x = c(rep(0.05, 2)),
+                       nrow = 1,
+                       axis = "lt",
+                       align = "hv",
+                       scale = 0.98,
+                       rel_widths = c(1, 1)
+))
+
+
+# save plot
+save_plot(file.path("figures", "nuuk_shrub_drivers_lit_review.pdf"),
+          nuuk_lit_plot, base_height = 8, base_aspect_ratio = 1.8)
+
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
@@ -1741,3 +1776,66 @@ model_plot_sig_function <- function(model_coeff_output, title_string, plot_width
           legend.position = "none")
   return(model_plot_sig)
 }
+
+# ________________________----
+
+# former lit review plot ----
+# >> import data ####
+lit <- read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/Data/MiniReview/200716_tundra_shrub_drivers.csv", header = T)
+
+# >> format data ####
+colnames(lit) <- lit %>% 
+  colnames %>% 
+  str_replace_all("\\.", "_")
+lit <- lit %>% 
+  rename(species = Shrub_species, 
+         drivers =  Controlling_factor, 
+         origin = Factor_origin, 
+         response = Shrub_expansion_response_measured, 
+         study_type = Study_type, 
+         location = Location,
+         year = Year_of_study, 
+         reference = Reference, 
+         comment = Comment)
+
+# >> summarise studies ####
+n_levels <- lit %>% 
+  group_by(reference) %>% 
+  summarise_at(vars(species, drivers), n_distinct) %>% 
+  pivot_longer(-reference, names_to = "group", values_to = "freq")
+n_levels$group <- factor(n_levels$group, levels = c("species","drivers"))
+# levels(n_levels$group)[levels(n_levels$group) == "species"] <- "no. species studied"
+# levels(n_levels$group)[levels(n_levels$group) == "drivers"] <- "no. drivers studied"
+
+
+# >> plot ####
+species_count <- ggplot(n_levels %>% filter(group == "species")) +
+  geom_bar(aes(x = freq), stat = "count", width = .9) +
+  #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
+  scale_y_continuous(limits = c(0,12), breaks = c(3,6,9,12)) +
+  labs(x = "number of taxa studied",
+       y = "number of published studies") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text = element_text(size = 32),
+        axis.title = element_text(size = 40),
+        axis.ticks = element_line(size = 1.5),
+        axis.line = element_line(size = 1.5))
+
+driver_count <- ggplot(n_levels %>% filter(group == "drivers")) +
+  geom_bar(aes(x = freq), stat = "count", width = .9) +
+  #facet_grid(cols = vars(group), scales = "free_x", space = "free_x") +
+  scale_y_continuous(limits = c(0,14), breaks = c(3,6,9,12)) +
+  labs(x = "number of drivers studied",
+       y = "number of published studies") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text = element_text(size = 32),
+        axis.title = element_text(size = 40),
+        axis.ticks = element_line(size = 1.5),
+        axis.line = element_line(size = 1.5))
+
+(driver_count / species_count) + 
+  plot_annotation(tag_levels = "a", 
+                  tag_suffix = ")") &
+  theme(plot.tag = element_text(size = 40))
