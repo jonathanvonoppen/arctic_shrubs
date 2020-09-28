@@ -728,6 +728,33 @@ prediction_plots_species <- function(species) {
                       ncol = 1,
                       rel_heights = c(0.5, 1))
   
+  # draw extra plot to extract legend from
+  xplot <- ggplot(data = data.frame(x = c(1:6),
+                                    y = c(1:6),
+                                    z = c(rep("significant     ",2), rep("marginal     ",2),rep("n.s.",2))) %>% 
+                    mutate(z = ordered(z, levels = c("significant     ", "marginal     ", "n.s."))),
+                  aes(group = z)) +
+    geom_line(aes(x = x,
+                  y = y,
+                  colour = z),
+              size = 1) +
+    geom_ribbon(aes(x = x,
+                    ymin = y-.5,
+                    ymax = y+.5,
+                    fill = z),
+                alpha = .2) +
+    scale_colour_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+    scale_fill_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+    labs(colour = "significance level     ",
+         fill = "significance level     ") +
+    guides(colour = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom",
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 17))
+  
+  # extract legend
+  legend_hor <- get_legend(xplot)
+  
 # combine axis label and plots
   pred_plots_row <- plot_grid(ylabel,
                               plot_grid(plotlist = plot_list,
@@ -741,11 +768,12 @@ prediction_plots_species <- function(species) {
                               rel_widths = c(.03, 1)
                               )
   
-# add title
+# add title and legend
   pred_plot <- plot_grid(title,
                          pred_plots_row,
+                         legend_hor,
                          ncol = 1,
-                         rel_heights = c(0.1, 1))
+                         rel_heights = c(0.1, 1, 0.07))
   
   
   return(pred_plot)
@@ -1050,6 +1078,33 @@ prediction_plots_groups <- function(fgroup) {
                       ncol = 1,
                       rel_heights = c(0.5, 1))
   
+  # draw extra plot to extract legend from
+  xplot <- ggplot(data = data.frame(x = c(1:6),
+                                    y = c(1:6),
+                                    z = c(rep("significant     ",2), rep("marginal     ",2),rep("n.s.",2))) %>% 
+                    mutate(z = ordered(z, levels = c("significant     ", "marginal     ", "n.s."))),
+                  aes(group = z)) +
+    geom_line(aes(x = x,
+                  y = y,
+                  colour = z),
+              size = 1) +
+    geom_ribbon(aes(x = x,
+                    ymin = y-.5,
+                    ymax = y+.5,
+                    fill = z),
+                alpha = .2) +
+    scale_colour_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+    scale_fill_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+    labs(colour = "significance level     ",
+         fill = "significance level     ") +
+    guides(colour = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom",
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 17))
+  
+  # extract legend
+  legend_hor <- get_legend(xplot)
+  
   # combine axis label and plots
   pred_plots_row <- plot_grid(ylabel,
                               plot_grid(plotlist = plot_list,
@@ -1066,8 +1121,9 @@ prediction_plots_groups <- function(fgroup) {
   # add title
   pred_plot <- plot_grid(title,
                          pred_plots_row,
+                         legend_hor,
                          ncol = 1,
-                         rel_heights = c(0.1, 1))
+                         rel_heights = c(0.1, 1, .07))
   
   
   return(pred_plot)
