@@ -122,11 +122,11 @@ lit <- lit_raw %>%
          n_drivers,
          driver_regime:comment)
   
-# >> summarise data ----
+# save data
 
-# lit_stat <- lit %>% 
+# write.csv(lit, 
+#           file = file.path("data", "nuuk_shrub_drivers_lit_selection.csv")) 
   
-  # 
 
 # >> compile plot ----
 
