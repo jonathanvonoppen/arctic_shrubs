@@ -1544,6 +1544,7 @@ effectsize_plot <- function(species, plot_width) {
     #              "graminoid cover")) +
     annotate("segment", x = 0, xend = plot_width, y = 0, yend = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, colour = label_colour, face = label_face),
+          axis.title = element_blank(),
           plot.title = element_text(colour = title_colour, face = "italic"),
           legend.position = "none")
   return(model_plot)
@@ -1577,24 +1578,57 @@ for (model_output in model_outputs_groups){
 (es_plot_SalGla <- effectsize_plot(species = "Salix glauca", plot_width = 9.5))
 (es_plot_VacUli <- effectsize_plot(species = "Vaccinium uliginosum", plot_width = 9.5))
 
-# extract legend
-# legend_int_plot <- get_legend(int_plot_BetNan + theme(legend.box.margin = margin(t = 70, l = 70)))
+# make y label
+ylabel_es <- ggdraw() +
+  draw_label("Effect size (scaled)",
+             vjust = 0,
+             angle = 90,
+             size = 20,
+             fontface = "bold")
 
-# 3x2 grid (vertical layout)
+# draw extra plot to extract legend from
+xplot <- ggplot(data = data.frame(x = c(1:6),
+                                  y = c(1:6),
+                                  z = c(rep("significant     ",2), rep("marginal     ",2),rep("n.s.",2))) %>% 
+                  mutate(z = ordered(z, levels = c("significant     ", "marginal     ", "n.s."))),
+                aes(group = z)) +
+  geom_line(aes(x = x,
+                y = y,
+                colour = z),
+            size = 1) +
+  geom_ribbon(aes(x = x,
+                  ymin = y-.5,
+                  ymax = y+.5,
+                  fill = z),
+              alpha = .2) +
+  scale_colour_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+  scale_fill_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+  labs(colour = "significance level     ",
+       fill = "significance level     ") +
+  guides(colour = guide_legend(nrow = 1)) +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 17))
+
+# extract legend
+legend_hor <- get_legend(xplot)
+
+
+# ¨¨¨¨4x2 grid (vertical layout) ----
 (nuuk_effect_size_plot_grid_ver <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
-                                                                     axis.title.x = element_blank()),
+                                                                     axis.title = element_blank()),
                                              es_plot_AllEve + theme(legend.position = "none", 
                                                                      axis.title = element_blank()),
                                              es_plot_AllDec + theme(legend.position = "none", 
-                                                                     axis.title.x = element_blank()),
+                                                                     axis.title = element_blank()),
                                              es_plot_BetNan + theme(legend.position = "none", 
                                                                      axis.title = element_blank()), 
                                              es_plot_EmpNig + theme(legend.position = "none", 
-                                                                     axis.title.x = element_blank()), 
+                                                                     axis.title = element_blank()), 
                                              es_plot_RhoGro + theme(legend.position = "none", 
                                                                      axis.title = element_blank()), 
                                              es_plot_SalGla + theme(legend.position = "none",
-                                                                     axis.title.x = element_blank()),
+                                                                     axis.title = element_blank()),
                                              es_plot_VacUli + theme(legend.position = "none",
                                                                      axis.title = element_blank()),
                                              labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
@@ -1608,6 +1642,36 @@ for (model_output in model_outputs_groups){
 # save plot
 # save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels.pdf"),
 #           nuuk_effect_size_plot_grid_ver, base_height = 22, base_aspect_ratio = .6)
+
+
+# ¨¨¨¨3x3 grid (horizontal layout) ----
+(es_plots_row <- plot_grid(ylabel_es,
+                           plot_grid(es_plot_AllShr,
+                                     es_plot_AllEve,
+                                     es_plot_AllDec,
+                                     es_plot_BetNan, 
+                                     es_plot_EmpNig, 
+                                     es_plot_RhoGro, 
+                                     es_plot_SalGla,
+                                     es_plot_VacUli,
+                                     labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+                                     label_size = 20,
+                                     label_fontface = "bold",
+                                     label_x = c(rep(.02, 8)),
+                                     ncol = 3,
+                                     axis = "lt",
+                                     align = "hv"),
+                           rel_widths = c(0.03, 1)))
+
+# combine with legend
+(nuuk_effect_size_plot_grid_hor <- plot_grid(es_plots_row,
+                                             legend_hor,
+                                             ncol = 1,
+                                             rel_heights = c(1, 0.07)))
+
+# save plot
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels.pdf"),
+          nuuk_effect_size_plot_grid_hor, base_height = 18, base_aspect_ratio = 1.3)
 
 
 # ________________________________________ ----
