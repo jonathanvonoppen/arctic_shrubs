@@ -19,15 +19,8 @@ pacman::p_load(tidyverse,
 
 # Colour scheme ####
 theme_red <- "#E64447FF"
-theme_blue <- "#12435DFF"
-theme_lightblue <- "#1FA3AEFF"
-theme_grey <- "#EDEDEDFF"
-theme_yellow <- "#EEBE5BFF"
-
-# additional colours
 theme_darkblue <- "#1D5799"
 theme_darkgreen <- "#13944D"
-theme_orange <- "#B56A24"
 theme_purple <- "#8757B3"
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -486,6 +479,27 @@ prediction_plots_species <- function(species) {
   if(species == "Salix arctophila") species_df <- SalArc.tot
   if(species == "Salix glauca") species_df <- SalGla.tot
   if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
+  
+  if(species == "Betula nana") figure_no <- "Fig. S6: "
+  if(species == "Cassiope tetragona") figure_no <- "Fig. S7: "
+  if(species == "Empetrum nigrum") figure_no <- "Fig. S8: "
+  if(species == "Phyllodoce caerulea") figure_no <- "Fig. S9: "
+  if(species == "Rhododendron groenlandicum") figure_no <- "Fig. S10: "
+  if(species == "Rhododendron tomentosum") figure_no <- "Fig. S11: "
+  if(species == "Salix arctophila") figure_no <- "Fig. S12: "
+  if(species == "Salix glauca") figure_no <- "Fig. S13: "
+  if(species == "Vaccinium uliginosum") figure_no <- "Fig. S14: "
+  
+  if(species == "Betula nana") convergence_string <- ""
+  if(species == "Cassiope tetragona") convergence_string <- " (model not converged)"
+  if(species == "Empetrum nigrum") convergence_string <- ""
+  if(species == "Phyllodoce caerulea") convergence_string <- " (model not converged)"
+  if(species == "Rhododendron groenlandicum") convergence_string <- ""
+  if(species == "Rhododendron tomentosum") convergence_string <- " (model not converged)"
+  if(species == "Salix arctophila") convergence_string <- " (model not converged)"
+  if(species == "Salix glauca") convergence_string <- ""
+  if(species == "Vaccinium uliginosum") convergence_string <- ""
+  
   # 
   # # back-center and back-scale x data for the complete (not species-subsetted) dataset
   # num_pred <- env_cov_bio_sub %>% select(tempjja,
@@ -721,7 +735,7 @@ prediction_plots_species <- function(species) {
   
 # make title and y-axis label
   title <- ggdraw() +
-    draw_label(paste0(species, " cover ~ predictors"),
+    draw_label(paste0(figure_no, species, " cover ~ predictors", convergence_string),
                hjust = 0.5,
                size = 20)
   
@@ -861,6 +875,10 @@ prediction_plots_groups <- function(fgroup) {
   if(fgroup == "all shrub") group_df <- AllShr.tot
   if(fgroup == "evergreen shrub") group_df <- AllEve.tot
   if(fgroup == "deciduous shrub") group_df <- AllDec.tot
+  
+  if(fgroup == "all shrub") figure_no <- "Fig. S3: "
+  if(fgroup == "evergreen shrub") figure_no <- "Fig. S4: "
+  if(fgroup == "deciduous shrub") figure_no <- "Fig. S5: "
   
   
   # define initial predictions df
@@ -1071,7 +1089,7 @@ prediction_plots_groups <- function(fgroup) {
   
   # make title and y-axis label
   title <- ggdraw() +
-    draw_label(paste0(fgroup, " cover ~ predictors"),
+    draw_label(paste0(figure_no, fgroup, " cover ~ predictors"),
                hjust = 0.5,
                size = 20)
   
@@ -1873,13 +1891,8 @@ model_plot_sig_function <- function(model_coeff_output, title_string, plot_width
   label_colour[solutions$sig == "sig"] <- theme_darkgreen
   label_face <- rep("plain", nrow(solutions))
   label_face[solutions$sig == "sig"] <- "bold"
-  # label_face[response == "T1_mean" & solutions$sig == "sig"] <- "bold"
   title_string <- title_string
   title_colour <- "grey10"
-  # if(response == "T1_mean" | response == "T1_amp") title_colour <- theme_red
-  # if(response == "T2_mean" | response == "T2_amp") title_colour <- theme_yellow
-  # if(response == "T1_mean") response <- "Soil"
-  # if(response == "T2_mean") response <- "Ground"
   
   
   model_plot_sig <- ggplot(solutions, aes(x = variable, y = post.mean,
