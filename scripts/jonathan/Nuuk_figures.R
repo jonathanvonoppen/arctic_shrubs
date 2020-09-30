@@ -477,15 +477,42 @@ prediction_plots_species <- function(species) {
   if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
   if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
   
-  if(species == "Betula nana") species_df <- BetNan.tot
-  if(species == "Cassiope tetragona") species_df <- CasTet.tot
-  if(species == "Empetrum nigrum") species_df <- EmpNig.tot
-  if(species == "Phyllodoce caerulea") species_df <- PhyCae.tot
-  if(species == "Rhododendron groenlandicum") species_df <- RhoGro.tot
-  if(species == "Rhododendron tomentosum") species_df <- RhoTom.tot
-  if(species == "Salix arctophila") species_df <- SalArc.tot
-  if(species == "Salix glauca") species_df <- SalGla.tot
-  if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
+  # if(species == "Betula nana") species_df <- BetNan.tot
+  # if(species == "Cassiope tetragona") species_df <- CasTet.tot
+  # if(species == "Empetrum nigrum") species_df <- EmpNig.tot
+  # if(species == "Phyllodoce caerulea") species_df <- PhyCae.tot
+  # if(species == "Rhododendron groenlandicum") species_df <- RhoGro.tot
+  # if(species == "Rhododendron tomentosum") species_df <- RhoTom.tot
+  # if(species == "Salix arctophila") species_df <- SalArc.tot
+  # if(species == "Salix glauca") species_df <- SalGla.tot
+  # if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
+  # 
+  # # back-center and back-scale x data
+  # num_pred <- env_cov_bio_sub %>% select(tempjja,
+  #                                         tempcont,
+  #                                         precipjja,
+  #                                         sri,
+  #                                         tcws,
+  #                                         tri,
+  #                                         ends_with("_cover"),
+  #                                         matches("compet"))
+  # num_predC <- env_cov_bio_sub %>% select(tempjjaC,
+  #                                        tempcontC,
+  #                                        precipjjaC,
+  #                                        sriC,
+  #                                        tcwsC,
+  #                                        triC,
+  #                                        ends_with("_coverC"),
+  #                                        matches("competC"))
+  # for(i in 1:length(num_pred)){
+  #   col <- colnames(num_pred[i])
+  #   env_cov_bio_sub[paste0(col, "R")] <- as.numeric(attr(scale(env_cov_bio_sub[, col]), 'scaled:scale') + attr(scale(env_cov_bio_sub[, col]), 'scaled:center'))
+  # }
+
+  # filter for target species
+  species_df <- env_cov_bio_sub %>%
+    filter(taxon == species)
+    
   
   # define initial predictions df
   phats_long <- as.data.frame(matrix(data = NA, 
@@ -511,8 +538,10 @@ prediction_plots_species <- function(species) {
                          length.out = 100)) %>% 
       
       # add column for back-centered and back-scaled values
-      mutate(pred_values = xhats * attr(scale(species_df[, predictor]), 'scaled:scale') + attr(scale(species_df[, predictor]), 'scaled:center'))
+      mutate(pred_values = xhats * (attr(scale(env_cov_bio_sub[, predictor]), 'scaled:scale')[which(env_cov_bio_sub$taxon == species)]) + (attr(scale(env_cov_bio_sub[, predictor]), 'scaled:center')[which(env_cov_bio_sub$taxon == species)]))
     
+    # previous line
+    #mutate(pred_values = xhats * attr(scale(species_df[, predictor]), 'scaled:scale') + attr(scale(species_df[, predictor]), 'scaled:center'))
   }
   
   
