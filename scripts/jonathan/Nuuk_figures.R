@@ -368,7 +368,7 @@ predictors_set_clim_long <- c("mean\nsummer\ntemperature [°C]",
 # >> plot (environmental predictors) ----
 predictors_set_env_long <- c("slope angle [°]",
                              "Solar\nRadiation\nIndex",
-                             "Terrain Ruggedness\nIndex",
+                             "Terrain\nRuggedness\nIndex",
                              # "Topographic Wetness\nIndex",
                              "Tasseled-cap\nWetness\nIndex",
                              "overgrowing\ncompetition",
@@ -448,7 +448,49 @@ predictors_set_final_long <- c("mean\nsummer\ntemperature [°C]",
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
+# 4) Species patterns along the gradient ----
 
+# >> load data ----
+
+env_cov_bio <- read.csv(file.path("data", "nuuk_env_cover_plots.csv"), 
+                        header = T)
+
+# >> plot ----
+(nuuk_spec_abundance_plot <- ggplot(env_cov_bio %>% 
+                                      
+                                      # make site a factor
+                                      mutate(site = as.factor(site)) %>% 
+                                      mutate(site_alt_id = factor(site_alt_id, levels = c(paste(rep(1, 3), c("20", "100", "200"), sep = "_"),
+                                                                                          paste(rep(2, 3), c("20", "100", "200"), sep = "_"),
+                                                                                          paste(rep(3, 5), c("20", "100", "200", "300", "400"), sep = "_"),
+                                                                                          paste(rep(4, 6), c("20", "100", "200", "300", "400", "500"), sep = "_"),
+                                                                                          paste(rep(5, 6), c("20", "100", "200", "300", "400", "500"), sep = "_")))) %>% 
+                                      # group by site and isocline
+                                      group_by(site, site_alt_id), 
+                                    
+                                    aes(x = site_alt_id, 
+                                        y = cover, 
+                                        fill = site)) + 
+   
+   # draw boxplots of cover
+   geom_boxplot() + 
+   
+   # split by taxon
+   facet_grid(rows = vars(taxon)) +
+   
+   # scale_fill_manual() +
+   theme_bw() +
+   xlab("site / isocline") +
+   theme(strip.text.y = element_text(face = "italic"),
+         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = rel(1.2)),
+         axis.title = element_text(size = rel(1.2))))
+
+# save plot
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_species_abundance_gradient.eps"),
+#           nuuk_spec_abundance_plot, base_height = 18, base_aspect_ratio = 0.8)
+
+
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨----
 # 4) Species: cover and predictions for all predictors ----
 
 prediction_plots_species <- function(species) {
