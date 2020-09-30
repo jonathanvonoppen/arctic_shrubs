@@ -1446,11 +1446,11 @@ ylabel <- ggdraw() +
                                    plot_grid(int_plot_AllShr + theme(legend.position = "none"),
                                              int_plot_AllEve + theme(legend.position = "none"),
                                              int_plot_AllDec + theme(legend.position = "none"),
-                                             int_plot_BetNan, 
                                              int_plot_EmpNig, 
                                              int_plot_RhoGro, 
-                                             int_plot_SalGla,
+                                             int_plot_BetNan, 
                                              int_plot_VacUli,
+                                             int_plot_SalGla,
                                              legend_int_plot,
                                              labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
                                              label_size = 18,
@@ -1656,15 +1656,15 @@ legend_hor <- get_legend(xplot)
                                                                      axis.title = element_blank()),
                                              es_plot_AllDec + theme(legend.position = "none", 
                                                                      axis.title = element_blank()),
-                                             es_plot_BetNan + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()), 
                                              es_plot_EmpNig + theme(legend.position = "none", 
                                                                      axis.title = element_blank()), 
                                              es_plot_RhoGro + theme(legend.position = "none", 
                                                                      axis.title = element_blank()), 
-                                             es_plot_SalGla + theme(legend.position = "none",
-                                                                     axis.title = element_blank()),
+                                             es_plot_BetNan + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
                                              es_plot_VacUli + theme(legend.position = "none",
+                                                                     axis.title = element_blank()),
+                                             es_plot_SalGla + theme(legend.position = "none",
                                                                      axis.title = element_blank()),
                                              labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
                                              label_size = 20,
@@ -1684,11 +1684,11 @@ legend_hor <- get_legend(xplot)
                            plot_grid(es_plot_AllShr,
                                      es_plot_AllEve,
                                      es_plot_AllDec,
-                                     es_plot_BetNan, 
                                      es_plot_EmpNig, 
                                      es_plot_RhoGro, 
-                                     es_plot_SalGla,
+                                     es_plot_BetNan, 
                                      es_plot_VacUli,
+                                     es_plot_SalGla,
                                      labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
                                      label_size = 20,
                                      label_fontface = "bold",
@@ -1705,8 +1705,8 @@ legend_hor <- get_legend(xplot)
                                              rel_heights = c(1, 0.07)))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels.pdf"),
-          nuuk_effect_size_plot_grid_hor, base_height = 18, base_aspect_ratio = 1.3)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels.pdf"),
+#           nuuk_effect_size_plot_grid_hor, base_height = 18, base_aspect_ratio = 1.3)
 
 
 # ________________________________________ ----
