@@ -522,15 +522,15 @@ prediction_plots_species <- function(species) {
   if(species == "Salix glauca") species_df <- SalGla.tot
   if(species == "Vaccinium uliginosum") species_df <- VacUli.tot
   
-  if(species == "Betula nana") figure_no <- "Fig. S6: "
-  if(species == "Cassiope tetragona") figure_no <- "Fig. S7: "
-  if(species == "Empetrum nigrum") figure_no <- "Fig. S8: "
-  if(species == "Phyllodoce caerulea") figure_no <- "Fig. S9: "
-  if(species == "Rhododendron groenlandicum") figure_no <- "Fig. S10: "
-  if(species == "Rhododendron tomentosum") figure_no <- "Fig. S11: "
-  if(species == "Salix arctophila") figure_no <- "Fig. S12: "
-  if(species == "Salix glauca") figure_no <- "Fig. S13: "
-  if(species == "Vaccinium uliginosum") figure_no <- "Fig. S14: "
+  if(species == "Betula nana") figure_no <- "Fig. S8: "
+  if(species == "Cassiope tetragona") figure_no <- "Fig. S9: "
+  if(species == "Empetrum nigrum") figure_no <- "Fig. S10: "
+  if(species == "Phyllodoce caerulea") figure_no <- "Fig. S11: "
+  if(species == "Rhododendron groenlandicum") figure_no <- "Fig. S12: "
+  if(species == "Rhododendron tomentosum") figure_no <- "Fig. S13: "
+  if(species == "Salix arctophila") figure_no <- "Fig. S14: "
+  if(species == "Salix glauca") figure_no <- "Fig. S15: "
+  if(species == "Vaccinium uliginosum") figure_no <- "Fig. S16: "
   
   if(species == "Betula nana") convergence_string <- ""
   if(species == "Cassiope tetragona") convergence_string <- " (model not converged)"
@@ -918,9 +918,9 @@ prediction_plots_groups <- function(fgroup) {
   if(fgroup == "evergreen shrub") group_df <- AllEve.tot
   if(fgroup == "deciduous shrub") group_df <- AllDec.tot
   
-  if(fgroup == "all shrub") figure_no <- "Fig. S3: "
-  if(fgroup == "evergreen shrub") figure_no <- "Fig. S4: "
-  if(fgroup == "deciduous shrub") figure_no <- "Fig. S5: "
+  if(fgroup == "all shrub") figure_no <- "Fig. S5: "
+  if(fgroup == "evergreen shrub") figure_no <- "Fig. S6: "
+  if(fgroup == "deciduous shrub") figure_no <- "Fig. S7: "
   
   
   # define initial predictions df
