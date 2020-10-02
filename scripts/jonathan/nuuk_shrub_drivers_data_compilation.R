@@ -31,13 +31,13 @@ pacman::p_load(tidyverse,   # for multiple data wrangling packages
 # Nuuk_data_path <- file.path("../", "../", "../" , "gl_microclim")
 
 # environmental data (plot level) [compiled by Nathalie Chardon]:
-load(file.path("data", "ts_plot.RData"))
+load(file.path("data", "input_data", "ts_plot.RData"))
 env_pred_nuuk <- ts_plot
 
 # former env data at #read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_05102015.csv")
 
 # species data (raw pinpoint data) [from Jacob Nabe-Nielsen]
-spec_nuuk <- read.csv(file.path("data", "Nuuk plant data 150201 - Pin-point data - stacked.csv")) %>% 
+spec_nuuk <- read.csv(file.path("data", "input_data", "Nuuk plant data 150201 - Pin-point data - stacked.csv")) %>% 
   as_tibble
 
 #####################################################################################################################################################
@@ -297,4 +297,4 @@ env_cov_long_target_groups <- env_cov_long %>%
 
 # >> for plot level: ----
 write_csv(env_cov_long_target_groups, path = "I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/nuuk_env_cover_plots.csv")
-write_csv(env_cov_long_target_groups, path = file.path("data", "nuuk_env_cover_plots.csv"))
+write_csv(env_cov_long_target_groups, path = file.path("data", "processed", "nuuk_env_cover_plots.csv"))
