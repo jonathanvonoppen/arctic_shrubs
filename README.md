@@ -6,13 +6,13 @@ The repository is maintained by [Jonathan von Oppen](mailto:jonathan.vonoppen@bi
 # File structure
 The repository contains the following folders:
 
-*[data](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/data) with the original and pre-processed data as well as cleaned model input data and model outputs;
+* [data](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/data) with the original and pre-processed data as well as cleaned model input data and model outputs;
 
-*[documentation](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/documentation) of the analysis workflow;
+* [documentation](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/documentation) of the analysis workflow;
 
-*[scripts](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/scripts) written for processing data and producing figures, sorted by the respective contributor.
+* [scripts](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/scripts) written for processing data and producing figures, sorted by the respective contributor.
 
-*[figures](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/figures) produced for the manuscript and supplementary material;
+* [figures](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/figures) produced for the manuscript and supplementary material;
 
-*[models](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/models) in JAGS code written during the analysis;
+* [models](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/models) in JAGS code written during the analysis;
 
