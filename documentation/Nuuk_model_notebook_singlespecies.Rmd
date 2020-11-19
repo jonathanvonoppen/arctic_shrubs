@@ -1328,7 +1328,7 @@ params_AllEve2 <- c("intercept",
 # run model
 model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params_groups,                      # parameters to be saved
+                                        params_AllEve2,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.AllEve2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -1337,7 +1337,7 @@ model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # i
                                         working.directory = NULL, 
                                         progress.bar = "text") 
 
-# plot(model_out.shrub_gradient.AllShr2) #check convergence, etc.
+# plot(model_out.shrub_gradient.AllEve2) #check convergence, etc.
 ```
 
 Extract coefficients and plot effect sizes:
@@ -1370,7 +1370,7 @@ coeff.shrub_gradient.AllEve2 <- coeff.shrub_gradient.AllEve2 %>%
 
 save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllEve2.Rdata"))
 
-(effect_size_plot.AllEve2 <- model_plot_sig_function(coeff.shrub_gradient.AllEve2, title_string = "evergreen shrubs", plot_width = 11))
+(effect_size_plot.AllEve2 <- model_plot_sig_function(coeff.shrub_gradient.AllEve2, title_string = "evergreen shrubs", plot_width = 8.5))
 ```
 
 ### *Deciduous shrubs*
@@ -1451,7 +1451,7 @@ write("
       b.tempjja.x ~ dnorm(0, 0.001)
       # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
-      # b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
       
@@ -1483,7 +1483,7 @@ write("
                     b.tempjja.x * tempjja.tot[k] + 
                     # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
-                    # b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
                     # b.precipjja.x2 * (precipjja.tot[k]^2) 
       }
@@ -1496,7 +1496,7 @@ write("
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_tcws[m] <- intercept + b.tcws * xhat_tcws[m]
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
-        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
@@ -1515,8 +1515,8 @@ write("
 
 # specify new set of parameters
 params_AllDec2 <- c("intercept",
-                   "b.tempjja.x", "b.tempjja.x2",
-                   "b.tempcont.x", # "b.tempcont.x2",
+                   "b.tempjja.x", # "b.tempjja.x2",
+                   "b.tempcont.x", "b.tempcont.x2",
                    "b.precipjja.x", # "b.precipjja.x2",
                    "b.gramin_cov",
                    "b.sri",
@@ -1532,7 +1532,7 @@ params_AllDec2 <- c("intercept",
 # run model
 model_out.shrub_gradient.AllDec2 <- jags(shrub_gradient_jags.AllDec.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params_groups,                      # parameters to be saved
+                                        params_AllDec2,                      # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.AllDec2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -1573,7 +1573,7 @@ coeff.shrub_gradient.AllDec2 <- coeff.shrub_gradient.AllDec2 %>%
 
 save(coeff.shrub_gradient.AllDec2, file = file.path("..", "data", "model_outputs", "groups", "model_output_AllDec2.Rdata"))
 
-(effect_size_plot.AllDec2 <- model_plot_sig_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 11))
+(effect_size_plot.AllDec2 <- model_plot_marg_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 8.5))
 ```
 
 ### Species
@@ -2834,7 +2834,7 @@ write("
       
       intercept ~ dnorm(0, 0.0001)
       
-      # b.compet ~ dnorm(0, 0.0001)
+      b.compet ~ dnorm(0, 0.0001)
       b.shrub_cov ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
@@ -2862,7 +2862,7 @@ write("
       for (i in 1:N_discrete){ 
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-                        # b.compet * compet.dis[i] + 
+                        b.compet * compet.dis[i] + 
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
@@ -2880,7 +2880,7 @@ write("
         p[j] <- mu2[j] * phi
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-                        # b.compet * compet.cont[j] +
+                        b.compet * compet.cont[j] +
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
@@ -2907,7 +2907,7 @@ write("
       
       # add predicted values (derived parameters)
       for (m in 1:Nxhat){
-        # phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
@@ -2936,7 +2936,7 @@ params_RhoGro2 <- c("intercept",
                     "b.tempjja.x", "b.tempjja.x2",
                     "b.tempcont.x", # "b.tempcont.x2",
                     "b.precipjja.x", # "b.precipjja.x2",
-                    # "b.compet", 
+                    "b.compet", 
                     "b.shrub_cov",
                     "b.gramin_cov",
                     "b.sri",
@@ -2945,15 +2945,15 @@ params_RhoGro2 <- c("intercept",
                     "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
                     "sigma.plotgroup",
                     "phi",
-                    # "phat_compet", 
+                    "phat_compet", 
                     "phat_shrub_cover", "phat_graminoid_cover", 
                     "phat_sri", "phat_tri", "phat_tcws", 
                     "phat_tempjja", "phat_tempcont", "phat_precipjja",
                     "phat_tempXmoist")
 
-model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # input data
+model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,   # input data
                                         inits = NULL,                       # JAGS to create initial values
-                                        params_RhoGro2,                             # parameters to be saved
+                                        params_RhoGro2,                     # parameters to be saved
                                         model.file = file.path("..", "models", "shrub_gradient.RhoGro2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
@@ -2977,7 +2977,7 @@ coeff.shrub_gradient.RhoGro2 <- model_out.shrub_gradient.RhoGro2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.RhoGro2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.RhoGro$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.RhoGro2$BUGSoutput$sims.list)-4)){
   ci_90.RhoGro2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.RhoGro2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.RhoGro2[param, 3] <- names(data.frame(model_out.shrub_gradient.RhoGro2$BUGSoutput$sims.list))[param]
 }
@@ -2993,11 +2993,11 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "model_outputs", "species", "model_output_RhoGro2.Rdata"))
+save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "model_outputs", "species", "model_output_RhoGro2.Rdata"))
 # load(file.path("..", "data", "model_outputs", "species", "model_output_RhoGro2.Rdata"))
 
 # effect size plot
-(effect_size_plot.RhoGro2 <- model_plot_sig_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 10.5))
+(effect_size_plot.RhoGro2 <- model_plot_marg_function(coeff.shrub_gradient.RhoGro2, title_string = "Rhododendron groenlandicum", plot_width = 10.5))
 
 ```
 
