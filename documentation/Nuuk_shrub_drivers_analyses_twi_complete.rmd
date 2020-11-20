@@ -3341,7 +3341,7 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "processed", "model_outputs", "model_output_VacUli2.Rdata"))
+save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_VacUli2.Rdata"))
 
 # effect size plot
 (effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 9.5))
