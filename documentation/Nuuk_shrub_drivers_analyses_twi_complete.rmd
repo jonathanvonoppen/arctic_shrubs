@@ -463,25 +463,25 @@ for (taxon_id in 1:nlevels(env_cov_bio_sub$taxon)){
          env_cov_bio_sub_spec.cont[[taxon_id]])
 }
 
-# save all input data
-# groups
-save(list = c("AllShr.tot",
-              "AllEve.tot",
-              "AllDec.tot"), 
-     file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
-
-# species
-# groups
-save(list = c("BetNan.tot",
-              "CasTet.tot",
-              "EmpNig.tot",
-              "PhyCae.tot",
-              "RhoGro.tot",
-              "RhoTom.tot",
-              "SalArc.tot",
-              "SalGla.tot",
-              "VacUli.tot"), 
-     file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+# # save all input data
+# # groups
+# save(list = c("AllShr.tot",
+#               "AllEve.tot",
+#               "AllDec.tot"), 
+#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
+# 
+# # species
+# # groups
+# save(list = c("BetNan.tot",
+#               "CasTet.tot",
+#               "EmpNig.tot",
+#               "PhyCae.tot",
+#               "RhoGro.tot",
+#               "RhoTom.tot",
+#               "SalArc.tot",
+#               "SalGla.tot",
+#               "VacUli.tot"), 
+#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
 
 ```
 
@@ -597,13 +597,13 @@ shrub_gradient_jags.AllDec.data <- list(
 str(shrub_gradient_jags.AllDec.data)
 
 
-# save model input data
-shrub_gradient_jags.groupdata <- list
-
-save(list = c("shrub_gradient_jags.AllShr.data",
-              "shrub_gradient_jags.AllEve.data",
-              "shrub_gradient_jags.AllDec.data"), 
-     file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_jags.groupdata.Rdata"))
+# # save model input data
+# shrub_gradient_jags.groupdata <- list
+# 
+# save(list = c("shrub_gradient_jags.AllShr.data",
+#               "shrub_gradient_jags.AllEve.data",
+#               "shrub_gradient_jags.AllDec.data"), 
+#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_jags.groupdata.Rdata"))
 ```
 
 ### > specifying model
@@ -765,13 +765,13 @@ save(coeff.shrub_gradient.AllShr,
 (effect_size_plot.AllShr <- model_plot_sig_function(coeff.shrub_gradient.AllShr, title_string = "all shrubs", plot_width = 10.5))
 ```
 
-* **positive response to soil moisture, negative response to graminoid cover (sig.)**
+* **unimodal response to summer temperature, negative response to graminoid cover (sig.)**
 * slightly positive response to solar radiation (n.s.)
 
 <br>
 
-As none of the quadratic terms come out significant, re-run without them:
-```{r, eval = FALSE}
+As precipitation and temp. variability quadratic terms didn't come out significant, re-run without them:
+```{r}
 write("
   
   model{
@@ -792,14 +792,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      # b.tempjja.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
       
       b.tempXtwi ~ dnorm(0, 0.001)
-      # b.tempXtwi2 ~ dnorm(0, 0.001)
+      b.tempXtwi2 ~ dnorm(0, 0.001)
       
       
     # plot level
@@ -810,7 +810,7 @@ write("
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.twi * twi.tot[i] + 
                         b.tempXtwi * tempjja.tot.plot[i] * twi.tot[i] +       # for interaction
-                        # b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
+                        b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
                         b.sri * sri.tot[i] +
                         b.tri * tri.tot[i]
       }
@@ -824,7 +824,7 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
@@ -838,17 +838,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
-                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] # +
-                                      # b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
+                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
         }
       }
 
@@ -858,7 +858,7 @@ write("
 
 # specify new set of parameters
 params_AllShr2 <- c("intercept",
-                   "b.tempjja.x", # "b.tempjja.x2",
+                   "b.tempjja.x", "b.tempjja.x2",
                    "b.tempcont.x", # "b.tempcont.x2",
                    "b.precipjja.x", # "b.precipjja.x2",
                    "b.gramin_cov",
@@ -887,7 +887,7 @@ model_out.shrub_gradient.AllShr2 <- jags(shrub_gradient_jags.AllShr.data,    # i
 # plot(model_out.shrub_gradient.AllShr2) #check convergence, etc.
 ```
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllShr2 <- model_out.shrub_gradient.AllShr2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -916,10 +916,10 @@ coeff.shrub_gradient.AllShr2 <- coeff.shrub_gradient.AllShr2 %>%
 
 save(coeff.shrub_gradient.AllShr2, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "model_output_AllShr2.Rdata"))
 
-(effect_size_plot.AllShr2 <- model_plot_sig_function(coeff.shrub_gradient.AllShr2, title_string = "all shrubs", plot_width = 7.5))
+(effect_size_plot.AllShr2 <- model_plot_sig_function(coeff.shrub_gradient.AllShr2, title_string = "all shrubs", plot_width = 8.5))
 ```
 
-* **positive response to soil moisture, negative response to graminoid cover (sig.)**
+* **positive response to temperature variability, unimodal response to summer temperature, negative response to graminoid cover (sig.)**
 * positive response to solar radiation (n.s.)
 
 <br>
@@ -969,17 +969,17 @@ coeff.shrub_gradient.AllEve <- coeff.shrub_gradient.AllEve %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.AllEve, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "first_runs_converged", "model_output_AllEve.Rdata"))
+save(coeff.shrub_gradient.AllEve, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "first_runs_converged", "model_output_AllEve.Rdata"))
 
 (effect_size_plot.AllEve <- model_plot_sig_function(coeff.shrub_gradient.AllEve, title_string = "evergreen shrubs", plot_width = 10.5))
 ```
 
-* **unimodal response to temperature, positive response to soil moisture, negative response to graminoid cover (sig.)**
+* **unimodal response to temperature, negative response to graminoid cover (sig.)**
 * slightly positive response to solar radiation (n.s.)
 
 <br>
 
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -1096,7 +1096,7 @@ model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllEve2 <- model_out.shrub_gradient.AllEve2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1123,11 +1123,11 @@ coeff.shrub_gradient.AllEve2 <- coeff.shrub_gradient.AllEve2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "model_output_AllEve2.Rdata"))
+save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "model_output_AllEve2.Rdata"))
 
 (effect_size_plot.AllEve2 <- model_plot_sig_function(coeff.shrub_gradient.AllEve2, title_string = "evergreen shrubs", plot_width = 8.5))
 ```
-* **unimodal response to temperature, positive response to soil moisture, negative response to graminoid cover & temperature variability (sig.)**
+* **unimodal response to temperature, negative response to graminoid cover (sig.)**
 * slightly positive response to solar radiation (n.s.)
 
 <br>
@@ -1177,18 +1177,17 @@ coeff.shrub_gradient.AllDec <- coeff.shrub_gradient.AllDec %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "first_runs_converged", "model_output_AllDec.Rdata"))
+save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "first_runs_converged", "model_output_AllDec.Rdata"))
 
 (effect_size_plot.AllDec <- model_plot_marg_function(coeff.shrub_gradient.AllDec, title_string = "deciduous shrubs", plot_width = 10.5))
 ```
 
-* **positive/unimodal response to temperature variability, negative response to graminoid cover (sig.)**
-* *positive response to solar radiation (m.s.)*
-* slightly positive response to temperature, negative response to terrain heterogeneity (n.s.)
+* **positive/unimodal response to summer temperature & temp. variability, negative response to graminoid cover (sig.)**
+* slightly positive response to solar radiation, negative response to terrain heterogeneity (n.s.)
 
 <br>
 
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -1209,14 +1208,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      # b.tempjja.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
-      # b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
       
       b.tempXtwi ~ dnorm(0, 0.001)
-      # b.tempXtwi2 ~ dnorm(0, 0.001)
+      b.tempXtwi2 ~ dnorm(0, 0.001)
       
       
     # plot level
@@ -1227,7 +1226,7 @@ write("
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.twi * twi.tot[i] + 
                         b.tempXtwi * tempjja.tot.plot[i] * twi.tot[i] +       # for interaction
-                        # b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
+                        b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
                         b.sri * sri.tot[i] +
                         b.tri * tri.tot[i]
       }
@@ -1241,7 +1240,7 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
@@ -1255,17 +1254,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
-                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] # +
-                                      # b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
+                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
         }
       }
 
@@ -1275,7 +1274,7 @@ write("
 
 # specify new set of parameters
 params_AllDec2 <- c("intercept",
-                   "b.tempjja.x", # "b.tempjja.x2",
+                   "b.tempjja.x", "b.tempjja.x2",
                    "b.tempcont.x", "b.tempcont.x2",
                    "b.precipjja.x", # "b.precipjja.x2",
                    "b.gramin_cov",
@@ -1304,7 +1303,7 @@ model_out.shrub_gradient.AllDec2 <- jags(shrub_gradient_jags.AllDec.data,    # i
 # plot(model_out.shrub_gradient.AllDec2) #check convergence, etc.
 ```
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllDec2 <- model_out.shrub_gradient.AllDec2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1331,9 +1330,9 @@ coeff.shrub_gradient.AllDec2 <- coeff.shrub_gradient.AllDec2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.AllDec2, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "model_output_AllDec2.Rdata"))
+save(coeff.shrub_gradient.AllDec2, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "model_output_AllDec2.Rdata"))
 
-(effect_size_plot.AllDec2 <- model_plot_marg_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 8.5))
+(effect_size_plot.AllDec2 <- model_plot_marg_function(coeff.shrub_gradient.AllDec2, title_string = "deciduous shrubs", plot_width = 9.5))
 ```
 * **positive/unimodal response to temperature variability, positive response to soil moisture, negative response to graminoid cover (sig.)**
 * *positive response to solar radiation (m.s.)*
@@ -1805,17 +1804,17 @@ shrub_gradient_jags.VacUli.data <- list(
 str(shrub_gradient_jags.VacUli.data)
 
 
-# save model input data
-save(list = c("shrub_gradient_jags.BetNan.data",
-              "shrub_gradient_jags.CasTet.data",
-              "shrub_gradient_jags.EmpNig.data",
-              "shrub_gradient_jags.PhyCae.data",
-              "shrub_gradient_jags.RhoGro.data",
-              "shrub_gradient_jags.RhoTom.data",
-              "shrub_gradient_jags.SalArc.data",
-              "shrub_gradient_jags.SalGla.data",
-              "shrub_gradient_jags.VacUli.data"), 
-     file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+# # save model input data
+# save(list = c("shrub_gradient_jags.BetNan.data",
+#               "shrub_gradient_jags.CasTet.data",
+#               "shrub_gradient_jags.EmpNig.data",
+#               "shrub_gradient_jags.PhyCae.data",
+#               "shrub_gradient_jags.RhoGro.data",
+#               "shrub_gradient_jags.RhoTom.data",
+#               "shrub_gradient_jags.SalArc.data",
+#               "shrub_gradient_jags.SalGla.data",
+#               "shrub_gradient_jags.VacUli.data"), 
+#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
 ```
 
 ### > specifying model
@@ -1993,20 +1992,21 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
          l90 = q5,
          u90 = q95,
          u95 = "97.5%",
-         Rhat) %>% print
+         Rhat)
 
-# save(coeff.shrub_gradient.BetNan, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_BetNan.Rdata"))
+save(coeff.shrub_gradient.BetNan, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_BetNan.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_BetNan.Rdata"))
 print(coeff.shrub_gradient.BetNan)
 (effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 12.5))
 ```
 
-* **negative response to graminoid cover (sig.)** and *other shrub cover (m.s.)*
+* **negative response to graminoid cover (sig.)** 
+* *unimodal response to temp. variability & other shrub cover (m.s.)*
 
 <br>
 
 As the quadratic terms for summer temperature and precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2147,7 +2147,7 @@ model_out.shrub_gradient.BetNan2 <- jags(shrub_gradient_jags.BetNan.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.BetNan2 <- model_out.shrub_gradient.BetNan2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2173,11 +2173,11 @@ coeff.shrub_gradient.BetNan2 <- coeff.shrub_gradient.BetNan2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.BetNan2, file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_BetNan2.Rdata"))
+save(coeff.shrub_gradient.BetNan2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_BetNan2.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_BetNan2.Rdata"))
 
 # effect size plot
-(effect_size_plot.BetNan2 <- model_plot_marg_function(coeff.shrub_gradient.BetNan2, title_string = "Betula nana", plot_width = 10.5))
+(effect_size_plot.BetNan2 <- model_plot_marg_function(coeff.shrub_gradient.BetNan2, title_string = "Betula nana", plot_width = 9.5))
 
 ```
 
@@ -2228,9 +2228,11 @@ coeff.shrub_gradient.CasTet <- coeff.shrub_gradient.CasTet %>%
          l90 = q5,
          u90 = q95,
          u95 = "97.5%",
-         Rhat) %>% print
+         Rhat)
+
 print(coeff.shrub_gradient.CasTet)
-# save(coeff.shrub_gradient.CasTet, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_CasTet.Rdata"))
+
+save(coeff.shrub_gradient.CasTet, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_CasTet.Rdata"))
 
 ```
 
@@ -2282,7 +2284,7 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.EmpNig, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_EmpNig.Rdata"))
+save(coeff.shrub_gradient.EmpNig, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_EmpNig.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_EmpNig.Rdata"))
 
 # effect size plot
@@ -2290,13 +2292,13 @@ coeff.shrub_gradient.EmpNig <- coeff.shrub_gradient.EmpNig %>%
 
 ```
 
-* **positive response to other shrub cover, precipitation (linear) & soil moisture, negative response to competition (sig.)**
-* negative response to graminoid cover, terrain heterogeneity (n.s.)
+* **positive response to other shrub cover, precipitation (linear), negative response to competition (sig.)**
+* slightly negative response to graminoid cover, slightly positive relationship with moisture (n.s.)
 
 <br>
 
-As the quadratic terms for temperature variability and precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+As none of the quadratic terms for climatic variables were significant, they were removed from the model before re-running:
+```{r}
 # new model object with terms removed
 write("
   
@@ -2437,7 +2439,7 @@ model_out.shrub_gradient.EmpNig2 <- jags(shrub_gradient_jags.EmpNig.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.EmpNig2 <- model_out.shrub_gradient.EmpNig2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2463,7 +2465,7 @@ coeff.shrub_gradient.EmpNig2 <- coeff.shrub_gradient.EmpNig2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.EmpNig2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_EmpNig2.Rdata"))
+save(coeff.shrub_gradient.EmpNig2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_EmpNig2.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_EmpNig2.Rdata"))
 
 # effect size plot
@@ -2471,8 +2473,8 @@ coeff.shrub_gradient.EmpNig2 <- coeff.shrub_gradient.EmpNig2 %>%
 
 ```
 
-* **positive response to other shrub cover, precipitation (linear) & soil moisture, negative response to competition & temperature variability (sig.)**
-* negative response to graminoid cover, terrain heterogeneity (n.s.)
+* **positive response to other shrub cover, precipitation (linear), negative response to competition & temperature variability (sig.)**
+* negative response to graminoid cover, positive relationship with moisture (n.s.)
 
 <br>
 
@@ -2520,11 +2522,11 @@ coeff.shrub_gradient.PhyCae <- coeff.shrub_gradient.PhyCae %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_PhyCae.Rdata"))
+save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_PhyCae.Rdata"))
 
 ```
 
-* **not converged** large R-hat values (~ 1.4) (only 10 non-zero values across plot groups)
+* **not converged** large R-hat values (~ 1.36) (only 10 non-zero values across plot groups)
 
 <br>
 
@@ -2572,7 +2574,7 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.RhoGro, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_RhoGro.Rdata"))
+save(coeff.shrub_gradient.RhoGro, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_RhoGro.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_RhoGro.Rdata"))
 
 # effect size plot
@@ -2580,15 +2582,15 @@ coeff.shrub_gradient.RhoGro <- coeff.shrub_gradient.RhoGro %>%
 
 ```
 
-* **positive response to other shrub cover (sig.), unimodal response to temperature (m.s.)** 
+* **positive response to other shrub cover, negative relationship with precipitation, unimodal response to temperature (sig.)** 
+* *negative response to graminoid cover (m.s.)*
 * slightly positive response to solar radiation, temperature variability (n.s.)
-* slightly negative response to graminoid cover & predipitation (n.s.)
 * large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
 
 <br>
 
 As the quadratic terms for temperature variability and precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2730,7 +2732,7 @@ model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.RhoGro2 <- model_out.shrub_gradient.RhoGro2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2757,7 +2759,7 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_RhoGro2.Rdata"))
+save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_RhoGro2.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_RhoGro2.Rdata"))
 
 # effect size plot
@@ -2765,7 +2767,8 @@ coeff.shrub_gradient.RhoGro2 <- coeff.shrub_gradient.RhoGro2 %>%
 
 ```
 
-* **positive response to temperature variability & other shrub cover (sig.), unimodal response to temperature and negative response to precipitation (linear) (m.s.) **
+* **positive response to temperature variability & other shrub cover, unimodal response to temperature and negative response to precipitation (linear) (sig) **
+* *negative relationship with graminoid cover (n.s.)*
 * positive response to solar radiation (n.s.)
 * large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
 
@@ -2815,11 +2818,11 @@ coeff.shrub_gradient.RhoTom <- coeff.shrub_gradient.RhoTom %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.RhoTom, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_RhoTom.Rdata"))
+save(coeff.shrub_gradient.RhoTom, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_RhoTom.Rdata"))
 
 ```
 
-* **not converging**: large R-hat values (~ 1.3), large variation in parameter estimates (only 13 non-zero values)
+* **not converging**: large R-hat values (~ 1.38), large variation in parameter estimates (only 13 non-zero values)
 
 <br>
 
@@ -2867,11 +2870,11 @@ coeff.shrub_gradient.SalArc <- coeff.shrub_gradient.SalArc %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.SalArc, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_SalArc.Rdata"))
+save(coeff.shrub_gradient.SalArc, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_SalArc.Rdata"))
 
 ```
 
-* **not converging well**: relatively large R-hat values (~ 1.09), quite some variation in parameter estimates (only 13 non-zero values across plot groups)
+* **not converging well**: relatively large R-hat values (~ 1.37), quite some variation in parameter estimates (only 13 non-zero values across plot groups)
 
 <br>
 
@@ -2919,11 +2922,11 @@ coeff.shrub_gradient.SalGla <- coeff.shrub_gradient.SalGla %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.SalGla, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_SalGla.Rdata"))
+save(coeff.shrub_gradient.SalGla, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_SalGla.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_SalGla.Rdata"))
 
 # effect size plot
-(effect_size_plot.SalGla <- model_plot_marg_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
+(effect_size_plot.SalGla <- model_plot_sig_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
 
 ```
 
@@ -2933,7 +2936,7 @@ coeff.shrub_gradient.SalGla <- coeff.shrub_gradient.SalGla %>%
 <br>
 
 As the quadratic terms for summer temperature, temperature variability and summer precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -3074,7 +3077,7 @@ model_out.shrub_gradient.SalGla2 <- jags(shrub_gradient_jags.SalGla.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.SalGla2 <- model_out.shrub_gradient.SalGla2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -3100,7 +3103,7 @@ coeff.shrub_gradient.SalGla2 <- coeff.shrub_gradient.SalGla2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.SalGla2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_SalGla2.Rdata"))
+save(coeff.shrub_gradient.SalGla2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_SalGla2.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_SalGla2.Rdata"))
 
 # effect size plot
@@ -3109,7 +3112,7 @@ coeff.shrub_gradient.SalGla2 <- coeff.shrub_gradient.SalGla2 %>%
 ```
 
 * **positive response to competition (sig.) and temperature variability (linear, m.s.); negative response to other shrub cover (m.s.)**
-* positive response to soil moisture, negative response to solar radiation (n.s.)
+* positive response to moisture & terrain heterogeneity, negative response to solar radiation (n.s.)
 
 <br>
 
@@ -3158,7 +3161,7 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_VacUli.Rdata"))
+save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_VacUli.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_VacUli.Rdata"))
 
 # effect size plot
@@ -3166,12 +3169,12 @@ coeff.shrub_gradient.VacUli <- coeff.shrub_gradient.VacUli %>%
 
 ```
 
-* **positive response to soil moisture (sig.)**, *precipitation, temperature (m.s.); negative response to competition (m.s.)*
+* **unimodal relationship with summer temperature (sig.)**, *negative relationship with competition (m.s.)*
 
 <br>
 
-As the quadratic terms for all climate variables were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+As the quadratic terms for summer precipitation and temperature variability were not significant, they were removed from the model before re-running:
+```{r}
 # new model object with terms removed
 write("
   
@@ -3192,14 +3195,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      # b.tempjja.x2 ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
       
       b.tempXtwi ~ dnorm(0, 0.001)
-      # b.tempXtwi2 ~ dnorm(0, 0.001)
+      b.tempXtwi2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -3213,7 +3216,7 @@ write("
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtwi * tempjja.dis[i] * twi.dis[i] +       # for interaction
-                        # b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
+                        b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
                         b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -3231,7 +3234,7 @@ write("
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
-                        # b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
+                        b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
                         b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -3244,7 +3247,7 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
@@ -3260,17 +3263,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
-                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] # +
-                                      # b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
+                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
           }
         }
 
@@ -3312,7 +3315,7 @@ model_out.shrub_gradient.VacUli2 <- jags(shrub_gradient_jags.VacUli.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.VacUli2 <- model_out.shrub_gradient.VacUli2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -3338,15 +3341,15 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
          u95 = "97.5%",
          Rhat) %>% print
 
-# save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "processed", "model_outputs", "model_output_VacUli2.Rdata"))
+save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "processed", "model_outputs", "model_output_VacUli2.Rdata"))
 
 # effect size plot
 (effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 9.5))
 
 ```
 
-* **positive response to soil moisture (sig.)**, *precipitation, temperature (m.s.)*
-* negative response to competition & terrain heterogeneity, positive response to solar radiation (n.s.)
+* *negative relationship with competition (m.s.)*
+* negative relationship with moisture, positive response to solar radiation (n.s.)
 
 <br>
 
