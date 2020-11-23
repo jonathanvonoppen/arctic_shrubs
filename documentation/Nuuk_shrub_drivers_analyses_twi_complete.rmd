@@ -349,7 +349,9 @@ env_cov_bio_sub <- env_cov_bio_sub %>%
   
   rename(tempjja = tempjja_ts_30,
          tempcont = tempcont_ts_30,
-         precipjja = precipjja_ts_30)
+         precipjja = precipjja_ts_30) %>% 
+  
+  mutate(taxon = as.factor(taxon))
 str(env_cov_bio_sub)
 ```
 
@@ -463,25 +465,25 @@ for (taxon_id in 1:nlevels(env_cov_bio_sub$taxon)){
          env_cov_bio_sub_spec.cont[[taxon_id]])
 }
 
-# # save all input data
-# # groups
-# save(list = c("AllShr.tot",
-#               "AllEve.tot",
-#               "AllDec.tot"), 
-#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
-# 
-# # species
-# # groups
-# save(list = c("BetNan.tot",
-#               "CasTet.tot",
-#               "EmpNig.tot",
-#               "PhyCae.tot",
-#               "RhoGro.tot",
-#               "RhoTom.tot",
-#               "SalArc.tot",
-#               "SalGla.tot",
-#               "VacUli.tot"), 
-#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+# save all input data
+# groups
+save(list = c("AllShr.tot",
+              "AllEve.tot",
+              "AllDec.tot"),
+     file = file.path("..", "data", "processed", "model_input_data_twi", "shrub_gradient_group.datasets.Rdata"))
+
+# species
+# groups
+save(list = c("BetNan.tot",
+              "CasTet.tot",
+              "EmpNig.tot",
+              "PhyCae.tot",
+              "RhoGro.tot",
+              "RhoTom.tot",
+              "SalArc.tot",
+              "SalGla.tot",
+              "VacUli.tot"),
+     file = file.path("..", "data", "processed", "model_input_data_twi", "shrub_gradient_species.datasets.Rdata"))
 
 ```
 
@@ -599,11 +601,11 @@ str(shrub_gradient_jags.AllDec.data)
 
 # # save model input data
 # shrub_gradient_jags.groupdata <- list
-# 
-# save(list = c("shrub_gradient_jags.AllShr.data",
-#               "shrub_gradient_jags.AllEve.data",
-#               "shrub_gradient_jags.AllDec.data"), 
-#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_jags.groupdata.Rdata"))
+
+save(list = c("shrub_gradient_jags.AllShr.data",
+              "shrub_gradient_jags.AllEve.data",
+              "shrub_gradient_jags.AllDec.data"),
+     file = file.path("..", "data", "processed", "model_input_data_twi", "shrub_gradient_jags.groupdata.Rdata"))
 ```
 
 ### > specifying model
@@ -1805,16 +1807,16 @@ str(shrub_gradient_jags.VacUli.data)
 
 
 # # save model input data
-# save(list = c("shrub_gradient_jags.BetNan.data",
-#               "shrub_gradient_jags.CasTet.data",
-#               "shrub_gradient_jags.EmpNig.data",
-#               "shrub_gradient_jags.PhyCae.data",
-#               "shrub_gradient_jags.RhoGro.data",
-#               "shrub_gradient_jags.RhoTom.data",
-#               "shrub_gradient_jags.SalArc.data",
-#               "shrub_gradient_jags.SalGla.data",
-#               "shrub_gradient_jags.VacUli.data"), 
-#      file = file.path("..", "data", "processed", "model_input_data", "shrub_gradient_jags.speciesdata.Rdata"))
+save(list = c("shrub_gradient_jags.BetNan.data",
+              "shrub_gradient_jags.CasTet.data",
+              "shrub_gradient_jags.EmpNig.data",
+              "shrub_gradient_jags.PhyCae.data",
+              "shrub_gradient_jags.RhoGro.data",
+              "shrub_gradient_jags.RhoTom.data",
+              "shrub_gradient_jags.SalArc.data",
+              "shrub_gradient_jags.SalGla.data",
+              "shrub_gradient_jags.VacUli.data"),
+     file = file.path("..", "data", "processed", "model_input_data_twi", "shrub_gradient_jags.speciesdata.Rdata"))
 ```
 
 ### > specifying model
