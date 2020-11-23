@@ -847,6 +847,40 @@ prediction_plots_path <- file.path("figures", "prediction_plots")
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
 
+# Fig. S5.1ff) Groups: cover and predictions for all predictors ----
+
+# >> load function ----
+source(file = file.path("scripts", "jonathan", "plotting_functions", "prediction_plot_twi.R"))
+
+
+# >> load data ----
+model_outputs_groups <- file.path("data", "processed", "model_outputs", "groups_twi", list.files(path = file.path("data", "processed", "model_outputs", "groups"), 
+                                                                                             pattern = "*.Rdata"))
+for (model_output in model_outputs_groups){
+  load(model_output)
+}
+# load input data
+load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradient_group.datasets.Rdata"))
+
+
+# >> plot graphs ----
+(nuuk_prediction_plot_AllShr <- prediction_plots_groups(fgroup = "all shrub"))
+(nuuk_prediction_plot_AllEve <- prediction_plots_groups(fgroup = "evergreen shrub"))
+(nuuk_prediction_plot_AllDec <- prediction_plots_groups(fgroup = "deciduous shrub"))
+
+# >> save plots ----
+prediction_plots_path <- file.path("figures", "prediction_plots_twi")
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllShr.pdf"),
+#           nuuk_prediction_plot_AllShr, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllEve.pdf"),
+#           nuuk_prediction_plot_AllEve, base_height = 15, base_aspect_ratio = 1)
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllDec.pdf"),
+#           nuuk_prediction_plot_AllDec, base_height = 15, base_aspect_ratio = 1)
+
+
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
+
+
 # Fig. S8ff) Species: cover and predictions for all predictors ----
 
 # >> load function ----
@@ -913,7 +947,7 @@ for (model_output in model_outputs_species){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradient_species.datasets.Rdata"))
 
 
 # >> plot graphs ----
@@ -928,7 +962,7 @@ load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_s
 (nuuk_prediction_plot_VacUli <- prediction_plots_species(species = "Vaccinium uliginosum"))
 
 # >> save plots ----
-prediction_plots_path <- file.path("figures", "prediction_plots")
+prediction_plots_path <- file.path("figures", "prediction_plots_twi")
 # save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_BetNan.pdf"),
 #           nuuk_prediction_plot_BetNan, base_height = 15, base_aspect_ratio = 1)
 # save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_CasTet.pdf"),
