@@ -112,6 +112,7 @@ clusterEvalQ(cl, {
 # Sample variograms
 vario_list <- parLapply(cl, raster_list, sample_variogram)
 save(vario_list, file = "scripts/jakob/vario_list.Rda")
+#load("scripts/jakob/vario_list.Rda")
 stopCluster(cl)
 
 # Look up table for pretty names
