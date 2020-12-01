@@ -81,10 +81,10 @@ spec_nuuk <- spec_nuuk %>%
   mutate(site_plot_id = paste(site, plot, sep="_"))
 
 env_pred_nuuk <- env_pred_nuuk %>% 
-  rename(site_plot_id = id)
+  rename(site_plot_id = id) %>% 
 
 # Generate a plot group/site specific ID (site_alt_plotgroup_id) in the "env_pred_nuuk" and "spec_nuuk" tables
-env_pred_nuuk <- env_pred_nuuk %>% 
+  
   # create plot group number (3 x 6 within any isocline)
   mutate(plotgroup = rep(c(rep(1, 6), rep(2, 6), rep(3, 6)), 
                              nrow(env_pred_nuuk) / 18)) %>% 
@@ -148,15 +148,18 @@ for (i in 1:length(taxon_list)){
 # Cassiope tetragona	  Cassiope tetragona	        0.103653333	      1
 
 
-env_pred_nuuk.bio <- mutate(env_pred_nuuk, occ_graminoids = occ_Juncaceae + occ_Cyperaceae + occ_Poaceae,
-                  led.gro.bio = occ_Ledum_palustre,
-                  sal.gla.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum,
-                  bet.nan.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca,
-                  vac.uli.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana,
-                  emp.nig.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum,
-                  sal.arc.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum + occ_Empetrum_nigrum,
-                  phy.coe.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum + occ_Empetrum_nigrum + occ_Salix_arctophila,
-                  cas.tet.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum + occ_Empetrum_nigrum + occ_Salix_arctophila + occ_Phyllodoce_coerulea)
+env_pred_nuuk.bio <- mutate(env_pred_nuuk, 
+                            led.gro.bio = occ_Ledum_palustre,
+                            sal.gla.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum,
+                            bet.nan.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca,
+                            vac.uli.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana,
+                            emp.nig.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + occ_Vaccinium_uliginosum,
+                            sal.arc.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + 
+                                          occ_Vaccinium_uliginosum + occ_Empetrum_nigrum,
+                            phy.coe.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + 
+                                          occ_Vaccinium_uliginosum + occ_Empetrum_nigrum + occ_Salix_arctophila,
+                            cas.tet.bio = occ_Ledum_palustre + occ_Ledum_groenlandicum + occ_Salix_glauca + occ_Betula_nana + 
+                                          occ_Vaccinium_uliginosum + occ_Empetrum_nigrum + occ_Salix_arctophila + occ_Phyllodoce_coerulea)
 
 env_pred_nuuk.bio <- as.data.frame(env_pred_nuuk.bio)
 
@@ -179,8 +182,8 @@ env_pred_nuuk.bio <- as.data.frame(env_pred_nuuk.bio)
 
 # Calculate abundance measure (IF USING COVER PER PLOT): ----
 # compute "cover" (= rel. no. hits per plot)
-occ_cols <- env_pred_nuuk.bio %>% select(starts_with("occ")) %>% colnames()
-env_cov <- env_pred_nuuk.bio %>%
+occ_cols <- env_pred_nuuk %>% select(starts_with("occ")) %>% colnames()
+env_cov <- env_pred_nuuk %>%
   mutate_at(occ_cols, funs(cov = ./25)) %>%   # cover = n_hits per 25 pins
   rename_at(vars(ends_with("cov")), funs(str_replace(.,"occ","cov"))) %>%
   rename_at(vars(ends_with("cov")), funs(str_remove(.,"_cov"))) %>%
@@ -195,7 +198,10 @@ env_cov <- env_pred_nuuk.bio %>%
          
          cov_All_deciduous = cov_Betula_nana + cov_Salix_arctophila + cov_Salix_glauca + cov_Vaccinium_uliginosum,
          
-         cov_All_evergreens = cov_Cassiope_tetragona + cov_Empetrum_nigrum + cov_Phyllodoce_coerulea + cov_Ledum_groenlandicum + cov_Ledum_palustre) %>% 
+         cov_All_evergreens = cov_Cassiope_tetragona + cov_Empetrum_nigrum + cov_Phyllodoce_coerulea + cov_Ledum_groenlandicum + cov_Ledum_palustre,
+         
+# create graminoid cover column from Cyperaceae, Poaceae, Juncaceae cover
+         graminoid_cover = cov_Juncaceae + cov_Cyperaceae + cov_Poaceae) %>% 
   
 # copy all shrub cover column into predictor column
   mutate(shrub_cover = cov_All_shrubs,
@@ -208,9 +214,6 @@ env_cov <- env_pred_nuuk.bio %>%
          SalArc_shrub_cover = cov_All_shrubs - cov_Salix_arctophila,
          SalGla_shrub_cover = cov_All_shrubs - cov_Salix_glauca,
          VacUli_shrub_cover = cov_All_shrubs - cov_Vaccinium_uliginosum) %>% 
-  
-# rename graminoids column to not match reduction pattern in next step
-  rename(graminoid_cover = cov_graminoids) %>% 
   
   as.data.frame %>% 
   droplevels()
@@ -227,39 +230,147 @@ env_cov_long_cov <- env_cov %>% select(-c(starts_with("occ"), ends_with("bio")))
   mutate(taxon = str_replace(taxon, "_", " ")) %>% 
   mutate(taxon = factor(taxon))
 
-  # for competition values:
-env_cov_long_bio <- env_cov %>% select(site_plot_id, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(site_alt_plotgroup_id, [...])
-  pivot_longer(cols = ends_with("bio"), 
-               names_to = "taxon", 
-               values_to = "compet", 
-               values_drop_na = FALSE) %>% 
-  # rename taxon column entries
-  mutate(taxon = str_remove(taxon, ".bio")) %>% 
-  mutate(taxon = recode(taxon, 
-                        "led.gro" = "Ledum groenlandicum",
-                        "sal.gla" = "Salix glauca",
-                        "bet.nan" = "Betula nana",
-                        "vac.uli" = "Vaccinium uliginosum",
-                        "emp.nig" = "Empetrum nigrum",
-                        "sal.arc" = "Salix arctophila",
-                        "phy.coe" = "Phyllodoce coerulea",
-                        "cas.tet" = "Cassiope tetragona")) %>% 
-  mutate(taxon = factor(taxon))
+#   # for competition values:
+# env_cov_long_bio <- env_cov %>% select(site_plot_id, ends_with("bio")) %>% # for PLOT GROUP level, change to [...] select(site_alt_plotgroup_id, [...])
+#   pivot_longer(cols = ends_with("bio"), 
+#                names_to = "taxon", 
+#                values_to = "compet", 
+#                values_drop_na = FALSE) %>% 
+#   # rename taxon column entries
+#   mutate(taxon = str_remove(taxon, ".bio")) %>% 
+#   mutate(taxon = recode(taxon, 
+#                         "led.gro" = "Ledum groenlandicum",
+#                         "sal.gla" = "Salix glauca",
+#                         "bet.nan" = "Betula nana",
+#                         "vac.uli" = "Vaccinium uliginosum",
+#                         "emp.nig" = "Empetrum nigrum",
+#                         "sal.arc" = "Salix arctophila",
+#                         "phy.coe" = "Phyllodoce coerulea",
+#                         "cas.tet" = "Cassiope tetragona")) %>% 
+#   mutate(taxon = factor(taxon))
 
-# merge both long dataframes, insert NAs for taxa w/o compet values
-env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio, 
-                          by = c("site_plot_id", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
+
+# calculate acquisitiveness difference to community-weighted mean difference for each focal species:
+
+# load traits scores
+traits_scores_nuuk <- read.csv(file = file.path("data", "processed", "nuuk_traits_PCAscores_cleaned.csv"),
+                               header = T)
+
+# compile focal shrub species (as in original species data)
+focal_species <- c("Betula nana",
+                   "Cassiope tetragona",
+                   "Empetrum nigrum",
+                   "Phyllodoce coerulea",
+                   "Ledum groenlandicum",
+                   "Ledum palustre",
+                   "Salix arctophila",
+                   "Salix glauca",
+                   "Vaccinium uliginosum")
+
+spec_acquis_rel <- spec_nuuk %>% 
+  
+  # filter for focal species
+  filter(taxon %in% focal_species) %>% 
+  
+  # group by taxon and plot
+  group_by(plot, taxon) %>% 
+  
+  # calculate abundance per taxon per plot
+  summarise(abundance_rel = sum(presence, na.rm = TRUE) / 25) %>% 
+  ungroup() %>% 
+  
+  # create new taxon column matching names in trait data
+  mutate(taxon_traits = case_when(taxon %in% c("Ledum palustre", "Ledum groenlandicum") ~ "Rhododendron sp.",
+                                  taxon %in% c("Salix glauca", "Salix arctophila") ~ "Salix sp.",
+                                  taxon == "Phyllodoce coerulea" ~ "Phyllodoce caerulea",
+                                  TRUE ~ taxon)) %>% 
+  
+  # join with acquisitiveness PC score
+  left_join(traits_scores_nuuk %>% select(PC1, species),
+            by = c("taxon_traits" = "species")) %>% 
+  rename(acquisitiveness = PC1) %>% 
+  
+  # weight acquisitiveness score by relative abundance
+  mutate(acquis_rel_spec = acquisitiveness * abundance_rel) %>% 
+  
+  # replace zero values (= species not present) with NAs
+  mutate(acquis_rel_spec = case_when(acquis_rel_spec == 0 ~ NA_real_,
+                                     TRUE ~ acquis_rel_spec))
+
+# loop over focal species to calculate specific community-weighted means
+
+focal_taxa_traits <- c("Betula nana", "Cassiope tetragona", "Empetrum nigrum", "Phyllodoce caerulea", "Rhododendron sp.", "Salix sp.", "Vaccinium uliginosum")
+community_acquis <- tibble()
+for (focal_taxon_id in 1:length(focal_taxa_traits)) {
+  community_acquis_spec <- spec_acquis_rel %>% 
+    
+    filter(!(taxon_traits == focal_taxa_traits[focal_taxon_id])) %>% 
+    
+    group_by(plot) %>% 
+    
+    # calculate mean acquisitiveness score of community species
+    summarise(acquis_community = sum(acquis_rel_spec, na.rm = T)) %>% ungroup %>% 
+    
+    # replace zero values (= none or no other species than focal species present) with NAs
+    mutate(acquis_community = case_when(acquis_community == 0 ~ NA_real_,
+                                        TRUE ~ acquis_community)) %>% 
+    
+    # create new column with focal taxon
+    mutate(taxon_focal = focal_taxa_traits[focal_taxon_id])
+  
+  community_acquis <- bind_rows(community_acquis, community_acquis_spec)
+}
+
+# calculate species-specific differences in acquisitiveness to community
+
+spec_dist_acquis <- spec_acquis_rel %>% 
+  
+  # join community values
+  left_join(community_acquis, 
+            by = c("plot", "taxon_traits" = "taxon_focal")) %>% 
+  
+  # in acquisitiveness column, replace with NA if species is not present
+  mutate(acquisitiveness = case_when(abundance_rel == 0 ~ NA_real_,
+                                     TRUE ~ acquisitiveness)) %>% 
+  
+  # calculate differences in acquisitiveness
+  mutate(acquis_diff = acquisitiveness - acquis_community) %>% 
+  
+  # select relevant columns
+  select(plot,
+         taxon, 
+         acquis_diff)
+
+# This results in the following number of values per taxon:
+
+# taxon                n.values
+
+# Betula nana               144
+# Cassiope tetragona         15
+# Empetrum nigrum           147
+# Ledum groenlandicum        89
+# Ledum palustre             12
+# Phyllodoce coerulea         9
+# Salix arctophila           13
+# Salix glauca              105
+# Vaccinium uliginosum       99
+
+
+# merge both dataframes, insert NAs for taxa w/o compet values
+env_cov_long <- left_join(env_cov_long_cov, spec_dist_acquis, 
+                          by = c("plot", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
   mutate(taxon = factor(taxon)) %>% 
   # correct species names
-  mutate(taxon = recode(taxon, "Phyllodoce coerulea" = "Phyllodoce caerulea",
+  mutate(taxon = recode(taxon, 
+                        "Phyllodoce coerulea" = "Phyllodoce caerulea",
                         "Ledum groenlandicum" = "Rhododendron groenlandicum", 
                         "Ledum palustre" = "Rhododendron tomentosum")) %>% 
   
-# insert value 0 for competitive pressure for Ledum palustre aka Rhododendron tomentosum (= tallest-growing species)
-  mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet)) %>% 
-  
+# # insert value 0 for competitive pressure for Ledum palustre aka Rhododendron tomentosum (= tallest-growing species)
+#   mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet)) %>% 
+#   
 # add extracted values for Terrain Ruggedness Index (by Jakob Assmann, for procedure see scripts/others/extract_tri_jonathan_plots_nuuk_JA.R)
-  left_join(read.csv(file.path("data", "nuuk_env_cover_plots_with_tri.csv"), 
+  left_join(read.csv(file.path("data", "input_data", "nuuk_env_cover_plots_with_tri.csv"), 
                      header = T) %>% 
                                   select(plot, 
                                          tri) %>% 
@@ -277,9 +388,9 @@ env_cov_long <- left_join(env_cov_long_cov, env_cov_long_bio,
          starts_with("precipjfmam_"),                               # average yearly cumulative winter-spring (JFMAM) precipitation
          starts_with("precipmam_"),                                 # average yearly cumulative spring (MAM) precipitation
          inclin_down, inclin_dir, tri,                              # terrain variables
-         twi_90m, ndwi, tcws,                                       # moisture variables
+         twi_90m, ndwi, tcws,                                       # wetness variables
          sri,                                                       # solar radiation
-         ndvi, compet,                                              # biotic variables I: productivity, height-derived competitive pressure
+         ndvi, acquis_diff,                                         # biotic variables I: productivity, acquisitiveness difference to CWM
          ends_with("_cover"),                                       # biotic variables II: shrub & graminoid cover
          taxon,                                                     # shrub species or func group (all shrubs/deciduous/evergreens)
          cover)                                                     # response variable: relative no. pin hits per plot group
