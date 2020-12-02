@@ -23,7 +23,8 @@ if(!require(pacman)){       # provides p_load() as wrapper for require() and lib
 pacman::p_load(tidyverse,   # for multiple data wrangling packages
                tidylog,     # to log operations in pipes
                stringr,     # for string wrangling
-               skimr)       # to conveniently skim & summarise data frames
+               skimr,       # to conveniently skim & summarise data frames
+               scales)      # for scaling variables to specified range
 
 
 ### 1) Data import ----
@@ -267,6 +268,7 @@ focal_species <- c("Betula nana",
                    "Salix glauca",
                    "Vaccinium uliginosum")
 
+# calculate relative abundances and weight acquisitiveness
 spec_acquis_rel <- spec_nuuk %>% 
   
   # filter for focal species
@@ -290,11 +292,16 @@ spec_acquis_rel <- spec_nuuk %>%
             by = c("taxon_traits" = "species")) %>% 
   rename(acquisitiveness = PC1) %>% 
   
-  # weight acquisitiveness score by relative abundance
-  mutate(acquis_rel_spec = acquisitiveness * abundance_rel) %>% 
+  # scale acquisitiveness score (now on the arbitrary scale from -3.6 to -0.9)
+  mutate(acquis_scale = rescale(acquisitiveness, to = c(0, 1))) %>% 
   
-  # replace zero values (= species not present) with NAs
-  mutate(acquis_rel_spec = case_when(acquis_rel_spec == 0 ~ NA_real_,
+  # weight acquisitiveness score by relative abundance
+  mutate(acquis_rel_spec = acquis_scale * abundance_rel) %>% 
+  
+  # replace zero values (= species not present) with NAs in absolute and weighted acquisitiveness
+  mutate(acquis_scale = case_when(abundance_rel == 0 ~ NA_real_,
+                                  TRUE ~ acquis_scale),
+         acquis_rel_spec = case_when(abundance_rel == 0 ~ NA_real_,
                                      TRUE ~ acquis_rel_spec))
 
 # loop over focal species to calculate specific community-weighted means
@@ -329,12 +336,12 @@ spec_dist_acquis <- spec_acquis_rel %>%
   left_join(community_acquis, 
             by = c("plot", "taxon_traits" = "taxon_focal")) %>% 
   
-  # in acquisitiveness column, replace with NA if species is not present
-  mutate(acquisitiveness = case_when(abundance_rel == 0 ~ NA_real_,
-                                     TRUE ~ acquisitiveness)) %>% 
+  # # in acquisitiveness column, replace with NA if species is not present
+  # mutate(acquisitiveness = case_when(abundance_rel == 0 ~ NA_real_,
+  #                                    TRUE ~ acquisitiveness)) %>% 
   
   # calculate differences in acquisitiveness
-  mutate(acquis_diff = acquisitiveness - acquis_community) %>% 
+  mutate(acquis_diff = acquis_scale - acquis_community) %>% 
   
   # select relevant columns
   select(plot,
@@ -343,20 +350,20 @@ spec_dist_acquis <- spec_acquis_rel %>%
 
 # This results in the following number of values per taxon:
 
-# taxon                n.values
+#   taxon                 n.values
 
-# Betula nana               144
-# Cassiope tetragona         15
+# Betula nana               119
+# Cassiope tetragona         14
 # Empetrum nigrum           147
-# Ledum groenlandicum        89
+# Ledum groenlandicum        87
 # Ledum palustre             12
-# Phyllodoce coerulea         9
-# Salix arctophila           13
-# Salix glauca              105
-# Vaccinium uliginosum       99
+# Phyllodoce coerulea         8
+# Salix arctophila           11
+# Salix glauca               87
+# Vaccinium uliginosum       84
 
 
-# merge both dataframes, insert NAs for taxa w/o compet values
+# merge environmental with acquisitiveness data
 env_cov_long <- left_join(env_cov_long_cov, spec_dist_acquis, 
                           by = c("plot", "taxon")) %>%   # for PLOT GROUP level, change to [...] c("site_alt_plotgroup_id", [...])
   mutate(taxon = factor(taxon)) %>% 
