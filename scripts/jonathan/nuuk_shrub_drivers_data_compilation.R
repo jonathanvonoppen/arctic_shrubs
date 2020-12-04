@@ -33,7 +33,21 @@ pacman::p_load(tidyverse,   # for multiple data wrangling packages
 
 # environmental data (plot level) [compiled by Nathalie Chardon]:
 load(file.path("data", "input_data", "ts_plot.RData"))
-env_pred_nuuk <- ts_plot
+env_pred_nuuk <- ts_plot %>% 
+  
+  # select variables needed
+  select(id, site, alt, plot,                         # site/alt/plot IDs
+         long, lat, year,                             # WGS84 coordinates, year of sampling
+         starts_with("tempjja_"),                     # summer mean temperatures
+         starts_with("tempmax_"),                     # average yearly JJA max temperature
+         starts_with("tempmin_"),                     # average yearly JFMA min temperature
+         starts_with("tempcont_"),                    # temp. continentality = average yearly amplitude (tempmax - tempmin)
+         starts_with("precipjja_"),                   # average yearly cumulative summer (JJA) precipitation
+         starts_with("precipjfmam_"),                 # average yearly cumulative winter-spring (JFMAM) precipitation
+         starts_with("precipmam_"),                   # average yearly cumulative spring (MAM) precipitation
+         inclin_down, inclin_dir,                     # terrain variables: slope, aspect
+         sri,                                         # solar radiation
+         ndvi)                                        # productivity
 
 # former env data at #read.csv("I:/C_Write/_User/JonathanVonOppen_au630524/Project/A_NuukFjord_shrub_abundance_controls/aa_Godthaabsfjord/Data/PlotSpecies/Processed/godthaabsfjord_plots_fusion_table_with_pred_05102015.csv")
 
@@ -346,7 +360,7 @@ spec_dist_acquis <- spec_acquis_rel %>%
   # select relevant columns
   select(plot,
          taxon, 
-         acquis_diff)
+         compet = acquis_diff)
 
 # This results in the following number of values per taxon:
 
@@ -377,10 +391,15 @@ env_cov_long <- left_join(env_cov_long_cov, spec_dist_acquis,
 #   mutate(compet = ifelse(taxon == "Rhododendron tomentosum", 0, compet)) %>% 
 #   
 # add extracted values for Terrain Ruggedness Index (by Jakob Assmann, for procedure see scripts/others/extract_tri_jonathan_plots_nuuk_JA.R)
-  left_join(read.csv(file.path("data", "input_data", "nuuk_env_cover_plots_with_tri.csv"), 
+  left_join(read.csv(file.path("data", "processed", "nuuk_env_cover_plots_topo_variables.csv"), 
                      header = T) %>% 
                                   select(plot, 
-                                         tri) %>% 
+                                         tri = tri_new,               # Terrain Ruggedness Index based on 30m GIMP MEaSUREs DEM
+                                         twi_fd8 = kopecky_twi,   # Topographic Wetness Index based on 30m GIMP MEaSUREs DEM
+                                                                        # and Freeman FD8 flow algorithm (Kopecky et al. 2020 SciTotEnv)
+                                         twi_saga = saga_twi,         # TWI based on 30m GIMP MEaSUREs DEM and SAGA GIS flow algorithm
+                                         tcws = TCwet_new             # Tasseled-Cap Wetness Index based on original Landsat imagery
+                                         ) %>% 
                                   distinct(plot, .keep_all = T),
             by = c("plot")) %>% 
   
@@ -395,9 +414,9 @@ env_cov_long <- left_join(env_cov_long_cov, spec_dist_acquis,
          starts_with("precipjfmam_"),                               # average yearly cumulative winter-spring (JFMAM) precipitation
          starts_with("precipmam_"),                                 # average yearly cumulative spring (MAM) precipitation
          inclin_down, inclin_dir, tri,                              # terrain variables
-         twi_90m, ndwi, tcws,                                       # wetness variables
+         twi_fd8, twi_saga, tcws,                               # wetness variables
          sri,                                                       # solar radiation
-         ndvi, acquis_diff,                                         # biotic variables I: productivity, acquisitiveness difference to CWM
+         ndvi, compet,                                              # biotic variables I: productivity, acquisitiveness difference to CWM
          ends_with("_cover"),                                       # biotic variables II: shrub & graminoid cover
          taxon,                                                     # shrub species or func group (all shrubs/deciduous/evergreens)
          cover)                                                     # response variable: relative no. pin hits per plot group
