@@ -182,6 +182,83 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
 
+
+# Fig. 2.1) Tundra species traits PCA scores - scaled & only shrub species ----
+# scores extracted by Anne D. Bjorkman from Thomas et al. 2020 Nature Communications, https://doi.org/10.1038/s41467-020-15014-4
+
+# >> load cleaned data ----
+traits_scores_nuuk_shrubs_scaled <- read.csv(file = file.path("data", "processed", "nuuk_traits_PCAscores_cleaned.csv"),
+                               header = T) %>% 
+  
+  # filter out graminoids
+  filter(species != "graminoids mean") %>% 
+  
+  # scale acquisitiveness score (so far on the arbitrary scale from -3.6 to -0.9)
+  mutate(acquis_scale = rescale(PC1, to = c(0, 1)))
+
+
+# >> compile plot ----
+# create labels for x axis
+library(grid)
+text_right <- textGrob("acquisitive", gp = gpar(fontsize = 13, fontface = "bold"))
+text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"))
+
+
+# plot PC1 scores
+(traits_scores_plot <- ggplot(data = traits_scores_nuuk_shrubs_scaled,
+                              aes(x = acquis_scale,
+                                  y = 0,
+                                  colour = fgroup)) +
+    # plot scores
+    geom_point(aes(colour = acquis_scale),
+               shape = 18,
+               size = 4) +
+    
+    scale_color_gradientn(colours = c(theme_red, theme_darkblue)) +
+    
+    # add species names
+    geom_text(aes(label = species,
+                  angle = 90,
+                  y = .1),
+              hjust = 0,
+              vjust = ifelse(traits_scores_nuuk$species == "Rhododendron sp.", 0.8, 0.375),
+              colour = "grey30",
+              fontface = ifelse(traits_scores_nuuk$species == "graminoids mean", "plain", "italic")) +
+    
+    # add traits labels
+    annotation_custom(text_right, 
+                      xmin = 0.9, xmax = 0.9, ymin = -0.2, ymax = -0.2) + 
+    annotation_custom(text_left,
+                      xmin = 0.1, xmax = 0.1, ymin = -0.2, ymax = -0.2) +
+    
+    # specify axis label
+    labs(x = "relative acquisitiveness (scaled)") +
+    
+    # set appearance
+    theme_classic() +
+    
+    coord_cartesian(xlim = c(0, 1), 
+                    ylim = c(0, 1.2), 
+                    clip = "off") +
+    
+    theme(axis.line.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none",
+          plot.margin = unit(c(0, 0.5, 1.5, 0.5), "cm"))
+  
+)
+
+
+# >> save plot ----
+# save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores_shrubs_scaled.pdf"),
+#           traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
+
+
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
+
+
 # Fig. 5) Effect size plots ----
 
 # >> load function ----
