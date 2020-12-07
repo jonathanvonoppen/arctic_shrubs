@@ -717,7 +717,7 @@ params_groups <- c("intercept",
 <br>
 
 ### *All shrubs*
-```{r}
+```{r, eval = FALSE}
 # run model
 model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -734,7 +734,7 @@ model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllShr <- model_out.shrub_gradient.AllShr$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -927,7 +927,7 @@ save(coeff.shrub_gradient.AllShr2, file = file.path("..", "data", "processed", "
 <br>
 
 ### *Evergreen shrubs*
-```{r}
+```{r, eval = FALSE}
 # run model
 model_out.shrub_gradient.AllEve <- jags(shrub_gradient_jags.AllEve.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -944,7 +944,7 @@ model_out.shrub_gradient.AllEve <- jags(shrub_gradient_jags.AllEve.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllEve <- model_out.shrub_gradient.AllEve$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1135,7 +1135,7 @@ save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "processed", "
 <br>
 
 ### *Deciduous shrubs*
-```{r}
+```{r, eval = FALSE}
 # run model
 model_out.shrub_gradient.AllDec <- jags(shrub_gradient_jags.AllDec.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -1152,7 +1152,7 @@ model_out.shrub_gradient.AllDec <- jags(shrub_gradient_jags.AllDec.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllDec <- model_out.shrub_gradient.AllDec$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1833,7 +1833,7 @@ write("
       b.shrub_cov ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      b.tri ~ dnorm(0, 0.0001)
+      #b.tri ~ dnorm(0, 0.0001)
       b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
@@ -1863,8 +1863,8 @@ write("
                         b.tempXtwi * tempjja.dis[i] * twi.dis[i] +       # for interaction
                         b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
                         b.twi * twi.dis[i] + 
-                        b.sri * sri.dis[i] +
-                        b.tri * tri.dis[i]
+                        b.sri * sri.dis[i] #+
+                        #b.tri * tri.dis[i]
       }
       
       
@@ -1881,8 +1881,8 @@ write("
                         b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
                         b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
                         b.twi * twi.cont[j] + 
-                        b.sri * sri.cont[j] +
-                        b.tri * tri.cont[j]
+                        b.sri * sri.cont[j] #+
+                        #b.tri * tri.cont[j]
       }
 
 
@@ -1906,7 +1906,7 @@ write("
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
-        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        #phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
@@ -1937,7 +1937,7 @@ params <- c("intercept",
             "b.shrub_cov", 
             "b.gramin_cov",
             "b.sri",
-            "b.tri",
+            #"b.tri",
             "b.twi",
             "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
             "sigma.plotgroup",

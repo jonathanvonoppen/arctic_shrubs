@@ -10,7 +10,7 @@
       b.shrub_cov ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      b.tri ~ dnorm(0, 0.0001)
+      #b.tri ~ dnorm(0, 0.0001)
       b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
@@ -40,8 +40,8 @@
                         b.tempXtwi * tempjja.dis[i] * twi.dis[i] +       # for interaction
                         b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
                         b.twi * twi.dis[i] + 
-                        b.sri * sri.dis[i] +
-                        b.tri * tri.dis[i]
+                        b.sri * sri.dis[i] #+
+                        #b.tri * tri.dis[i]
       }
       
       
@@ -58,8 +58,8 @@
                         b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
                         b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
                         b.twi * twi.cont[j] + 
-                        b.sri * sri.cont[j] +
-                        b.tri * tri.cont[j]
+                        b.sri * sri.cont[j] #+
+                        #b.tri * tri.cont[j]
       }
 
 
@@ -83,7 +83,7 @@
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
-        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        #phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
