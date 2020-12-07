@@ -227,9 +227,9 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
     
     # add traits labels
     annotation_custom(text_right, 
-                      xmin = 0.9, xmax = 0.9, ymin = -0.2, ymax = -0.2) + 
+                      xmin = 0.9, xmax = 0.9, ymin = -0.22, ymax = -0.22) + 
     annotation_custom(text_left,
-                      xmin = 0.1, xmax = 0.1, ymin = -0.2, ymax = -0.2) +
+                      xmin = 0.15, xmax = 0.15, ymin = -0.22, ymax = -0.22) +
     
     # specify axis label
     labs(x = "relative acquisitiveness (scaled)") +
@@ -252,8 +252,8 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
 
 
 # >> save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores_shrubs_scaled.pdf"),
-#           traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
+save_plot(file.path("figures", "nuuk_shrub_drivers_species_PCA_scores_shrubs_scaled.pdf"),
+          traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
