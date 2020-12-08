@@ -306,7 +306,7 @@ spec_acquis_rel <- spec_nuuk %>%
             by = c("taxon_traits" = "species")) %>% 
   rename(acquisitiveness = PC1) %>% 
   
-  # scale acquisitiveness score (now on the arbitrary scale from -3.6 to -0.9)
+  # scale acquisitiveness score (so far on the arbitrary scale from -3.6 to -0.9)
   mutate(acquis_scale = rescale(acquisitiveness, to = c(0, 1))) %>% 
   
   # weight acquisitiveness score by relative abundance
@@ -332,9 +332,9 @@ for (focal_taxon_id in 1:length(focal_taxa_traits)) {
     # calculate mean acquisitiveness score of community species
     summarise(acquis_community = sum(acquis_rel_spec, na.rm = T)) %>% ungroup %>% 
     
-    # replace zero values (= none or no other species than focal species present) with NAs
-    mutate(acquis_community = case_when(acquis_community == 0 ~ NA_real_,
-                                        TRUE ~ acquis_community)) %>% 
+    # # replace zero values (= none or no other species than focal species present) with NAs
+    # mutate(acquis_community = case_when(acquis_community == 0 ~ NA_real_,
+    #                                     TRUE ~ acquis_community)) %>% 
     
     # create new column with focal taxon
     mutate(taxon_focal = focal_taxa_traits[focal_taxon_id])
@@ -350,31 +350,21 @@ spec_dist_acquis <- spec_acquis_rel %>%
   left_join(community_acquis, 
             by = c("plot", "taxon_traits" = "taxon_focal")) %>% 
   
-  # # in acquisitiveness column, replace with NA if species is not present
-  # mutate(acquisitiveness = case_when(abundance_rel == 0 ~ NA_real_,
-  #                                    TRUE ~ acquisitiveness)) %>% 
-  
   # calculate differences in acquisitiveness
   mutate(acquis_diff = acquis_scale - acquis_community) %>% 
   
+  # assign zero difference if none of the shrub species is present in a plot (n = 73)
+  group_by(plot) %>% 
+  mutate(acquis_diff = case_when(!any(abundance_rel > 0) ~ 0,
+                                 TRUE ~ acquis_diff)) %>% 
+     
   # select relevant columns
   select(plot,
          taxon, 
          compet = acquis_diff)
 
-# This results in the following number of values per taxon:
-
-#   taxon                 n.values
-
-# Betula nana               119
-# Cassiope tetragona         14
-# Empetrum nigrum           147
-# Ledum groenlandicum        87
-# Ledum palustre             12
-# Phyllodoce coerulea         8
-# Salix arctophila           11
-# Salix glauca               87
-# Vaccinium uliginosum       84
+# >> looking meaningfully (few values outside {-1, 1} due to cover > 1 (overlapping vegetation layers))
+# qplot(spec_dist_acquis$compet)
 
 
 # merge environmental with acquisitiveness data
@@ -395,7 +385,7 @@ env_cov_long <- left_join(env_cov_long_cov, spec_dist_acquis,
                      header = T) %>% 
                                   select(plot, 
                                          tri = tri_new,               # Terrain Ruggedness Index based on 30m GIMP MEaSUREs DEM
-                                         twi_fd8 = kopecky_twi,   # Topographic Wetness Index based on 30m GIMP MEaSUREs DEM
+                                         twi_fd8 = kopecky_twi,       # Topographic Wetness Index based on 30m GIMP MEaSUREs DEM
                                                                         # and Freeman FD8 flow algorithm (Kopecky et al. 2020 SciTotEnv)
                                          twi_saga = saga_twi,         # TWI based on 30m GIMP MEaSUREs DEM and SAGA GIS flow algorithm
                                          tcws = TCwet_new             # Tasseled-Cap Wetness Index based on original Landsat imagery
