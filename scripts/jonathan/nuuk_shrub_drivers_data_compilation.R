@@ -384,7 +384,7 @@ env_cov_long <- left_join(env_cov_long_cov, spec_dist_acquis,
   left_join(read.csv(file.path("data", "processed", "nuuk_env_cover_plots_topo_variables.csv"), 
                      header = T) %>% 
                                   select(plot, 
-                                         tri = tri_new,               # Terrain Ruggedness Index based on 30m GIMP MEaSUREs DEM
+                                         tri = tri_arctic_dem,        # Terrain Ruggedness Index based on 2m ArcticDEM
                                          twi_fd8 = kopecky_twi,       # Topographic Wetness Index based on 30m GIMP MEaSUREs DEM
                                                                         # and Freeman FD8 flow algorithm (Kopecky et al. 2020 SciTotEnv)
                                          twi_saga = saga_twi,         # TWI based on 30m GIMP MEaSUREs DEM and SAGA GIS flow algorithm
