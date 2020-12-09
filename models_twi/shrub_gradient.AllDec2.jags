@@ -18,7 +18,7 @@
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
@@ -36,7 +36,7 @@
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.twi * twi.tot[i] + 
                         b.tempXtwi * tempjja.tot.plot[i] * twi.tot[i] +       # for interaction
-                        b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
+                        # b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
                         b.sri * sri.tot[i] +
                         b.tri * tri.tot[i]
       }
@@ -50,7 +50,7 @@
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
@@ -64,17 +64,17 @@
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
-                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
-                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] # +
+                                      # b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
         }
       }
 
