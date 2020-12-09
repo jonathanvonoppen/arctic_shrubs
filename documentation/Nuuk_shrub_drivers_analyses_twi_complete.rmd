@@ -515,7 +515,7 @@ shrub_gradient_jags.AllShr.data <- list(
   # subset of values for prediction, for each predictor...
   xhat_graminoid_cover = seq(from = min(AllShr.tot$graminoid_coverC), to = max(AllShr.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(AllShr.tot$sriC), to = max(AllShr.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(AllShr.tot$triC, na.rm = T), to = max(AllShr.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(AllShr.tot$triC), to = max(AllShr.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(AllShr.tot$twiC), to = max(AllShr.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(AllShr.tot$tempjjaC), to = max(AllShr.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(AllShr.tot$precipjjaC), to = max(AllShr.tot$precipjjaC), length.out = 100),
@@ -550,7 +550,7 @@ shrub_gradient_jags.AllEve.data <- list(
   # subset of values for prediction, for each predictor...
   xhat_graminoid_cover = seq(from = min(AllEve.tot$graminoid_coverC), to = max(AllEve.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(AllEve.tot$sriC), to = max(AllEve.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(AllEve.tot$triC, na.rm = T), to = max(AllEve.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(AllEve.tot$triC), to = max(AllEve.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(AllEve.tot$twiC), to = max(AllEve.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(AllEve.tot$tempjjaC), to = max(AllEve.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(AllEve.tot$precipjjaC), to = max(AllEve.tot$precipjjaC), length.out = 100),
@@ -585,7 +585,7 @@ shrub_gradient_jags.AllDec.data <- list(
   # subset of values for prediction, for each predictor...
   xhat_graminoid_cover = seq(from = min(AllDec.tot$graminoid_coverC), to = max(AllDec.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(AllDec.tot$sriC), to = max(AllDec.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(AllDec.tot$triC, na.rm = T), to = max(AllDec.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(AllDec.tot$triC), to = max(AllDec.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(AllDec.tot$twiC), to = max(AllDec.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(AllDec.tot$tempjjaC), to = max(AllDec.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(AllDec.tot$precipjjaC), to = max(AllDec.tot$precipjjaC), length.out = 100),
@@ -717,7 +717,7 @@ params_groups <- c("intercept",
 <br>
 
 ### *All shrubs*
-```{r, eval = FALSE}
+```{r}
 # run model
 model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -734,7 +734,7 @@ model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllShr <- model_out.shrub_gradient.AllShr$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -773,7 +773,7 @@ save(coeff.shrub_gradient.AllShr,
 <br>
 
 As precipitation and temp. variability quadratic terms didn't come out significant, re-run without them:
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -889,7 +889,7 @@ model_out.shrub_gradient.AllShr2 <- jags(shrub_gradient_jags.AllShr.data,    # i
 # plot(model_out.shrub_gradient.AllShr2) #check convergence, etc.
 ```
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllShr2 <- model_out.shrub_gradient.AllShr2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -981,7 +981,7 @@ save(coeff.shrub_gradient.AllEve, file = file.path("..", "data", "processed", "m
 
 <br>
 
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -1098,7 +1098,7 @@ model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllEve2 <- model_out.shrub_gradient.AllEve2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1181,15 +1181,15 @@ coeff.shrub_gradient.AllDec <- coeff.shrub_gradient.AllDec %>%
 
 save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "processed", "model_outputs", "groups_twi", "first_runs_converged", "model_output_AllDec.Rdata"))
 
-(effect_size_plot.AllDec <- model_plot_marg_function(coeff.shrub_gradient.AllDec, title_string = "deciduous shrubs", plot_width = 10.5))
+(effect_size_plot.AllDec <- model_plot_sig_function(coeff.shrub_gradient.AllDec, title_string = "deciduous shrubs", plot_width = 10.5))
 ```
 
-* **positive/unimodal response to summer temperature & temp. variability, negative response to graminoid cover (sig.)**
+* **positive/unimodal response to temp. variability, negative response to graminoid cover (sig.)**
 * slightly positive response to solar radiation, negative response to terrain heterogeneity (n.s.)
 
 <br>
 
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -1210,7 +1210,7 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
@@ -1228,7 +1228,7 @@ write("
                         b.gramin_cov * gramin_cov.tot[i] + 
                         b.twi * twi.tot[i] + 
                         b.tempXtwi * tempjja.tot.plot[i] * twi.tot[i] +       # for interaction
-                        b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
+                        # b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
                         b.sri * sri.tot[i] +
                         b.tri * tri.tot[i]
       }
@@ -1242,7 +1242,7 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
@@ -1256,17 +1256,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
-                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
-                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] # +
+                                      # b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
         }
       }
 
@@ -1276,7 +1276,7 @@ write("
 
 # specify new set of parameters
 params_AllDec2 <- c("intercept",
-                   "b.tempjja.x", "b.tempjja.x2",
+                   "b.tempjja.x", # "b.tempjja.x2",
                    "b.tempcont.x", "b.tempcont.x2",
                    "b.precipjja.x", # "b.precipjja.x2",
                    "b.gramin_cov",
@@ -1305,7 +1305,7 @@ model_out.shrub_gradient.AllDec2 <- jags(shrub_gradient_jags.AllDec.data,    # i
 # plot(model_out.shrub_gradient.AllDec2) #check convergence, etc.
 ```
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllDec2 <- model_out.shrub_gradient.AllDec2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1380,11 +1380,11 @@ shrub_gradient_jags.BetNan.data <- list(
   N_plotgroups = length(unique(BetNan.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(BetNan.tot$competC, na.rm = T), to = max(BetNan.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(BetNan.tot$competC), to = max(BetNan.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(BetNan.tot$BetNan_shrub_coverC), to = max(BetNan.tot$BetNan_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(BetNan.tot$graminoid_coverC), to = max(BetNan.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(BetNan.tot$sriC), to = max(BetNan.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(BetNan.tot$triC, na.rm = T), to = max(BetNan.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(BetNan.tot$triC), to = max(BetNan.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(BetNan.tot$twiC), to = max(BetNan.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(BetNan.tot$tempjjaC), to = max(BetNan.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(BetNan.tot$precipjjaC), to = max(BetNan.tot$precipjjaC), length.out = 100),
@@ -1431,11 +1431,11 @@ shrub_gradient_jags.CasTet.data <- list(
   N_plotgroups = length(unique(CasTet.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(CasTet.tot$competC, na.rm = T), to = max(CasTet.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(CasTet.tot$competC), to = max(CasTet.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(CasTet.tot$CasTet_shrub_coverC), to = max(CasTet.tot$CasTet_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(CasTet.tot$graminoid_coverC), to = max(CasTet.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(CasTet.tot$sriC), to = max(CasTet.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(CasTet.tot$triC, na.rm = T), to = max(CasTet.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(CasTet.tot$triC), to = max(CasTet.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(CasTet.tot$twiC), to = max(CasTet.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(CasTet.tot$tempjjaC), to = max(CasTet.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(CasTet.tot$precipjjaC), to = max(CasTet.tot$precipjjaC), length.out = 100),
@@ -1482,11 +1482,11 @@ shrub_gradient_jags.EmpNig.data <- list(
   N_plotgroups = length(unique(EmpNig.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(EmpNig.tot$competC, na.rm = T), to = max(EmpNig.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(EmpNig.tot$competC), to = max(EmpNig.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(EmpNig.tot$EmpNig_shrub_coverC), to = max(EmpNig.tot$EmpNig_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(EmpNig.tot$graminoid_coverC), to = max(EmpNig.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(EmpNig.tot$sriC), to = max(EmpNig.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(EmpNig.tot$triC, na.rm = T), to = max(EmpNig.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(EmpNig.tot$triC), to = max(EmpNig.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(EmpNig.tot$twiC), to = max(EmpNig.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(EmpNig.tot$tempjjaC), to = max(EmpNig.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(EmpNig.tot$precipjjaC), to = max(EmpNig.tot$precipjjaC), length.out = 100),
@@ -1533,11 +1533,11 @@ shrub_gradient_jags.PhyCae.data <- list(
   N_plotgroups = length(unique(PhyCae.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(PhyCae.tot$competC, na.rm = T), to = max(PhyCae.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(PhyCae.tot$competC), to = max(PhyCae.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(PhyCae.tot$PhyCae_shrub_coverC), to = max(PhyCae.tot$PhyCae_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(PhyCae.tot$graminoid_coverC), to = max(PhyCae.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(PhyCae.tot$sriC), to = max(PhyCae.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(PhyCae.tot$triC, na.rm = T), to = max(PhyCae.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(PhyCae.tot$triC), to = max(PhyCae.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(PhyCae.tot$twiC), to = max(PhyCae.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(PhyCae.tot$tempjjaC), to = max(PhyCae.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(PhyCae.tot$precipjjaC), to = max(PhyCae.tot$precipjjaC), length.out = 100),
@@ -1584,11 +1584,11 @@ shrub_gradient_jags.RhoGro.data <- list(
   N_plotgroups = length(unique(RhoGro.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(RhoGro.tot$competC, na.rm = T), to = max(RhoGro.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(RhoGro.tot$competC), to = max(RhoGro.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(RhoGro.tot$RhoGro_shrub_coverC), to = max(RhoGro.tot$RhoGro_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(RhoGro.tot$graminoid_coverC), to = max(RhoGro.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(RhoGro.tot$sriC), to = max(RhoGro.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(RhoGro.tot$triC, na.rm = T), to = max(RhoGro.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(RhoGro.tot$triC), to = max(RhoGro.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(RhoGro.tot$twiC), to = max(RhoGro.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(RhoGro.tot$tempjjaC), to = max(RhoGro.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(RhoGro.tot$precipjjaC), to = max(RhoGro.tot$precipjjaC), length.out = 100),
@@ -1635,11 +1635,11 @@ shrub_gradient_jags.RhoTom.data <- list(
   N_plotgroups = length(unique(RhoTom.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(RhoTom.tot$competC, na.rm = T), to = max(RhoTom.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(RhoTom.tot$competC), to = max(RhoTom.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(RhoTom.tot$RhoTom_shrub_coverC), to = max(RhoTom.tot$RhoTom_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(RhoTom.tot$graminoid_coverC), to = max(RhoTom.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(RhoTom.tot$sriC), to = max(RhoTom.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(RhoTom.tot$triC, na.rm = T), to = max(RhoTom.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(RhoTom.tot$triC), to = max(RhoTom.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(RhoTom.tot$twiC), to = max(RhoTom.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(RhoTom.tot$tempjjaC), to = max(RhoTom.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(RhoTom.tot$precipjjaC), to = max(RhoTom.tot$precipjjaC), length.out = 100),
@@ -1686,11 +1686,11 @@ shrub_gradient_jags.SalArc.data <- list(
   N_plotgroups = length(unique(SalArc.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(SalArc.tot$competC, na.rm = T), to = max(SalArc.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(SalArc.tot$competC), to = max(SalArc.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(SalArc.tot$SalArc_shrub_coverC), to = max(SalArc.tot$SalArc_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(SalArc.tot$graminoid_coverC), to = max(SalArc.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(SalArc.tot$sriC), to = max(SalArc.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(SalArc.tot$triC, na.rm = T), to = max(SalArc.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(SalArc.tot$triC), to = max(SalArc.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(SalArc.tot$twiC), to = max(SalArc.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(SalArc.tot$tempjjaC), to = max(SalArc.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(SalArc.tot$precipjjaC), to = max(SalArc.tot$precipjjaC), length.out = 100),
@@ -1737,11 +1737,11 @@ shrub_gradient_jags.SalGla.data <- list(
   N_plotgroups = length(unique(SalGla.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(SalGla.tot$competC, na.rm = T), to = max(SalGla.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(SalGla.tot$competC), to = max(SalGla.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(SalGla.tot$SalGla_shrub_coverC), to = max(SalGla.tot$SalGla_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(SalGla.tot$graminoid_coverC), to = max(SalGla.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(SalGla.tot$sriC), to = max(SalGla.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(SalGla.tot$triC, na.rm = T), to = max(SalGla.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(SalGla.tot$triC), to = max(SalGla.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(SalGla.tot$twiC), to = max(SalGla.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(SalGla.tot$tempjjaC), to = max(SalGla.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(SalGla.tot$precipjjaC), to = max(SalGla.tot$precipjjaC), length.out = 100),
@@ -1788,11 +1788,11 @@ shrub_gradient_jags.VacUli.data <- list(
   N_plotgroups = length(unique(VacUli.tot$site_alt_plotgroup_id)),
   
   # subset of values for prediction, for each predictor...
-  xhat_compet = seq(from = min(VacUli.tot$competC, na.rm = T), to = max(VacUli.tot$competC, na.rm = T), length.out = 100),
+  xhat_compet = seq(from = min(VacUli.tot$competC), to = max(VacUli.tot$competC), length.out = 100),
   xhat_shrub_cover = seq(from = min(VacUli.tot$VacUli_shrub_coverC), to = max(VacUli.tot$VacUli_shrub_coverC), length.out = 100),
   xhat_graminoid_cover = seq(from = min(VacUli.tot$graminoid_coverC), to = max(VacUli.tot$graminoid_coverC), length.out = 100),
   xhat_sri = seq(from = min(VacUli.tot$sriC), to = max(VacUli.tot$sriC), length.out = 100),
-  xhat_tri = seq(from = min(VacUli.tot$triC, na.rm = T), to = max(VacUli.tot$triC, na.rm = T), length.out = 100),
+  xhat_tri = seq(from = min(VacUli.tot$triC), to = max(VacUli.tot$triC), length.out = 100),
   xhat_twi = seq(from = min(VacUli.tot$twiC), to = max(VacUli.tot$twiC), length.out = 100),
   xhat_tempjja = seq(from = min(VacUli.tot$tempjjaC), to = max(VacUli.tot$tempjjaC), length.out = 100),
   xhat_precipjja = seq(from = min(VacUli.tot$precipjjaC), to = max(VacUli.tot$precipjjaC), length.out = 100),
@@ -1820,7 +1820,7 @@ save(list = c("shrub_gradient_jags.BetNan.data",
 ```
 
 ### > specifying model
-```{r}
+```{r, eval = FALSE}
 write("
   
   model{
@@ -1833,7 +1833,7 @@ write("
       b.shrub_cov ~ dnorm(0, 0.0001)
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      #b.tri ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
       b.twi ~ dnorm(0, 0.0001)
 
       sigma.plotgroup ~ dunif(0,100)
@@ -1863,8 +1863,8 @@ write("
                         b.tempXtwi * tempjja.dis[i] * twi.dis[i] +       # for interaction
                         b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
                         b.twi * twi.dis[i] + 
-                        b.sri * sri.dis[i] #+
-                        #b.tri * tri.dis[i]
+                        b.sri * sri.dis[i] +
+                        b.tri * tri.dis[i]
       }
       
       
@@ -1881,8 +1881,8 @@ write("
                         b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
                         b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
                         b.twi * twi.cont[j] + 
-                        b.sri * sri.cont[j] #+
-                        #b.tri * tri.cont[j]
+                        b.sri * sri.cont[j] +
+                        b.tri * tri.cont[j]
       }
 
 
@@ -1906,7 +1906,7 @@ write("
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
-        #phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
@@ -1928,7 +1928,7 @@ write("
 ```
 
 Specify the parameters to be monitored:
-```{r}
+```{r, eval = FALSE}
 params <- c("intercept",
             "b.tempjja.x", "b.tempjja.x2",
             "b.tempcont.x", "b.tempcont.x2",
@@ -1937,7 +1937,7 @@ params <- c("intercept",
             "b.shrub_cov", 
             "b.gramin_cov",
             "b.sri",
-            #"b.tri",
+            "b.tri",
             "b.twi",
             "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]","b_plotgroup[63]",
             "sigma.plotgroup",
@@ -1952,7 +1952,7 @@ params <- c("intercept",
 <br>
 
 ### *Betula nana*
-```{r}
+```{r, eval = FALSE}
 # run model
 model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
@@ -1969,7 +1969,7 @@ model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.BetNan <- model_out.shrub_gradient.BetNan$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1999,16 +1999,15 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
 save(coeff.shrub_gradient.BetNan, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_BetNan.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_BetNan.Rdata"))
 print(coeff.shrub_gradient.BetNan)
-(effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 12.5))
+(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 12.5))
 ```
 
-* **negative response to graminoid cover (sig.)** 
-* *unimodal response to temp. variability & other shrub cover (m.s.)*
+* **positive relationship with more conservative communities, negative response to graminoid cover (sig.)** 
 
 <br>
 
-As the quadratic terms for summer temperature and precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+As none of the quadratic terms for climatic variables were significant, they were removed from the model before re-running:
+```{r}
 # new model object with terms removed
 write("
   
@@ -2149,7 +2148,7 @@ model_out.shrub_gradient.BetNan2 <- jags(shrub_gradient_jags.BetNan.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.BetNan2 <- model_out.shrub_gradient.BetNan2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2189,7 +2188,7 @@ save(coeff.shrub_gradient.BetNan2, file = file.path("..", "data", "processed", "
 
 
 ### *Cassiope tetragona*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.CasTet <- jags(shrub_gradient_jags.CasTet.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2205,7 +2204,7 @@ model_out.shrub_gradient.CasTet <- jags(shrub_gradient_jags.CasTet.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.CasTet <- model_out.shrub_gradient.CasTet$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2238,12 +2237,12 @@ save(coeff.shrub_gradient.CasTet, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **not converging**: really large R-hat values (~ 6.8) (only 16 non-zero values across plot groups)
+* **not converging**: large R-hat values (~ 1.2) (only 16 non-zero values across plot groups)
 
 <br>
 
 ### *Empetrum nigrum*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.EmpNig <- jags(shrub_gradient_jags.EmpNig.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2259,7 +2258,7 @@ model_out.shrub_gradient.EmpNig <- jags(shrub_gradient_jags.EmpNig.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.EmpNig <- model_out.shrub_gradient.EmpNig$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2290,17 +2289,17 @@ save(coeff.shrub_gradient.EmpNig, file = file.path("..", "data", "processed", "m
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_EmpNig.Rdata"))
 
 # effect size plot
-(effect_size_plot.EmpNig <- model_plot_sig_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum", plot_width = 12.5))
+(effect_size_plot.EmpNig <- model_plot_marg_function(coeff.shrub_gradient.EmpNig, title_string = "Empetrum nigrum", plot_width = 12.5))
 
 ```
 
-* **positive response to other shrub cover, precipitation (linear), negative response to competition (sig.)**
-* slightly negative response to graminoid cover, slightly positive relationship with moisture (n.s.)
+* *positive linear relationship to summer precipitation (m.s.)*
+* slightly unimodal relationship with summer temperature and topographic wetness (n.s.)
 
 <br>
 
 As none of the quadratic terms for climatic variables were significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2441,7 +2440,7 @@ model_out.shrub_gradient.EmpNig2 <- jags(shrub_gradient_jags.EmpNig.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.EmpNig2 <- model_out.shrub_gradient.EmpNig2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2481,7 +2480,7 @@ save(coeff.shrub_gradient.EmpNig2, file = file.path("..", "data", "processed", "
 <br>
 
 ### *Phyllodoce caerulea*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.PhyCae.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2497,7 +2496,7 @@ model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.PhyCae.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.PhyCae <- model_out.shrub_gradient.PhyCae$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2528,12 +2527,12 @@ save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **not converged** large R-hat values (~ 1.36) (only 10 non-zero values across plot groups)
+* **not converged** large R-hat values (~ 1.2) (only 10 non-zero values across plot groups)
 
 <br>
 
 ### *Rhododendron groenlandicum*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.RhoGro.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2549,7 +2548,7 @@ model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.RhoGro.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.RhoGro <- model_out.shrub_gradient.RhoGro$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2584,15 +2583,14 @@ save(coeff.shrub_gradient.RhoGro, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **positive response to other shrub cover, negative relationship with precipitation, unimodal response to temperature (sig.)** 
-* *negative response to graminoid cover (m.s.)*
-* slightly positive response to solar radiation, temperature variability (n.s.)
-* large variation in competiton response as there was only one (however rare) taller-growing species in the system (*R. tomentosum*)
+* **negative response to graminoid cover, unimodal relationship with summer temperature (sig.)** 
+* *positive relationship with temperature variability (m.s.)*
+* slightly positive response to solar radiation, terrain heterogeneity, topographic wetness, and other shrub cover (n.s.)
 
 <br>
 
 As the quadratic terms for temperature variability and precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2734,7 +2732,7 @@ model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.RhoGro2 <- model_out.shrub_gradient.RhoGro2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2777,7 +2775,7 @@ save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "processed", "
 <br>
 
 ### *Rhododendron tomentosum*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.RhoTom.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2793,7 +2791,7 @@ model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.RhoTom.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.RhoTom <- model_out.shrub_gradient.RhoTom$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2824,12 +2822,12 @@ save(coeff.shrub_gradient.RhoTom, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **not converging**: large R-hat values (~ 1.38), large variation in parameter estimates (only 13 non-zero values)
+* **not converging**: relatively large R-hat values (~ 1.05), large variation in parameter estimates (only 13 non-zero values)
 
 <br>
 
 ### *Salix arctophila*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.SalArc <- jags(shrub_gradient_jags.SalArc.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2845,7 +2843,7 @@ model_out.shrub_gradient.SalArc <- jags(shrub_gradient_jags.SalArc.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.SalArc <- model_out.shrub_gradient.SalArc$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2872,16 +2870,19 @@ coeff.shrub_gradient.SalArc <- coeff.shrub_gradient.SalArc %>%
          u95 = "97.5%",
          Rhat) %>% print
 
+# R-hats look okay => check traceplots
+traceplot(coeff.shrub_gradient.SalArc)
+
 save(coeff.shrub_gradient.SalArc, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_SalArc.Rdata"))
 
 ```
 
-* **not converging well**: relatively large R-hat values (~ 1.37), quite some variation in parameter estimates (only 13 non-zero values across plot groups)
+* **not converging well**: relatively low R-hat values (< 1.02), but quite some variation in trace plots, especially for climatic parameters (only 13 non-zero values across plot groups)
 
 <br>
 
 ### *Salix glauca*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.SalGla <- jags(shrub_gradient_jags.SalGla.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -2897,7 +2898,7 @@ model_out.shrub_gradient.SalGla <- jags(shrub_gradient_jags.SalGla.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.SalGla <- model_out.shrub_gradient.SalGla$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2928,17 +2929,17 @@ save(coeff.shrub_gradient.SalGla, file = file.path("..", "data", "processed", "m
 # load(file.path("..", "data", "processed", "model_outputs", "species_twi", "first_runs_converged", "model_output_SalGla.Rdata"))
 
 # effect size plot
-(effect_size_plot.SalGla <- model_plot_sig_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
+(effect_size_plot.SalGla <- model_plot_marg_function(coeff.shrub_gradient.SalGla, title_string = "Salix glauca", plot_width = 12.5))
 
 ```
 
-* **positive response to competition (sig.), negative response to other shrub cover (m.s.)**
-* slightly negative response to temperature & solar radiation (n.s.)
+* **positive relationship with less acquisitive communities and topographic wetness (sig.), other shrub cover and temperature variability (m.s.)**
+* slightly negative response to graminoid cover and summer temperature (n.s.)
 
 <br>
 
 As the quadratic terms for summer temperature, temperature variability and summer precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -3079,7 +3080,7 @@ model_out.shrub_gradient.SalGla2 <- jags(shrub_gradient_jags.SalGla.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.SalGla2 <- model_out.shrub_gradient.SalGla2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -3120,7 +3121,7 @@ save(coeff.shrub_gradient.SalGla2, file = file.path("..", "data", "processed", "
 
 
 ### *Vaccinium uliginosum*
-```{r}
+```{r, eval = FALSE}
 model_out.shrub_gradient.VacUli <- jags(shrub_gradient_jags.VacUli.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
@@ -3136,7 +3137,7 @@ model_out.shrub_gradient.VacUli <- jags(shrub_gradient_jags.VacUli.data,    # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE}
+```{r, warning = FALSE, eval = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.VacUli <- model_out.shrub_gradient.VacUli$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -3171,12 +3172,12 @@ save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **unimodal relationship with summer temperature (sig.)**, *negative relationship with competition (m.s.)*
-
+* **positive relationship with more conservative communities (sig.)** *and topographic wetness (m.s.)*
+* slightly positive relationship with graminoid cover, slightly unimodal relationship with summer temperature (n.s.)
 <br>
 
-As the quadratic terms for summer precipitation and temperature variability were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+As the quadratic terms for summer temperature, precipitation and temperature variability were not significant, they were removed from the model before re-running:
+```{r}
 # new model object with terms removed
 write("
   
@@ -3197,14 +3198,14 @@ write("
       tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
       
       b.tempjja.x ~ dnorm(0, 0.001)
-      b.tempjja.x2 ~ dnorm(0, 0.001)
+      # b.tempjja.x2 ~ dnorm(0, 0.001)
       b.tempcont.x ~ dnorm(0, 0.001)
       # b.tempcont.x2 ~ dnorm(0, 0.001)
       b.precipjja.x ~ dnorm(0, 0.001)
       # b.precipjja.x2 ~ dnorm(0, 0.001)
       
       b.tempXtwi ~ dnorm(0, 0.001)
-      b.tempXtwi2 ~ dnorm(0, 0.001)
+      # b.tempXtwi2 ~ dnorm(0, 0.001)
       
       phi ~ dgamma(0.1, 0.1)
       
@@ -3218,7 +3219,7 @@ write("
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtwi * tempjja.dis[i] * twi.dis[i] +       # for interaction
-                        b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
+                        # b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
                         b.twi * twi.dis[i] + 
                         b.sri * sri.dis[i] +
                         b.tri * tri.dis[i]
@@ -3236,7 +3237,7 @@ write("
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
-                        b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
+                        # b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
                         b.twi * twi.cont[j] + 
                         b.sri * sri.cont[j] +
                         b.tri * tri.cont[j]
@@ -3249,7 +3250,7 @@ write("
                     
                     # plot group level predictors, linear and quadratic term
                     b.tempjja.x * tempjja.tot[k] + 
-                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    # b.tempjja.x2 * (tempjja.tot[k]^2) + 
                     b.tempcont.x * tempcont.tot[k] + 
                     # b.tempcont.x2 * (tempcont.tot[k]^2) +
                     b.precipjja.x * precipjja.tot[k] # + 
@@ -3265,17 +3266,17 @@ write("
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
         phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
-        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] # + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] # + b.tempcont.x2 * (xhat_tempcont[m]^2)
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] # + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
           phat_tempXmoist[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
-                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      # b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
                                       b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
-                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+                                      # b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
           }
         }
 
@@ -3317,7 +3318,7 @@ model_out.shrub_gradient.VacUli2 <- jags(shrub_gradient_jags.VacUli.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.VacUli2 <- model_out.shrub_gradient.VacUli2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -3346,7 +3347,7 @@ coeff.shrub_gradient.VacUli2 <- coeff.shrub_gradient.VacUli2 %>%
 save(coeff.shrub_gradient.VacUli2, file = file.path("..", "data", "processed", "model_outputs", "species_twi", "model_output_VacUli2.Rdata"))
 
 # effect size plot
-(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 9.5))
+(effect_size_plot.VacUli2 <- model_plot_marg_function(coeff.shrub_gradient.VacUli2, title_string = "Vaccinium uliginosum", plot_width = 8.5))
 
 ```
 
