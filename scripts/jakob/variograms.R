@@ -51,18 +51,27 @@ raster_list <- lapply(
   }
 )
 
-# # add TRI to raster to list
-# raster_list <- append(
-#   raster_list,
-  # setNames(
-  #   raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
-  #   "tri"))
+# add TRI to raster to list
+raster_list <- append(
+   raster_list,
+   setNames(
+     raster("D:/Jakob/ArcticDEM/jonathan_wet/GIMP_MEaSUREs_30m/tri/nuuk_fjord_ArcticDEM_mosaic_2m_tri.tif"),
+     "tri"))
 # add tcw raster to list
 raster_list <- append(
   raster_list,
-  setNames(raster("O:/Nat_Ecoinformatics/C_Write/_Proj/Greenland_NormandVegDyn_au150176/NuukFjord/spatial_data_for_Nathalie_by_Jakob/nathalie_90m_grid_polar_stereo/landsatTCwet_nuuk.tif"),
-           "tcws"))
-
+  setNames(raster("D:/Jakob/ArcticDEM/nathalie_nuuk/landsatTCwet_NUUK_UTM22.tif"),
+           "TCwet"))
+# add Kopecky_TWI to list
+raster_list <- append(
+  raster_list,
+  setNames(raster("D:/Jakob/ArcticDEM/jonathan_wet/GIMP_MEaSUREs_30m/twi/nuuk_fjord_GIMP_MEaSUREs_30m_DEM_flow_mfd_twi.tif"),
+           "kopecky_twi"))
+study_area_extent <- as(extent(raster_list[[10]]), "SpatialPolygons")
+crs(study_area_extent) <- crs(raster_list[[10]])
+study_area_extent <- spTransform(study_area_extent, crs(raster_list[[9]]))
+raster_list[[9]] <- crop(raster_list[[9]],study_area_extent )
+raster_list[[9]] <- mask(raster_list[[9]],study_area_extent )
 
 # # Crop TRI raster to same extent as other rasters
 # raster_list[[8]] <- crop(raster_list[[8]], raster_list[[1]])
@@ -103,7 +112,7 @@ sample_variogram <- function(predictor_raster, thin = 10, bin_width = 90) {
 }
 
 # Prep parallel envrionment
-cl <- makeCluster(9)
+cl <- makeCluster(12)
 clusterEvalQ(cl, {
   library(gstat)
   library(raster)

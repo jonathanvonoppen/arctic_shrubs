@@ -35,20 +35,30 @@ raster_list <- lapply(
   }
 )
 
-# add TRI raster to list
+# add TRI to raster to list
 raster_list <- append(
-  raster_list, 
+  raster_list,
   setNames(
-    raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
+    raster("D:/Jakob/ArcticDEM/jonathan_wet/GIMP_MEaSUREs_30m/tri/nuuk_fjord_ArcticDEM_mosaic_2m_tri.tif"),
     "tri"))
 # add tcw raster to list
 raster_list <- append(
   raster_list,
-  setNames(raster("O:/Nat_Ecoinformatics/C_Write/_Proj/Greenland_NormandVegDyn_au150176/NuukFjord/spatial_data_for_Nathalie_by_Jakob/nathalie_90m_grid_polar_stereo/landsatTCwet_nuuk.tif"),
-           "tcws"))
+  setNames(raster("D:/Jakob/ArcticDEM/nathalie_nuuk/landsatTCwet_NUUK_UTM22.tif"),
+           "TCwet"))
+# add Kopecky_TWI to list
+raster_list <- append(
+  raster_list,
+  setNames(raster("D:/Jakob/ArcticDEM/jonathan_wet/GIMP_MEaSUREs_30m/twi/nuuk_fjord_GIMP_MEaSUREs_30m_DEM_flow_mfd_twi.tif"),
+           "kopecky_twi"))
+study_area_extent <- as(extent(raster_list[[10]]), "SpatialPolygons")
+crs(study_area_extent) <- crs(raster_list[[10]])
+study_area_extent <- spTransform(study_area_extent, crs(raster_list[[9]]))
+raster_list[[9]] <- crop(raster_list[[9]],study_area_extent )
+raster_list[[9]] <- mask(raster_list[[9]],study_area_extent )
 
 ## Load plot locations
-nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
+nuuk_plots <- read.csv("data/processed/nuuk_env_cover_plots.csv",
                        stringsAsFactors = F) %>%
   distinct(site, lat, long) %>%
   st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
@@ -70,7 +80,8 @@ lookup_table <- data.frame(
                    "Annual Minimum Temperature (°C)",
                    "Annual Temperature Variability",
                    "Terrain Ruggedness Index (TRI)",
-                   "Tasseled-cap Wetness Index (TCWS)"),
+                   "Tasseled-cap Wetness Index (TCWS)",
+                   "Topographic Wetness Index (TWI)"),
   scale_name = c("Oranges",
                  "Blues",
                  "Blues",
@@ -79,6 +90,7 @@ lookup_table <- data.frame(
                  "Blues",
                  "Greens",
                  "YlOrBr",
+                 "Blues",
                  "Blues"),
   label_colour = c(
     "white",
@@ -89,19 +101,21 @@ lookup_table <- data.frame(
     "white",
     "white",
     "black",
+    "black",
     "black"
   ),
   stringsAsFactors = F
 )
 
-# Crop TRI raster before plotting
-raster_list[[8]] <- crop(raster_list[[8]], raster_list[[1]])
-
 # Write function to plot rasters
 plot_raster <- function(predictor_raster){
- 
+  # Reproject site data if TCwet raster is plotted
+  if(names(predictor_raster) == "TCwet") {
+    nuuk_plots <- spTransform(nuuk_plots, crs(predictor_raster))
+  }
+   
   # Set random seed
-  set.seed(1)
+  set.seed(10)
   # Create plot
   raster_plot <- levelplot(predictor_raster, 
                            margin = F,
@@ -141,7 +155,7 @@ lapply(raster_list, plot_raster)
 
 # Plot TRI seperately as it has some funny values
 predictor_raster <- raster_list[[8]]
-set.seed(1)
+set.seed(10)
 raster_plot <- levelplot(predictor_raster, 
                          margin = F,
                          main = lookup_table$pretty_names[lookup_table$raster_names == names(predictor_raster)],
