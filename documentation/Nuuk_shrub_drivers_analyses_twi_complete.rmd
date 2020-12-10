@@ -1,6 +1,6 @@
 ---
 title: 'Temperature variability, moisture and biotic interactions drive shrub species abundance along a coastal-inland gradient in arctic Greenland'
-subtitle: <center>- Analysis workflow -</center>
+subtitle: <center>- Primary analysis workflow | Topographic Wetness Index as wetness predictor -</center>
 author: "Jonathan von Oppen (jonathan.vonoppen@bio.au.dk) et al."
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
