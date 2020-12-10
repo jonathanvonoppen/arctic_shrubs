@@ -8,7 +8,7 @@
       
       b.gramin_cov ~ dnorm(0, 0.0001)
       b.sri ~ dnorm(0, 0.0001)
-      #b.tri ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
       b.twi ~ dnorm(0, 0.0001)
 
       sigma.plot ~ dunif(0,100)
@@ -37,8 +37,8 @@
                         b.twi * twi.tot[i] + 
                         b.tempXtwi * tempjja.tot.plot[i] * twi.tot[i] +       # for interaction
                         b.tempXtwi2 * (tempjja.tot.plot[i]^2) * twi.tot[i] +  # for interaction
-                        b.sri * sri.tot[i] #+
-                        #b.tri * tri.tot[i]
+                        b.sri * sri.tot[i] +
+                        b.tri * tri.tot[i]
       }
 
 
@@ -62,7 +62,7 @@
       for (m in 1:Nxhat){
         phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
         phat_sri[m] <- intercept + b.sri * xhat_sri[m]
-        #phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
         phat_twi[m] <- intercept + b.twi * xhat_twi[m]
         phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
         phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
