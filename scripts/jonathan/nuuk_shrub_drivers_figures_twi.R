@@ -120,7 +120,18 @@ save_plot(file.path("figures", "nuuk_shrub_drivers_lit_review.pdf"),
 
 # >> load cleaned data ----
 traits_scores_nuuk <- read.csv(file = file.path("data", "processed", "nuuk_traits_PCAscores_cleaned.csv"),
-                               header = T)
+                               header = T) %>% 
+  
+  # adjust species labels
+  mutate(species = recode(species,
+                          "Betula nana" = "italic('Betula nana')",
+                          "Cassiope tetragona" = "italic('Cassiope tetragona')",
+                          "Empetrum nigrum" = "italic('Empetrum nigrum')",
+                          "Phyllodoce caerulea" = "italic('Phyllodoce caerulea')",
+                          "Rhododendron sp." = "italic('Rhododendron')~sp.",
+                          "Salix sp." = "italic('Salix')~sp.",
+                          "Vaccinium uliginosum" = "italic('Vaccinium uliginosum')",
+                          "graminoids mean" = "graminoids~mean"))
 
 
 # >> compile plot ----
@@ -135,6 +146,13 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
                               aes(x = PC1,
                                   y = 0,
                                   colour = fgroup)) +
+    
+    # # add gradient rectangle - not working yet!
+    # geom_tile(fill = "blue",
+    #           xmin = -3.7, xmax = -0.3,
+    #           ymin = 0, ymax = 0.2,
+    #           colour = "grey70") +
+    
     # plot scores
     geom_point(aes(colour = PC1),
                shape = 18,
@@ -147,9 +165,9 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
                   angle = 90,
                   y = .1),
               hjust = 0,
-              vjust = ifelse(traits_scores_nuuk$species == "Rhododendron sp.", 0.8, 0.375),
+              vjust = ifelse(traits_scores_nuuk$species == "italic('Rhododendron')~sp.", 0.8, 0.375),
               colour = "grey30",
-              fontface = ifelse(traits_scores_nuuk$species == "graminoids mean", "plain", "italic")) +
+              parse = TRUE) +
     
     # add traits labels
     annotation_custom(text_right, 
