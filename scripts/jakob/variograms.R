@@ -104,6 +104,9 @@ sample_variogram <- function(predictor_raster, thin = 10, bin_width = 90) {
   # Change id colum
   vario$id <- names(predictor_raster)
   
+  # save variogram
+  save(vario, file = paste0("data/variograms/", names(predictor_raster), ".Rda"))
+  
   # clean memory
   gc()
   
@@ -124,18 +127,32 @@ save(vario_list, file = "scripts/jakob/vario_list.Rda")
 #load("scripts/jakob/vario_list.Rda")
 stopCluster(cl)
 
+# Load successful variogram fits in case one failed
+if(!exists("vario_list")){
+  if(exists("vario")) rm("vario")
+  list_of_vario_files <- list.files("data/variograms/", 
+                                    pattern = ".Rda",
+                                    full.names = T)
+  vario_list <- lapply(list_of_vario_files, function(x){
+    load(x)
+    return(vario)
+  })
+}
+
 # Look up table for pretty names
 lookup_table <- data.frame(
-  raster_names = c(unlist(lapply(raster_list, names)), "tri"),
+  raster_names = c(unlist(lapply(vario_list, function(x) x$id[1]))),
   pretty_names = c("Insolation",
                   "Cumulative Summer Precipitation (mm)",
+                  "Kopecky Topographic Wetness Index",
                   "Mean Precipitation March-April-May (mm)",
+                  "Tasseled-cap Wetness Index (TCWS)",
+                  "Annual Temperature Variability",
                   "Mean Summer Temperature (°C)",
                   "Annual Maximum Temperature (°C)",
-                  "Annual Minimum Temperature (°C)",
-                  "Annual Temperature Variability",
-                  "Tasseled-cap Wetness Index (TCWS)",
-                  "Terrain Ruggedness Index (TRI)"),
+                  "Annual Minimum Temperature (°C)" #,
+                  #"Terrain Ruggedness Index (TRI)",
+                  ),
   stringsAsFactors = F)
 
 
@@ -167,13 +184,9 @@ lapply(vario_list, plot_variogram)
 # the raster is different to the others
 
 # Load TRI raster
-predictor_raster <-   setNames(
-  raster("D:/Jakob/ArcticDEM/jonathan/nuuk_fjord_tri_mosaic.vrt"),
-  "tri")
-# Crop to common extent
-predictor_raster <- crop(predictor_raster, raster_list[[1]])
+predictor_raster <-  raster_list[[8]]
 
-# Sample raster that
+# Sample raster
 predictor_spdf <- sampleRandom(predictor_raster,
                                1400000,
                                sp = T)
@@ -196,7 +209,7 @@ save(vario, file = "scripts/jakob/tri_vario.Rda")
 #load("scripts/jakob/tri_vario.Rda")
 
 ## Variograms for SRI (a non-raster variable)
-nuuk_plots <- read.csv("data/nuuk_env_cover_plots.csv",
+nuuk_plots <- read.csv("data/processed/nuuk_env_cover_plots_topo_variables.csv",
                        stringsAsFactors = F) %>%
   distinct(plot, lat, long, sri) %>%
   st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
@@ -223,7 +236,7 @@ save_plot("figures/variograms/sri.png",
           base_height = 5)
 
 # Get distances between plots
-distances <- read.csv("data/nuuk_env_cover_plots.csv",
+distances <- read.csv("data/processed/nuuk_env_cover_plots_topo_variables.csv",
                       stringsAsFactors = F) %>%
   distinct(plot, lat, long) %>%
   st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
