@@ -201,11 +201,16 @@ vario <- variogram(tri ~  1,
 # Change id colum
 vario$id <- names(predictor_raster)
 
+# Add row to lookup table
+lookup_table <- bind_rows(lookup_table,
+                          data.frame(raster_names = "tri", 
+                                     pretty_names = "Terrain Ruggedness Index (TRI)"))
+                          
 # Plot variogram using the variogram plotting function.
 plot_variogram(vario)
 
 # Save variogram 
-save(vario, file = "scripts/jakob/tri_vario.Rda")
+save(vario, file = "data/variograms/tri_vario.Rda")
 #load("scripts/jakob/tri_vario.Rda")
 
 ## Variograms for SRI (a non-raster variable)
