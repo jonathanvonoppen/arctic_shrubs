@@ -277,7 +277,7 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
 
 
-# Fig. 5) Effect size plots ----
+# Fig. 5) Effect size plots (TWI) ----
 
 # >> load function ----
 source(file = file.path("scripts", "jonathan", "plotting_functions", "effectsize_plot.R"))
@@ -287,28 +287,161 @@ source(file = file.path("scripts", "jonathan", "plotting_functions", "effectsize
 
 # species
 # load model output data
-model_outputs_focal_species <- file.path("data", "processed", "model_outputs", "species", list.files(path = file.path("data", "processed", "model_outputs", "species"), pattern = "*2.Rdata"))
+model_outputs_focal_species <- file.path("data", "processed", "model_outputs", "species_twi", list.files(path = file.path("data", "processed", "model_outputs", "species_twi"), pattern = "*2.Rdata"))
 for (model_output in model_outputs_focal_species){
   load(model_output)
 }
 
 # groups
 # load model output data
-model_outputs_groups <- file.path("data", "processed", "model_outputs", "groups", list.files(path = file.path("data", "processed", "model_outputs", "groups"), pattern = "*2.Rdata"))
+model_outputs_groups <- file.path("data", "processed", "model_outputs", "groups_twi", list.files(path = file.path("data", "processed", "model_outputs", "groups_twi"), pattern = "*2.Rdata"))
 for (model_output in model_outputs_groups){
   load(model_output)
 }
 
 
 # >> plot graphs ----
-(es_plot_AllShr <- effectsize_plot(species = "all shrubs", plot_width = 7.5))
-(es_plot_AllEve <- effectsize_plot(species = "evergreen shrubs", plot_width = 8.5))
-(es_plot_AllDec <- effectsize_plot(species = "deciduous shrubs", plot_width = 8.5))
-(es_plot_BetNan <- effectsize_plot(species = "Betula nana", plot_width = 9.5))
-(es_plot_EmpNig <- effectsize_plot(species = "Empetrum nigrum", plot_width = 9.5))
-(es_plot_RhoGro <- effectsize_plot(species = "Rhododendron groenlandicum", plot_width = 10.5))
-(es_plot_SalGla <- effectsize_plot(species = "Salix glauca", plot_width = 9.5))
-(es_plot_VacUli <- effectsize_plot(species = "Vaccinium uliginosum", plot_width = 9.5))
+(es_plot_AllShr <- effectsize_plot_twi(species = "all shrubs", plot_width = 8.5))
+(es_plot_AllEve <- effectsize_plot_twi(species = "evergreen shrubs", plot_width = 8.5))
+(es_plot_AllDec <- effectsize_plot_twi(species = "deciduous shrubs", plot_width = 8.5))
+(es_plot_BetNan <- effectsize_plot_twi(species = "Betula nana", plot_width = 9.5))
+(es_plot_EmpNig <- effectsize_plot_twi(species = "Empetrum nigrum", plot_width = 9.5))
+(es_plot_RhoGro <- effectsize_plot_twi(species = "Rhododendron groenlandicum", plot_width = 10.5))
+(es_plot_SalGla <- effectsize_plot_twi(species = "Salix glauca", plot_width = 9.5))
+(es_plot_VacUli <- effectsize_plot_twi(species = "Vaccinium uliginosum", plot_width = 9.5))
+
+# make y label
+ylabel_es <- ggdraw() +
+  draw_label("Effect size (scaled)",
+             vjust = 0,
+             angle = 90,
+             size = 20,
+             fontface = "bold")
+
+# draw extra plot to extract legend from
+xplot <- ggplot(data = data.frame(x = c(1:6),
+                                  y = c(1:6),
+                                  z = c(rep("significant     ",2), rep("marginal     ",2),rep("n.s.",2))) %>% 
+                  mutate(z = ordered(z, levels = c("significant     ", "marginal     ", "n.s."))),
+                aes(group = z)) +
+  geom_line(aes(x = x,
+                y = y,
+                colour = z),
+            size = 1) +
+  geom_ribbon(aes(x = x,
+                  ymin = y-.5,
+                  ymax = y+.5,
+                  fill = z),
+              alpha = .2) +
+  scale_colour_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+  scale_fill_manual(values = c(theme_darkgreen, theme_purple, "black")) +
+  labs(colour = "significance level     ",
+       fill = "significance level     ") +
+  guides(colour = guide_legend(nrow = 1)) +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 17))
+
+# extract legend
+legend_hor <- get_legend(xplot)
+
+
+# >> save plot ----
+# ¨¨¨¨4x2 grid (vertical layout) ----
+(nuuk_effect_size_plot_grid_ver_twi <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()),
+                                             es_plot_AllEve + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()),
+                                             es_plot_AllDec + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()),
+                                             es_plot_EmpNig + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             es_plot_RhoGro + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             es_plot_BetNan + theme(legend.position = "none", 
+                                                                     axis.title = element_blank()), 
+                                             es_plot_VacUli + theme(legend.position = "none",
+                                                                     axis.title = element_blank()),
+                                             es_plot_SalGla + theme(legend.position = "none",
+                                                                     axis.title = element_blank()),
+                                             labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+                                             label_size = 20,
+                                             label_fontface = "plain",
+                                             label_x = c(.05, .05, .05, .05, .05, .05, .05, .05),
+                                             ncol = 2,
+                                             axis = "lt",
+                                             align = "hv"))
+
+# save plot
+# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels_twi.pdf"),
+#           nuuk_effect_size_plot_grid_ver_twi, base_height = 22, base_aspect_ratio = .6)
+
+
+# ¨¨¨¨3x3 grid (horizontal layout) ----
+(es_plots_row_twi <- plot_grid(ylabel_es,
+                               plot_grid(es_plot_AllShr,
+                                         es_plot_AllEve,
+                                         es_plot_AllDec,
+                                         es_plot_EmpNig, 
+                                         es_plot_RhoGro, 
+                                         es_plot_BetNan, 
+                                         es_plot_VacUli,
+                                         es_plot_SalGla,
+                                         labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+                                         label_size = 20,
+                                         label_fontface = "bold",
+                                         label_x = c(rep(.02, 8)),
+                                         ncol = 3,
+                                         axis = "lt",
+                                         align = "hv"),
+                               rel_widths = c(0.03, 1)))
+
+# combine with legend
+(nuuk_effect_size_plot_grid_hor_twi <- plot_grid(es_plots_row_twi,
+                                                 legend_hor,
+                                                 ncol = 1,
+                                                 rel_heights = c(1, 0.07)))
+
+# save plot
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_twi.pdf"),
+          nuuk_effect_size_plot_grid_hor_twi, base_height = 18, base_aspect_ratio = 1.3)
+
+
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
+
+
+# Fig. 5.1) Effect size plots (TCWS) ----
+
+# >> load function ----
+source(file = file.path("scripts", "jonathan", "plotting_functions", "effectsize_plot.R"))
+
+
+# >> load data ----
+
+# species
+# load model output data
+model_outputs_focal_species <- file.path("data", "processed", "model_outputs", "species_tcws", list.files(path = file.path("data", "processed", "model_outputs", "species_tcws"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_focal_species){
+  load(model_output)
+}
+
+# groups
+# load model output data
+model_outputs_groups <- file.path("data", "processed", "model_outputs", "groups_tcws", list.files(path = file.path("data", "processed", "model_outputs", "groups_tcws"), pattern = "*2.Rdata"))
+for (model_output in model_outputs_groups){
+  load(model_output)
+}
+
+
+# >> plot graphs ----
+(es_plot_AllShr <- effectsize_plot_tcws(species = "all shrubs", plot_width = 7.5))
+(es_plot_AllEve <- effectsize_plot_tcws(species = "evergreen shrubs", plot_width = 8.5))
+(es_plot_AllDec <- effectsize_plot_tcws(species = "deciduous shrubs", plot_width = 8.5))
+(es_plot_BetNan <- effectsize_plot_tcws(species = "Betula nana", plot_width = 9.5))
+(es_plot_EmpNig <- effectsize_plot_tcws(species = "Empetrum nigrum", plot_width = 9.5))
+(es_plot_RhoGro <- effectsize_plot_tcws(species = "Rhododendron groenlandicum", plot_width = 9.5))
+(es_plot_SalGla <- effectsize_plot_tcws(species = "Salix glauca", plot_width = 9.5))
+(es_plot_VacUli <- effectsize_plot_tcws(species = "Vaccinium uliginosum", plot_width = 9.5))
 
 # make y label
 ylabel_es <- ggdraw() +
@@ -349,21 +482,21 @@ legend_hor <- get_legend(xplot)
 # >> save plot ----
 # ¨¨¨¨4x2 grid (vertical layout) ----
 (nuuk_effect_size_plot_grid_ver <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()),
+                                                                    axis.title = element_blank()),
                                              es_plot_AllEve + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()),
+                                                                    axis.title = element_blank()),
                                              es_plot_AllDec + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()),
+                                                                    axis.title = element_blank()),
                                              es_plot_EmpNig + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()), 
+                                                                    axis.title = element_blank()), 
                                              es_plot_RhoGro + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()), 
+                                                                    axis.title = element_blank()), 
                                              es_plot_BetNan + theme(legend.position = "none", 
-                                                                     axis.title = element_blank()), 
+                                                                    axis.title = element_blank()), 
                                              es_plot_VacUli + theme(legend.position = "none",
-                                                                     axis.title = element_blank()),
+                                                                    axis.title = element_blank()),
                                              es_plot_SalGla + theme(legend.position = "none",
-                                                                     axis.title = element_blank()),
+                                                                    axis.title = element_blank()),
                                              labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
                                              label_size = 20,
                                              label_fontface = "plain",
@@ -378,33 +511,33 @@ legend_hor <- get_legend(xplot)
 
 
 # ¨¨¨¨3x3 grid (horizontal layout) ----
-(es_plots_row <- plot_grid(ylabel_es,
-                           plot_grid(es_plot_AllShr,
-                                     es_plot_AllEve,
-                                     es_plot_AllDec,
-                                     es_plot_EmpNig, 
-                                     es_plot_RhoGro, 
-                                     es_plot_BetNan, 
-                                     es_plot_VacUli,
-                                     es_plot_SalGla,
-                                     labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
-                                     label_size = 20,
-                                     label_fontface = "bold",
-                                     label_x = c(rep(.02, 8)),
-                                     ncol = 3,
-                                     axis = "lt",
-                                     align = "hv"),
-                           rel_widths = c(0.03, 1)))
+(es_plots_row_tcws <- plot_grid(ylabel_es,
+                                plot_grid(es_plot_AllShr,
+                                          es_plot_AllEve,
+                                          es_plot_AllDec,
+                                          es_plot_EmpNig, 
+                                          es_plot_RhoGro, 
+                                          es_plot_BetNan, 
+                                          es_plot_VacUli,
+                                          es_plot_SalGla,
+                                          labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+                                          label_size = 20,
+                                          label_fontface = "bold",
+                                          label_x = c(rep(.02, 8)),
+                                          ncol = 3,
+                                          axis = "lt",
+                                          align = "hv"),
+                                rel_widths = c(0.03, 1)))
 
 # combine with legend
-(nuuk_effect_size_plot_grid_hor <- plot_grid(es_plots_row,
-                                             legend_hor,
-                                             ncol = 1,
-                                             rel_heights = c(1, 0.07)))
+(nuuk_effect_size_plot_grid_hor_tcws <- plot_grid(es_plots_row_tcws,
+                                                  legend_hor,
+                                                  ncol = 1,
+                                                  rel_heights = c(1, 0.07)))
 
 # save plot
-# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels.pdf"),
-#           nuuk_effect_size_plot_grid_hor, base_height = 18, base_aspect_ratio = 1.3)
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_tcws.pdf"),
+          nuuk_effect_size_plot_grid_hor_tcws, base_height = 18, base_aspect_ratio = 1.3)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
@@ -420,21 +553,21 @@ source(file = file.path("scripts", "jonathan", "plotting_functions", "interactio
 
 # species
 # load model output data
-model_outputs_focal_species <- file.path("data", "processed", "model_outputs", "species", list.files(path = file.path("data", "processed", "model_outputs", "species"), pattern = "*2.Rdata"))
+model_outputs_focal_species <- file.path("data", "processed", "model_outputs", "species_tcws", list.files(path = file.path("data", "processed", "model_outputs", "species_tcws"), pattern = "*2.Rdata"))
 for (model_output in model_outputs_focal_species){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+load(file = file.path("data", "processed", "model_input_data_tcws", "shrub_gradient_species.datasets.Rdata"))
 
 # groups
 # load model output data
-model_outputs_groups <- file.path("data", "processed", "model_outputs", "groups", list.files(path = file.path("data", "processed", "model_outputs", "groups"), pattern = "*2.Rdata"))
+model_outputs_groups <- file.path("data", "processed", "model_outputs", "groups_tcws", list.files(path = file.path("data", "processed", "model_outputs", "groups_tcws"), pattern = "*2.Rdata"))
 for (model_output in model_outputs_groups){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
+load(file = file.path("data", "processed", "model_input_data_tcws", "shrub_gradient_group.datasets.Rdata"))
 
 
 # >> plot graphs ----
@@ -448,7 +581,8 @@ load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_g
 (int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
 
 # extract legend
-legend_int_plot <- get_legend(int_plot_AllShr + theme(legend.box.margin = margin(t = 70, l = 70)))
+legend_int_plot <- get_legend(int_plot_AllShr + 
+                                theme(legend.box.margin = margin(t = 70, l = 70)))
 
 # make x- and y-axis label
 xlabel <- ggdraw() +
@@ -458,7 +592,7 @@ xlabel <- ggdraw() +
              fontface = "bold")
 
 ylabel <- ggdraw() +
-  draw_label("cover per plot group",
+  draw_label("relative abundance per plot group",
              vjust = 0,
              angle = 90,
              size = 20,
@@ -486,14 +620,14 @@ ylabel <- ggdraw() +
 ))
 
 # add xlabel
-(nuuk_interaction_plot_grid_ver <- plot_grid(nuuk_interactions_row,
+(nuuk_interaction_plot_grid_ver_tcws <- plot_grid(nuuk_interactions_row,
                                              xlabel,
                                              ncol = 1,
                                              rel_heights = c(1, 0.05)))
 
-# >> save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert.pdf"),
-#           nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
+# # >> save plot ----
+# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert_tcws.pdf"),
+#           nuuk_interaction_plot_grid_ver_tcws, base_height = 15, base_aspect_ratio = 1)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
@@ -514,7 +648,7 @@ for (model_output in model_outputs_focal_species){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_species.datasets.Rdata"))
+load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradient_species.datasets.Rdata"))
 
 # groups
 # load model output data
@@ -523,7 +657,7 @@ for (model_output in model_outputs_groups){
   load(model_output)
 }
 # load input data
-load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_group.datasets.Rdata"))
+load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradient_group.datasets.Rdata"))
 
 
 # >> plot graphs ----
@@ -537,7 +671,8 @@ load(file = file.path("data", "processed", "model_input_data", "shrub_gradient_g
 (int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
 
 # extract legend
-legend_int_plot <- get_legend(int_plot_AllShr + theme(legend.box.margin = margin(t = 70, l = 70)))
+legend_int_plot <- get_legend(int_plot_AllShr + 
+                                theme(legend.box.margin = margin(t = 70, l = 70)))
 
 # make x- and y-axis label
 xlabel <- ggdraw() +
@@ -547,7 +682,7 @@ xlabel <- ggdraw() +
              fontface = "bold")
 
 ylabel <- ggdraw() +
-  draw_label("cover per plot group",
+  draw_label("relative abundance per plot group",
              vjust = 0,
              angle = 90,
              size = 20,
@@ -575,14 +710,14 @@ ylabel <- ggdraw() +
 ))
 
 # add xlabel
-(nuuk_interaction_plot_grid_ver <- plot_grid(nuuk_interactions_row,
+(nuuk_interaction_plot_grid_ver_twi <- plot_grid(nuuk_interactions_row,
                                              xlabel,
                                              ncol = 1,
                                              rel_heights = c(1, 0.05)))
 
-# >> save plot ----
-save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert_twi.pdf"),
-          nuuk_interaction_plot_grid_ver, base_height = 15, base_aspect_ratio = 1)
+# # >> save plot ----
+# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert_twi.pdf"),
+#           nuuk_interaction_plot_grid_ver_twi, base_height = 15, base_aspect_ratio = 1)
 
 
 # ________________________________________ ----
@@ -601,8 +736,7 @@ env_cov_bio <- read.csv(file.path("data", "processed", "nuuk_env_cover_plots.csv
 # >> data compilation ----
 predictors_set <- env_cov_bio %>% 
   select(ends_with("_ts_30"),   # CHELSA predictors averaged over 10-year period prior to study year
-         inclin_down, sri, tri, tcws,      # environmental data
-         compet,
+         inclin_down, sri, tri, twi_fd8, tcws,      # environmental data
          shrub_cover,
          graminoid_cover) %>% 
   names()
@@ -640,9 +774,8 @@ preds_plot_data <- env_cov_bio %>%
                                 "slope angle [°]" = "inclin_down",
                                 "Solar\nRadiation\nIndex" = "sri",
                                 "Terrain\nRuggedness\nIndex" = "tri",
-                                # "Topographic Wetness\nIndex" = "twi",
+                                "Topographic\nWetness\nIndex" = "twi_fd8",
                                 "Tasseled-cap\nWetness\nIndex" = "tcws",
-                                "overgrowing\ncompetition" = "compet",
                                 "total\nshrub cover" = "shrub_cover",
                                 "graminoid\ncover" = "graminoid_cover"),
          predictor = fct_relevel(predictor,
@@ -656,9 +789,8 @@ preds_plot_data <- env_cov_bio %>%
                                  "slope angle [°]",
                                  "Solar\nRadiation\nIndex",
                                  "Terrain\nRuggedness\nIndex",
-                                 # "Topographic Wetness\nIndex",
+                                 "Topographic\nWetness\nIndex",
                                  "Tasseled-cap\nWetness\nIndex",
-                                 "overgrowing\ncompetition",
                                  "total\nshrub cover",
                                  "graminoid\ncover")) %>% 
   
@@ -701,7 +833,7 @@ predictors_set_clim_long <- c("mean\nsummer\ntemperature [°C]",
           legend.text = element_text(size = 14)))
 
 # ¨¨ save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_clim_gradient.eps"),
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_clim_gradient.pdf"),
 #           nuuk_preds_clim_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
 
 
@@ -709,9 +841,8 @@ predictors_set_clim_long <- c("mean\nsummer\ntemperature [°C]",
 predictors_set_env_long <- c("slope angle [°]",
                              "Solar\nRadiation\nIndex",
                              "Terrain\nRuggedness\nIndex",
-                             # "Topographic Wetness\nIndex",
+                             "Topographic\nWetness\nIndex",
                              "Tasseled-cap\nWetness\nIndex",
-                             "overgrowing\ncompetition",
                              "total\nshrub cover",
                              "graminoid\ncover")
 
@@ -741,7 +872,7 @@ predictors_set_env_long <- c("slope angle [°]",
           legend.text = element_text(size = 14)))
 
 # ¨¨ save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_env_gradient.eps"),
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_env_gradient.pdf"),
 #           nuuk_preds_env_gradient_plot, base_height = 15, base_aspect_ratio = 0.8)
 
 
@@ -751,10 +882,10 @@ predictors_set_final_long <- c("mean\nsummer\ntemperature [°C]",
                                "cumulative\nsummer\nprecipitation [mm]",
                                "Solar\nRadiation\nIndex",
                                "Terrain\nRuggedness\nIndex",
+                               "Topographic\nWetness\nIndex",
                                "Tasseled-cap\nWetness\nIndex",
                                "total\nshrub cover",
-                               "graminoid\ncover",
-                               "overgrowing\ncompetition")
+                               "graminoid\ncover")
 
 (nuuk_preds_final_gradient_plot <- ggplot(preds_plot_data %>% 
                                             filter(predictor %in% predictors_set_final_long),
@@ -782,7 +913,7 @@ predictors_set_final_long <- c("mean\nsummer\ntemperature [°C]",
           legend.text = element_text(size = 14)))
 
 # ¨¨ save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_final_gradient.eps"),
+# save_plot(file.path("figures", "nuuk_shrub_drivers_gradient", "nuuk_shrub_drivers_preds_final_gradient.pdf"),
 #           nuuk_preds_final_gradient_plot, base_height = 16, base_aspect_ratio = 0.8)
 
 
