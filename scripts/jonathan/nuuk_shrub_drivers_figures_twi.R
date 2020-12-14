@@ -23,6 +23,7 @@ pacman::p_load(tidyverse,
 theme_red <- "#E64447FF"
 theme_darkblue <- "#1D5799"
 theme_darkgreen <- "#13944D"
+theme_lightpurple <- "#b774e8"
 theme_purple <- "#8757B3"
 
 # ________________________________________ ----
@@ -148,17 +149,19 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
                                   colour = fgroup)) +
     
     # # add gradient rectangle - not working yet!
-    # geom_tile(fill = "blue",
-    #           xmin = -3.7, xmax = -0.3,
-    #           ymin = 0, ymax = 0.2,
+    # geom_rect(aes(fill = PC1,
+    #               xmin = -3.7, xmax = -0.3,
+    #               ymin = 0, ymax = 0.1),
     #           colour = "grey70") +
+    # 
+    # scale_fill_gradientn(colours = c(theme_red, theme_pink, theme_darkblue)) +
     
     # plot scores
     geom_point(aes(colour = PC1),
                shape = 18,
                size = 4) +
     
-    scale_color_gradientn(colours = c(theme_red, theme_darkblue)) +
+    scale_colour_gradientn(colours = c(theme_red, rep(theme_lightpurple, 3), theme_darkblue)) +
     
     # add species names
     geom_text(aes(label = species,
