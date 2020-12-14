@@ -98,8 +98,8 @@ interaction_plots_species <- function(species) {
     
     # define appearance
     ggtitle(paste0(species)) +
-    scale_colour_manual("soil\nmoisture", values = c("dodgerblue4", "orange1")) +
-    scale_fill_manual("soil\nmoisture", values = c("dodgerblue4", "orange1")) +
+    scale_colour_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
+    scale_fill_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
     theme_cowplot(18) +
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank(),
@@ -197,8 +197,8 @@ interaction_plots_groups <- function(fgroup) {
     
     # define appearance
     ggtitle(paste0(fgroup)) +
-    scale_colour_manual("moisture\navailability", values = c("dodgerblue4", "orange1")) +
-    scale_fill_manual("moisture\navailability", values = c("dodgerblue4", "orange1")) +
+    scale_colour_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
+    scale_fill_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
     theme_cowplot(18) +
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank(),
