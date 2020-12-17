@@ -2,6 +2,10 @@
 
 # Comparison of wetness predictor power for predicting Cyperaceae & bryophyte abundance
 
+# dependencies
+library(tidyverse)
+library(cowplot)
+
 # species data (raw pinpoint data) [from Jacob Nabe-Nielsen]
 spec_nuuk <- read.csv(file.path("data", "input_data", "Nuuk plant data 150201 - Pin-point data - stacked.csv")) %>% 
   as_tibble
@@ -98,14 +102,17 @@ abund_cyp_bry_plot <- abund_cyp_bry %>%
                 method = "lm",
                 size = 2) +
     
-    ylim(c(0,0.9)) +
+    ylim(c(0,1.5)) +
     
-    annotate("text",
-             data = r2labels,
-             aes(x = pos_x, y = pos_y,
-                 label = r2lab),
-             size = 6,
-             parse = TRUE) +
+    labs(x = "wetness value",
+         y = "abundance") +
+    
+    # annotate("text",
+    #          data = r2labels,
+    #          aes(x = pos_x, y = pos_y,
+    #              label = r2lab),
+    #          size = 6,
+    #          parse = TRUE) +
     
     facet_wrap(vars(wetness_var),
                scales = "free_x") +
@@ -114,7 +121,7 @@ abund_cyp_bry_plot <- abund_cyp_bry %>%
     
     theme_bw()) 
 
-# save_plot(file.path("figures", "nuuk_shrub_drivers_wetness_predictors_comparison.pdf"),
-#           comparison_plot, base_height = 8, base_aspect_ratio = 1.2)
+save_plot(file.path("figures", "nuuk_shrub_drivers_wetness_predictors_comparison.pdf"),
+          comparison_plot, base_height = 8, base_aspect_ratio = 1.2)
 
 
