@@ -1,0 +1,54 @@
+//Permalink to script at Google Earth Engine: https://code.earthengine.google.com/e995697be92b2398fe0c0ee0755beda2
+
+
+// Jakob Assmann j.assmann@bios.au.dk May 2020
+
+// Filter Landsat 8 Sruface Reflectance data (time period selected for clear scenes)
+var collection = l8sr
+    .filterBounds(nuuk_area) 
+    .filterDate('2013-07-15', '2013-08-20');
+    //.map(maskL8);
+
+print(collection, 'L8 NuukCollection');
+
+var composite = collection
+    .mean(); //stich the two tiles together. (mean where overlap if there is any)
+print(ee.Image(collection));
+
+Map.setCenter(-51.6867, 64.1807, 8);
+Map.addLayer(composite, {bands: ['B4', 'B3', 'B2'], min:0, max: 3000});
+Map.addLayer(nuuk_area);
+
+// Define function to calculate TCwetness from Landsat 8 Imagery
+// index values from https://www.indexdatabase.de/db/i-single.php?id=93
+var l8TCwet = function(image){
+  return image
+  .select('B2').multiply(0.1509)
+  .add(image.select('B3').multiply(0.1973))
+  .add(image.select('B4').multiply(0.3279))
+  .add(image.select('B5').multiply(0.3406))
+  .subtract(image.select('B6').multiply(0.7112))
+  .subtract(image.select('B7').multiply(0.4572));
+};
+Map.addLayer(l8TCwet(composite),{min:-2000, max: 500},
+'TCwetness');
+
+print(l8TCwet(composite).geometry().projection());
+
+Export.image.toDrive({image: l8TCwet(composite),
+  description: 'NathalieLandsatTCwetExport',
+  folder: 'Postdoc Aarhus/playground/',
+  fileNamePrefix: 'landsatTCwet_NUUK_UTM32',
+  region: nuuk_area.geometry().buffer(10000), // Export with 10 km buffer around Nathalie's area. 
+  scale: 30, // 30 m is original resolution of the NDWI Sentinel tiles
+  crs: 'EPSG:32622' // UTM32 N is the original projection of the Sentinel tiles.
+ }); 
+ 
+ Export.image.toDrive({image: composite,
+  description: 'NathalieLandsatExport',
+  folder: 'Postdoc Aarhus/playground/',
+  fileNamePrefix: 'landsat_NUUK_UTM32',
+  region: nuuk_area.geometry().buffer(10000), // Export with 10 km buffer around Nathalie's area. 
+  scale: 30, // 30 m is original resolution of the NDWI Sentinel tiles
+  crs: 'EPSG:32622' // UTM32 N is the original projection of the Sentinel tiles.
+ }); 
