@@ -67,6 +67,25 @@ lit <- lit_raw %>%
               mutate(n_drivers = lengths(str_split(drivers, ";"))),
             by = c("study_id", "drivers")) %>% 
   
+  # calculate and add investigation of specific drivers
+  left_join(lit_raw %>% 
+              select(study_id, drivers) %>% 
+              filter(!(drivers == "")) %>%
+              mutate(annual_temp_count = str_count(drivers, "annual temperature"),
+                     annual_precip_count = str_count(drivers, "annual precipitation"),
+                     summer_temp_count = str_count(drivers, "summer temperature"),
+                     winter_temp_count = str_count(drivers, "winter temperature"),
+                     temp_var_count = str_count(drivers, "temperature variability|continentality"),
+                     summer_precip_count = str_count(drivers, "summer precipitation"),
+                     winter_precip_count = str_count(drivers, "winter precipitation|snow"),
+                     radiation_count = str_count(drivers, "radiation"),
+                     soil_moisture_count = str_count(drivers, "soil moisture"),
+                     topography_count = str_count(drivers, "topography|slope"),
+                     interactions_count = str_count(drivers, "neighbour|competition|species|vegetation type"),
+                     herbivory_count = str_count(drivers, "herbivory|herbivore"),
+                     nutrients_count = str_count(drivers, "fertilisation|nitrogen|phosphorous|soil N")),
+            by = c("study_id", "drivers")) %>% 
+  
   # filter for species-level, empirical studies, study location above 60°N
   filter(study_level == "species",
          str_detect(study_type, "empirical"),
@@ -100,6 +119,7 @@ lit <- lit_raw %>%
          date_of_export,
          study_type:drivers,
          n_drivers,
+         ends_with("_count"),
          driver_regime:comment)
 
 # Save data ----
