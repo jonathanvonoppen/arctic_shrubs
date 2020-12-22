@@ -87,16 +87,17 @@ temp_x_interact.jags_data <- list(
   
   # plot level, for discrete...
   abund.dis = temp_x_interact_data.dis$abundance,
-  tempjja.dis = temp_x_interact_data.dis$tempjja_C,
-  interact.dis = temp_x_interact_data.dis$interact_C,
+  tempjja.dis = temp_x_interact_data.dis$tempjja_C[,1],
+  interact.dis = temp_x_interact_data.dis$interact_C[,1],
   taxon.dis = temp_x_interact_data.dis$taxon.NUM,
   plotgroup_x_taxon.dis = temp_x_interact_data.dis$plotgroupXtaxon.NUM,
   N_discrete = nrow(temp_x_interact_data.dis),
   
   # ...and continuous part of the data
   abund.cont = temp_x_interact_data.cont$abundance,
-  tempjja.cont = temp_x_interact_data.cont$tempjja_C,
-  interact.cont = temp_x_interact_data.cont$interact_C,
+  tempjja.cont = temp_x_interact_data.cont$tempjja_C[,1],
+  interact.cont = temp_x_interact_data.cont$interact_C[,1],
+  taxon.cont = temp_x_interact_data.cont$taxon.NUM,
   plotgroup_x_taxon.cont = temp_x_interact_data.cont$plotgroupXtaxon.NUM,
   N_cont = nrow(temp_x_interact_data.cont),
   
@@ -104,6 +105,9 @@ temp_x_interact.jags_data <- list(
   tempjja.tot = temp_x_interact_data.tot %>% group_by(plotgroup.NUM, taxon.NUM) %>% summarise(tempjja.tot = mean(tempjja_C)) %>% pull(tempjja.tot),
   taxon.tot = temp_x_interact_data.tot %>% group_by(plotgroup.NUM) %>% distinct(taxon.NUM) %>% ungroup() %>% pull(taxon.NUM),
   N_plotgroups_x_taxon = length(unique(temp_x_interact_data.tot$plotgroupXtaxon.NUM)),
+  
+  # taxon level
+  N_taxa = length(unique(temp_x_interact_data.tot$taxon.NUM)),
   
   # subset of values for prediction, for each predictor...
   xhat_tempjja = seq(from = min(temp_x_interact_data.tot$tempjja_C), 
@@ -127,27 +131,31 @@ write("
   model{
 # priors 
 
-  intercept ~ dnorm(0, 0.0001)
+  for(t in N_taxa){
+    intercept[t] ~ dnorm(0, 0.0001)
   
-  b.interact ~ dnorm(0, 0.0001)
+    b.interact[t] ~ dnorm(0, 0.0001)
   
+    b.tempjja.x[t] ~ dnorm(0, 0.001)
+    b.tempjja.x2[t] ~ dnorm(0, 0.001)
+  
+    b.tempXinteract[t] ~ dnorm(0, 0.001)
+    b.tempXinteract2[t] ~ dnorm(0, 0.001)
+  }
+
   sigma.plot ~ dunif(0,100)
   tau.plot <- 1/(sigma.plot * sigma.plot)
   
   sigma.plotgroup_x_taxon ~ dunif(0,100)
   tau.plotgroup_x_taxon <- 1/(sigma.plotgroup_x_taxon * sigma.plotgroup_x_taxon)
   
-  b.tempjja.x ~ dnorm(0, 0.001)
-  b.tempjja.x2 ~ dnorm(0, 0.001)
+  phi ~ dgamma(0.1, 0.1)
   
-  b.tempXinteract ~ dnorm(0, 0.001)
-  b.tempXinteract2 ~ dnorm(0, 0.001)
-
-
+  
   # plot level - discrete part
   for (i in 1:N_discrete){ 
     abund.dis[i] ~ dbern(mu[i])
-    logit(mu[i]) <- b_plotgroup[plotgroup_x_taxon.dis[i]] + # ~= random effect of plot group
+    logit(mu[i]) <- b_plotgroup_x_taxon[plotgroup_x_taxon.dis[i]] + # ~= random effect of plot group
       b.interact[taxon.dis[i]] * interact.dis[i] + 
       b.tempXinteract[taxon.dis[i]] * tempjja.dis[i] * interact.dis[i] +       # for interaction
       b.tempXinteract2[taxon.dis[i]] * (tempjja.dis[i]^2) * interact.dis[i]    # for interaction
@@ -159,7 +167,7 @@ write("
     abund.cont[j] ~ dbeta(p[j], q[j])
     p[j] <- mu2[j] * phi
     q[j] <- (1 - mu2[j]) * phi
-    logit(mu2[j]) <- b_plotgroup[plotgroup_x_taxon.cont[j]] + # ~= random effect of plot group
+    logit(mu2[j]) <- b_plotgroup_x_taxon[plotgroup_x_taxon.cont[j]] + # ~= random effect of plot group
       b.interact[taxon.cont[j]] * interact.cont[j] + 
       b.tempXinteract[taxon.cont[j]] * tempjja.cont[j] * interact.cont[j] +       # for interaction
       b.tempXinteract2[taxon.cont[j]] * (tempjja.cont[j]^2) * interact.cont[j]    # for interaction
@@ -169,7 +177,7 @@ write("
   # plotgroup X taxon level
   for (k in 1:N_plotgroups_x_taxon){ # length of total plotgroup X taxon
     b_plotgroup_x_taxon[k] ~ dnorm(mu.plotgroup_x_taxon[k],tau.plotgroup_x_taxon)
-    mu.plotgroup_x_taxon[k] <- intercept + 
+    mu.plotgroup_x_taxon[k] <- intercept[taxon.tot[k]] + 
       
       # plot group level predictors, linear and quadratic term
       b.tempjja.x[taxon.tot[k]] * tempjja.tot[k] + 
@@ -197,6 +205,7 @@ params_tempXinteract <- c("intercept",
                           "b.interact.x", 
                           "b_plotgroup_x_taxon[1]","b_plotgroup_x_taxon[2]","b_plotgroup_x_taxon[3]","b_plotgroup[63]",
                           "sigma.plotgroup_x_taxon",
+                          "phi",
                           "phat_tempXinteract")
 
 
