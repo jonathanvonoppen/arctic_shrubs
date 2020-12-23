@@ -1,0 +1,104 @@
+
+  
+  model{
+    
+    # priors
+      
+      intercept ~ dnorm(0, 0.0001)
+      
+      b.compet ~ dnorm(0, 0.0001)
+      b.shrub_cov ~ dnorm(0, 0.0001)
+      b.gramin_cov ~ dnorm(0, 0.0001)
+      b.sri ~ dnorm(0, 0.0001)
+      b.tri ~ dnorm(0, 0.0001)
+      b.twi ~ dnorm(0, 0.0001)
+
+      sigma.plotgroup ~ dunif(0,100)
+      tau.plotgroup <- 1/(sigma.plotgroup * sigma.plotgroup)
+      
+      b.tempjja.x ~ dnorm(0, 0.001)
+      b.tempjja.x2 ~ dnorm(0, 0.001)
+      b.tempcont.x ~ dnorm(0, 0.001)
+      b.tempcont.x2 ~ dnorm(0, 0.001)
+      b.precipjja.x ~ dnorm(0, 0.001)
+      b.precipjja.x2 ~ dnorm(0, 0.001)
+      
+      b.tempXtwi ~ dnorm(0, 0.001)
+      b.tempXtwi2 ~ dnorm(0, 0.001)
+      
+      phi ~ dgamma(0.1, 0.1)
+      
+      
+    # LIKELIHOOD for discrete part
+
+      for (i in 1:N_discrete){ 
+        cov.dis[i] ~ dbern(mu[i])
+        logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
+                        b.compet * compet.dis[i] + 
+                        b.shrub_cov * shrub_cov.dis[i] + 
+                        b.gramin_cov * gramin_cov.dis[i] + 
+                        b.tempXtwi * tempjja.dis[i] * twi.dis[i] +       # for interaction
+                        b.tempXtwi2 * (tempjja.dis[i]^2) * twi.dis[i] +  # for interaction
+                        b.twi * twi.dis[i] + 
+                        b.sri * sri.dis[i] +
+                        b.tri * tri.dis[i]
+      }
+      
+      
+    # LIKELIHOOD for continuous part
+
+      for (j in 1:N_cont){
+        cov.cont[j] ~ dbeta(p[j], q[j])
+        p[j] <- mu2[j] * phi
+        q[j] <- (1 - mu2[j]) * phi
+        logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
+                        b.compet * compet.cont[j] +
+                        b.shrub_cov * shrub_cov.cont[j] +
+                        b.gramin_cov * gramin_cov.cont[j] +
+                        b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
+                        b.tempXtwi2 * (tempjja.cont[j]^2) * twi.cont[j] +  # for interaction
+                        b.twi * twi.cont[j] + 
+                        b.sri * sri.cont[j] +
+                        b.tri * tri.cont[j]
+      }
+
+
+      for (k in 1:N_plotgroups){ # length of total plotgroups
+        b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
+        mu.plotgroup[k] <- intercept + 
+                    
+                    # plot group level predictors, linear and quadratic term
+                    b.tempjja.x * tempjja.tot[k] + 
+                    b.tempjja.x2 * (tempjja.tot[k]^2) + 
+                    b.tempcont.x * tempcont.tot[k] + 
+                    b.tempcont.x2 * (tempcont.tot[k]^2) +
+                    b.precipjja.x * precipjja.tot[k] + 
+                    b.precipjja.x2 * (precipjja.tot[k]^2) 
+      }
+      
+      
+      # add predicted values (derived parameters)
+      for (m in 1:Nxhat){
+        phat_compet[m] <- intercept + b.compet * xhat_compet[m]
+        phat_graminoid_cover[m] <- intercept + b.gramin_cov * xhat_graminoid_cover[m]
+        phat_shrub_cover[m] <- intercept + b.shrub_cov * xhat_shrub_cover[m]
+        phat_sri[m] <- intercept + b.sri * xhat_sri[m]
+        phat_tri[m] <- intercept + b.tri * xhat_tri[m]
+        phat_twi[m] <- intercept + b.twi * xhat_twi[m]
+        phat_tempjja[m] <- intercept + b.tempjja.x * xhat_tempjja[m] + b.tempjja.x2 * (xhat_tempjja[m]^2)
+        phat_tempcont[m] <- intercept + b.tempcont.x * xhat_tempcont[m] + b.tempcont.x2 * (xhat_tempcont[m]^2)
+        phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
+      
+        for (p in 1:Nxhat2){
+          phat_tempXmoist[m,p] <- intercept +
+                                      b.tempjja.x * xhat_tempjja[m] +
+                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.twi * xhat_twi2[p] +
+                                      b.tempXtwi * xhat_tempjja[m] * xhat_twi2[p] +
+                                      b.tempXtwi2 * (xhat_tempjja[m]^2) * xhat_twi2[p]
+          }
+        }
+
+    
+      }
+  

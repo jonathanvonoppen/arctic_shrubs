@@ -2,4 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-data/processed/*
+
+# intermediate steps of analysis development workflow
+scripts/jonathan/former_analysis_scripts/*

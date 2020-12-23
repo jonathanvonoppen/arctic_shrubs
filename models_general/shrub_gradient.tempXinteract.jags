@@ -1,0 +1,71 @@
+
+  
+  model{
+# priors 
+
+  for(t in N_taxa){
+    intercept[t] ~ dnorm(0, 0.0001)
+  
+    b.interact[t] ~ dnorm(0, 0.0001)
+  
+    b.tempjja.x[t] ~ dnorm(0, 0.001)
+    b.tempjja.x2[t] ~ dnorm(0, 0.001)
+  
+    b.tempXinteract[t] ~ dnorm(0, 0.001)
+    b.tempXinteract2[t] ~ dnorm(0, 0.001)
+  }
+
+  sigma.plot ~ dunif(0,100)
+  tau.plot <- 1/(sigma.plot * sigma.plot)
+  
+  sigma.plotgroup_x_taxon ~ dunif(0,100)
+  tau.plotgroup_x_taxon <- 1/(sigma.plotgroup_x_taxon * sigma.plotgroup_x_taxon)
+  
+  phi ~ dgamma(0.1, 0.1)
+  
+  
+  # plot level - discrete part
+  for (i in 1:N_discrete){ 
+    abund.dis[i] ~ dbern(mu[i])
+    logit(mu[i]) <- b_plotgroup_x_taxon[plotgroup_x_taxon.dis[i]] + # ~= random effect of plot group
+      b.interact[taxon.dis[i]] * interact.dis[i] + 
+      b.tempXinteract[taxon.dis[i]] * tempjja.dis[i] * interact.dis[i] +       # for interaction
+      b.tempXinteract2[taxon.dis[i]] * (tempjja.dis[i]^2) * interact.dis[i]    # for interaction
+  }
+  
+  
+  # plot level - continuous part
+  for (j in 1:N_cont){
+    abund.cont[j] ~ dbeta(p[j], q[j])
+    p[j] <- mu2[j] * phi
+    q[j] <- (1 - mu2[j]) * phi
+    logit(mu2[j]) <- b_plotgroup_x_taxon[plotgroup_x_taxon.cont[j]] + # ~= random effect of plot group
+      b.interact[taxon.cont[j]] * interact.cont[j] + 
+      b.tempXinteract[taxon.cont[j]] * tempjja.cont[j] * interact.cont[j] +       # for interaction
+      b.tempXinteract2[taxon.cont[j]] * (tempjja.cont[j]^2) * interact.cont[j]    # for interaction
+  }
+  
+  
+  # plotgroup X taxon level
+  for (k in 1:N_plotgroups_x_taxon){ # length of total plotgroup X taxon
+    b_plotgroup_x_taxon[k] ~ dnorm(mu.plotgroup_x_taxon[k],tau.plotgroup_x_taxon)
+    mu.plotgroup_x_taxon[k] <- intercept[taxon.tot[k]] + 
+      
+      # plot group level predictors, linear and quadratic term
+      b.tempjja.x[taxon.tot[k]] * tempjja.tot[k] + 
+      b.tempjja.x2[taxon.tot[k]] * (tempjja.tot[k]^2) 
+  }
+  
+  
+  # derived parameters
+  for (m in 1:Nxhat){
+    for (p in 1:Nxhat2){
+      phat_tempXinteract[m,p] <- intercept +
+        b.tempjja.x * xhat_tempjja[m] +
+        b.tempjja.x2 * (xhat_tempjja[m]^2) +
+        b.interact * xhat_interact2[p]
+        
+    }
+  }
+  }
+
