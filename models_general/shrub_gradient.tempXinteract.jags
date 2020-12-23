@@ -3,7 +3,7 @@
   model{
 # priors 
 
-  for(t in N_taxa){
+  for(t in 1:N_taxa){ #AB added 1:
     intercept[t] ~ dnorm(0, 0.0001)
   
     b.interact[t] ~ dnorm(0, 0.0001)
@@ -58,14 +58,14 @@
   
   
   # derived parameters
-  for (m in 1:Nxhat){
-    for (p in 1:Nxhat2){
-      phat_tempXinteract[m,p] <- intercept +
-        b.tempjja.x * xhat_tempjja[m] +
-        b.tempjja.x2 * (xhat_tempjja[m]^2) +
-        b.interact * xhat_interact2[p]
-        
-    }
-  }
+  # for (m in 1:Nxhat){
+  #   for (p in 1:Nxhat2){
+  #     phat_tempXinteract[m,p] <- intercept +
+  #       b.tempjja.x * xhat_tempjja[m] +
+  #       b.tempjja.x2 * (xhat_tempjja[m]^2) +
+  #       b.interact * xhat_interact2[p]
+  #       
+  #   }
+  # }
   }
 

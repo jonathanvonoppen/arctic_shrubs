@@ -131,7 +131,7 @@ write("
   model{
 # priors 
 
-  for(t in N_taxa){
+  for(t in 1:N_taxa){ #AB added 1: to the for statement
     intercept[t] ~ dnorm(0, 0.0001)
   
     b.interact[t] ~ dnorm(0, 0.0001)
@@ -186,15 +186,15 @@ write("
   
   
   # derived parameters
-  for (m in 1:Nxhat){
-    for (p in 1:Nxhat2){
-      phat_tempXinteract[m,p] <- intercept +
-        b.tempjja.x * xhat_tempjja[m] +
-        b.tempjja.x2 * (xhat_tempjja[m]^2) +
-        b.interact * xhat_interact2[p]
-        
-    }
-  }
+  # for (m in 1:Nxhat){
+  #   for (p in 1:Nxhat2){
+  #     phat_tempXinteract[m,p] <- intercept +
+  #       b.tempjja.x * xhat_tempjja[m] +
+  #       b.tempjja.x2 * (xhat_tempjja[m]^2) +
+  #       b.interact * xhat_interact2[p]
+  #       
+  #   }
+  # }
   }
 ", file.path("models_general", "shrub_gradient.tempXinteract.jags"))
 
@@ -202,11 +202,11 @@ write("
 # Specify parameters ----
 params_tempXinteract <- c("intercept",
                           "b.tempjja.x", "b.tempjja.x2",
-                          "b.interact.x", 
+                          "b.interact", 
                           "b_plotgroup_x_taxon[1]","b_plotgroup_x_taxon[2]","b_plotgroup_x_taxon[3]","b_plotgroup[63]",
                           "sigma.plotgroup_x_taxon",
-                          "phi",
-                          "phat_tempXinteract")
+                          "phi")#,
+                          #"phat_tempXinteract")
 
 
 # Run model ----
