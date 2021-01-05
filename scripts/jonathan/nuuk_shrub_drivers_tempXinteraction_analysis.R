@@ -72,6 +72,10 @@ temp_x_interact_data.tot <- read.csv(file.path("data", "processed", "nuuk_env_co
   mutate(abund_discrete = case_when(abundance %in% c(0, 1) ~ 1,
                                     TRUE ~ 0))
 
+# save input data (for predictions plot)
+save("temp_x_interact_data.tot",
+     file = file.path("models_general", "shrub_gradient_temp_x_interact_preddata.Rdata"))
+
 # create subset for discrete and continuous data
 temp_x_interact_data.dis <- temp_x_interact_data.tot %>% 
   
@@ -185,13 +189,15 @@ write("
   }
   
   
-  # derived parameters
+  # derived parameters # have to be calculated at taxon level?
   # for (m in 1:Nxhat){
   #   for (p in 1:Nxhat2){
   #     phat_tempXinteract[m,p] <- intercept +
   #       b.tempjja.x * xhat_tempjja[m] +
   #       b.tempjja.x2 * (xhat_tempjja[m]^2) +
-  #       b.interact * xhat_interact2[p]
+  #       b.interact * xhat_interact2[p] + 
+  #       b.tempXinteract[taxon.dis[i]] * xhat_tempjja[i] * xhat_interact2[i] +       # for interaction
+  #       b.tempXinteract2[taxon.dis[i]] * (xhat_tempjja[i]^2) * xhat_interact2[i]    # for interaction
   #       
   #   }
   # }
@@ -223,3 +229,31 @@ model_out.shrub_gradient.tempXinteract <- jags(temp_x_interact.jags_data,       
 
 # plot(model_out.shrub_gradient.tempXinteract) #check convergence, etc.
 
+
+# Extract coefficients and save model output ----
+# extract coefficients 
+coeff.shrub_gradient.tempXinteract <- model_out.shrub_gradient.tempXinteract$BUGSoutput$summary %>% 
+  as.data.frame %>% 
+  select('mean','sd','2.5%','97.5%','Rhat') %>% 
+  # add identifying info to data frame
+  rownames_to_column(var = "param")
+
+# add 90% CIs
+ci_90.tempXinteract <- data.frame(q5 = NA, q95 = NA, param = NA)
+for (param in 1:(length(model_out.shrub_gradient.tempXinteract$BUGSoutput$sims.list)-4)){
+  ci_90.tempXinteract[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.tempXinteract$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
+  ci_90.tempXinteract[param, 3] <- names(data.frame(model_out.shrub_gradient.tempXinteract$BUGSoutput$sims.list))[param]
+}
+
+# join to coefficients table
+coeff.shrub_gradient.tempXinteract <- coeff.shrub_gradient.tempXinteract %>% 
+  left_join(ci_90.tempXinteract, by = "param") %>% 
+  # reorder and rename cols
+  select(param, mean, sd, 
+         l95 = "2.5%",
+         l90 = q5,
+         u90 = q95,
+         u95 = "97.5%",
+         Rhat)
+
+save(coeff.shrub_gradient.tempXinteract, file = file.path("models_general", "model_output_temp_x_interact.Rdata"))
