@@ -723,6 +723,143 @@ ylabel <- ggdraw() +
 #           nuuk_interaction_plot_grid_ver_twi, base_height = 15, base_aspect_ratio = 1)
 
 
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
+
+
+# Fig. 6.1) Interaction plots temp X moisture (TWI) ----
+
+# >> load function ----
+source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot.R"))
+
+
+# >> load data ----
+
+# load model output data
+load(file = file.path("models_general", "model_output_temp_x_interact.Rdata"))
+
+# load input data
+load(file = file.path("models_general", "shrub_gradient_temp_x_interact_preddata.Rdata"))
+
+
+# >> plot graphs ----
+species_df <- temp_x_interact_data.tot
+
+# define initial predictions df
+phats <- as.data.frame(matrix(data = NA,
+                              nrow = 100, 
+                              ncol = length(model_coeff_output) + 2))
+names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
+
+# extract predictions into phats data frame 
+phat_predictor <- "phat_tempXinteract"
+
+predictor_min <- min(species_df$tempjjaC)
+predictor_max <- max(species_df$tempjjaC)
+
+# assemble predicted and predictor values, for 100 rows (one predictor) at a time
+phats <- model_coeff_output %>% 
+  
+  # filter for predicted values
+  filter(param %in% c(paste0(phat_predictor,
+                             "[", 
+                             rep(seq(from = 1, to = 100), times = 2),
+                             ",",
+                             rep(seq(from = 1, to = 2), each = 100), 
+                             "]"))) %>% 
+  
+  # add xhats column
+  mutate(xhats = rep(seq(from = predictor_min, 
+                         to = predictor_max,
+                         length.out = 100), times = 2)) %>% 
+  
+  # add column for back-centered and back-scaled values
+  mutate(tempjja = xhats * attr(scale(species_df$tempjja), 'scaled:scale') + attr(scale(species_df$tempjja), 'scaled:center'),
+         
+         # add column for low/high diff. to community acquisitiveness values
+         dca = rep(c("low", "high"),
+                   each = 100))
+
+# graph
+
+int_plot <- ggplot() +
+  # tempjja is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
+  geom_point(data = species_df %>% group_by(site_alt_plotgroup_id) %>% summarise(tempjja = mean(tempjja), cover = mean(cover)), 
+             aes(x = tempjja, 
+                 y = cover), 
+             size = 2,
+             position = position_jitter(width=0, height=.001),
+             alpha = 0.5) +
+  
+  # draw line of predicted values
+  geom_line(data = phats, 
+            aes(x = tempjja, 
+                y = plogis(mean),
+                colour = dca), 
+            alpha = 1,
+            size = 3) + 
+  
+  # draw predicted 95% CI
+  geom_ribbon(data = phats,
+              aes(x = tempjja, 
+                  ymin = plogis(l95), 
+                  ymax = plogis(u95),
+                  fill = dca),
+              alpha = 0.2) +
+  
+  # set y range limits so ribbons are not cut off
+  coord_cartesian(ylim = c(0, 
+                           max(species_df %>% 
+                                 group_by(site_alt_plotgroup_id) %>% 
+                                 summarise(tempjja = mean(tempjja), cover = mean(cover)) %>% 
+                                 pull(cover)))) +
+  
+  # define appearance
+  scale_colour_manual("difference to\ncommunity\nacquisitiveness", values = c("indianred3", "goldenrod1")) +
+  scale_fill_manual("difference to\ncommunity\nacquisitiveness", values = c("indianred3", "goldenrod1")) +
+  theme_cowplot(18) +
+  theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
+        axis.title = element_blank(),
+        legend.position = "none")
+
+# extract legend
+legend_tempXint_plot <- get_legend(tempXint_plot + 
+                                theme(legend.box.margin = margin(t = 70, l = 70)))
+
+# make x- and y-axis label
+xlabel <- ggdraw() +
+  draw_label("mean summer temperature [°C]",
+             hjust = 0.5,
+             size = 20,
+             fontface = "bold")
+
+ylabel <- ggdraw() +
+  draw_label("relative abundance per plot group",
+             vjust = 0,
+             angle = 90,
+             size = 20,
+             fontface = "bold")
+
+# combine plot and ylabel
+(nuuk_tempXinteraction_row <- plot_grid(ylabel,
+                                    plot_grid(tempXint_plot,
+                                              legend_tempXint_plot,
+                                              ncol = 2,
+                                              axis = "lt",
+                                              align = "hv"),
+                                    rel_widths = c(.03, 1)
+))
+
+# add xlabel
+(nuuk_tempXint_plot <- plot_grid(nuuk_interactions_row,
+                                                 xlabel,
+                                                 ncol = 1,
+                                                 rel_heights = c(1, 0.05)))
+
+# # >> save plot ----
+# save_plot(file.path("figures", "nuuk_shrub_drivers_tempXinteraction.pdf"),
+#           nuuk_tempXinteraction_plot, base_height = 15, base_aspect_ratio = 1)
+
+
 # ________________________________________ ----
 
 ### Supplementary figures ----
