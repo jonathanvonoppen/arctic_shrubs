@@ -78,12 +78,12 @@ lit <- lit_raw %>%
                      temp_var_count = str_count(drivers, "temperature variability|continentality"),
                      summer_precip_count = str_count(drivers, "summer precipitation"),
                      winter_precip_count = str_count(drivers, "winter precipitation|snow"),
-                     radiation_count = str_count(drivers, "radiation"),
+                     radiation_count = str_count(drivers, "radiation|cloudiness"),
                      soil_moisture_count = str_count(drivers, "soil moisture"),
-                     topography_count = str_count(drivers, "topography|slope"),
-                     interactions_count = str_count(drivers, "neighbour|competition|species|vegetation type"),
+                     topography_count = str_count(drivers, "topography|slope|elevation"),
+                     interactions_count = str_count(drivers, "neighbour|competition|species|vegetation type|allelopath"),
                      herbivory_count = str_count(drivers, "herbivory|herbivore"),
-                     nutrients_count = str_count(drivers, "fertilisation|nitrogen|phosphorous|soil N")),
+                     nutrients_count = str_count(drivers, "fertilisation|nitrogen|phosphorous|nutrient")),
             by = c("study_id", "drivers")) %>% 
   
   # filter for species-level, empirical studies, study location above 60°N
@@ -103,8 +103,7 @@ lit <- lit_raw %>%
   mutate(driver_regime = fct_recode(driver_regime,
                                     "abiotic & biotic" = "biotic; abiotic"),
          n_species = fct_relevel(n_species,
-                                 as.character(c(1:25)),
-                                 "unknown")) %>% 
+                                 as.character(c(1:7, 10, 25)))) %>% 
   
   # reorder columns
   select(study_id,
