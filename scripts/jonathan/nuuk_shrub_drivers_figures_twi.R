@@ -40,6 +40,7 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
 
 
 # >> compile plot panels ----
+# ¨¨¨¨ a) count drivers ----
 (driver_count <- ggplot(data = lit,
                        aes(x = n_drivers,
                            fill = driver_regime)) +
@@ -70,6 +71,7 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
          axis.ticks = element_line(size = 1.5),
          axis.line = element_line(size = 1.5)))
 
+# ¨¨¨¨ b) count species ----
 (species_count <- ggplot(data = lit,
                         aes(x = n_species)) +
   
@@ -91,6 +93,65 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
         axis.title.y = element_blank(),
         axis.ticks = element_line(size = 1.5),
         axis.line = element_line(size = 1.5)))
+
+
+# ¨¨¨¨ c) count occurrence of drivers ----
+
+lit_driver_sums <- lit %>% 
+  summarise_at(vars(ends_with("_count")), sum) %>% 
+  pivot_longer(cols = ends_with("_count"),
+               names_to = "driver",
+               values_to = "sum_investigated") %>% 
+  mutate(driver = str_remove(driver, "_count"),
+         driver = str_replace_all(driver, c("_" = " ",
+                                      "temp" = "temperature",
+                                      "precip" = "precipitation",
+                                      "var" = "variability",
+                                      "nutrients" = "soil nutrients"))) %>% 
+  mutate(driver = factor(driver, levels = c("summer temperature",
+                    "temperature variability",
+                    "summer precipitation",
+                    "radiation",
+                    "topography",
+                    "soil moisture",
+                    "interactions",
+                    "annual temperature",
+                    "annual precipitation",
+                    "winter temperature",
+                    "winter precipitation",
+                    "soil nutrients",
+                    "herbivory"))) %>% 
+  arrange(driver) %>% print()
+
+(driver_occurrence_count <- ggplot(data = lit_var_sums,
+                                   aes(x = n_drivers,
+                                       fill = driver_regime)) +
+    
+    # draw bars
+    geom_bar(stat = "count", 
+             width = .9) +
+    
+    # change y axis range
+    scale_y_continuous(limits = c(0, 37), 
+                       breaks = c(10, 20, 30)) +
+    
+    # change axis labels
+    labs(x = "number of drivers included",
+         y = "number of published studies (n = 79)",
+         fill = "driver regime") +
+    
+    # adjust appearance
+    scale_fill_manual(values = c("steelblue3", "#64bd54", "#ffc16a")) +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          plot.margin = margin(t = 1, unit = "cm"),
+          legend.position = c(0.8, 0.8),
+          legend.title = element_text(size = 20),
+          legend.text = element_text(size = 18),
+          axis.text = element_text(size = 18),
+          axis.title = element_text(size = 20),
+          axis.ticks = element_line(size = 1.5),
+          axis.line = element_line(size = 1.5)))
 
 
 # >> combine plot panels ----
