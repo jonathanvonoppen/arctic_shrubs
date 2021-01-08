@@ -42,7 +42,7 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
 # >> compile plot panels ----
 # ¨¨¨¨ a) count drivers ----
 (driver_count <- ggplot(data = lit,
-                       aes(x = n_drivers,
+                       aes(x = factor(n_drivers),
                            fill = driver_regime)) +
   
    # draw bars
@@ -55,7 +55,7 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
   
    # change axis labels
    labs(x = "number of drivers included",
-        y = "number of published studies (n = 79)",
+        y = "number of published studies\n(n = 79)",
         fill = "driver regime") +
    
    # adjust appearance
@@ -66,14 +66,18 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
          legend.position = c(0.8, 0.8),
          legend.title = element_text(size = 20),
          legend.text = element_text(size = 18),
-         axis.text = element_text(size = 18),
-         axis.title = element_text(size = 20),
+         axis.text = element_text(size = 18,
+                                  margin = margin(t = 8)),
+         axis.title.x = element_text(size = 20,
+                                     margin = margin(t = 10)),
+         axis.title.y = element_text(size = 20,
+                                     margin = margin(r = 10)),
          axis.ticks = element_line(size = 1.5),
          axis.line = element_line(size = 1.5)))
 
 # ¨¨¨¨ b) count species ----
 (species_count <- ggplot(data = lit,
-                        aes(x = n_species)) +
+                        aes(x = factor(n_species))) +
   
   # draw bars
   geom_bar(stat = "count", 
@@ -82,15 +86,18 @@ lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection
   scale_y_continuous(limits = c(0, 37), 
                      breaks = c(10, 20, 30)) +
   labs(x = "number of taxa included",
-       y = "number of published studies") +
+       y = "number of published studies\n(n = 79)") +
   
   # adjust appearance
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         plot.margin = margin(t = 1, l = 1, unit = "cm"),
-        axis.text = element_text(size = 18),
-        axis.title.x = element_text(size = 20),
-        axis.title.y = element_blank(),
+        axis.text = element_text(size = 18,
+                                 margin = margin(t = 8)),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(t = 10)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(r = 10)),
         axis.ticks = element_line(size = 1.5),
         axis.line = element_line(size = 1.5)))
 
@@ -115,33 +122,37 @@ lit_driver_sums <- lit %>%
                     "topography",
                     "soil moisture",
                     "interactions",
-                    "annual temperature",
-                    "annual precipitation",
                     "winter temperature",
                     "winter precipitation",
+                    "annual temperature",
+                    "annual precipitation",
                     "soil nutrients",
                     "herbivory"))) %>% 
-  arrange(driver) %>% print()
+  arrange(driver)
+  
+  # add vector for axis text face
+  textface = c(rep("bold", 7),
+               rep("italic", 2),
+               rep("plain", 4))
 
-(driver_occurrence_count <- ggplot(data = lit_var_sums,
-                                   aes(x = n_drivers,
-                                       fill = driver_regime)) +
+(driver_occurrence_count <- ggplot(data = lit_driver_sums,
+                                   aes(x = driver,
+                                       y = sum_investigated)) +
     
     # draw bars
-    geom_bar(stat = "count", 
-             width = .9) +
+    geom_bar(stat = "identity", 
+             width = .9,
+             fill = "#9349c7") +
     
     # change y axis range
-    scale_y_continuous(limits = c(0, 37), 
+    scale_y_continuous(limits = c(0, 32), 
                        breaks = c(10, 20, 30)) +
     
     # change axis labels
-    labs(x = "number of drivers included",
-         y = "number of published studies (n = 79)",
-         fill = "driver regime") +
+    labs(x = "explanatory variable",
+         y = "times included\n(no. studies = 79)") +
     
     # adjust appearance
-    scale_fill_manual(values = c("steelblue3", "#64bd54", "#ffc16a")) +
     theme_bw() +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           plot.margin = margin(t = 1, unit = "cm"),
@@ -149,30 +160,39 @@ lit_driver_sums <- lit %>%
           legend.title = element_text(size = 20),
           legend.text = element_text(size = 18),
           axis.text = element_text(size = 18),
-          axis.title = element_text(size = 20),
+          axis.text.x = element_text(face = textface,
+                                     size = 16,
+                                     margin = margin(t = 8)),
+          axis.title.x = element_blank(),
+          axis.title.y = element_text(size = 20,
+                                      margin = margin(r = 10)),
           axis.ticks = element_line(size = 1.5),
           axis.line = element_line(size = 1.5)))
+  
+  driver_occurrence_count <- driver_occurrence_count +
+    ggpubr::rotate_x_text()
 
 
 # >> combine plot panels ----
 
 (nuuk_lit_plot <- plot_grid(driver_count,
                        species_count,
-                       labels = c("a)", "b)"),
+                       driver_occurrence_count,
+                       labels = c("a)", "b)", "c)"),
                        label_size = 20,
                        label_fontface = "bold",
-                       label_x = c(rep(0.05, 2)),
-                       nrow = 1,
+                       label_x = c(rep(0.05, 3)),
+                       ncol = 1,
                        axis = "lt",
                        align = "hv",
                        scale = 0.98,
-                       rel_widths = c(1, 1)
+                       rel_heights = c(1, 1, 1)
 ))
 
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_lit_review.pdf"),
-          nuuk_lit_plot, base_height = 8, base_aspect_ratio = 1.8)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_lit_review_update.pdf"),
+#           nuuk_lit_plot, base_height = 20, base_aspect_ratio = .5)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
