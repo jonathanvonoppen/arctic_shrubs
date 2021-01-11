@@ -1,43 +1,34 @@
+# Temperature variability, moisture and biotic interactions drive shrub species abundance along a coastal-inland gradient in arctic Greenland
+
+# von Oppen, J. et al. 2020
+
+# Figure code
+
+# Jonathan von Oppen, Aarhus University, Sept 2020
+
+# contact: jonathan.vonoppen@bios.au.dk
 
 
-# load data
-model_outputs_focal_species <- file.path("data", "processed", "model_outputs", "species_twi", list.files(path = file.path("data", "processed", "model_outputs", "species_twi"), pattern = "*2.Rdata"))
-for (model_output in model_outputs_focal_species){
+
+# load model outputs
+model_outputs_species <- file.path("data", "processed", "model_outputs", "species_twi", list.files(path = file.path("data", "processed", "model_outputs", "species_twi"), pattern = "*.Rdata"))
+for (model_output in model_outputs_species){
   load(model_output)
 }
 
-# fix row names
-var_order <- c("intercept", 
-               "b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", 
-               "b.sri", "b.tri", "b.twi", 
-               "b.compet", "b.gramin_cov", "b.shrub_cov", 
-               "phi", "sigma.plotgroup")
-BetNan_output_table <- coeff.shrub_gradient.BetNan2 %>% 
-  
-  # filter for coefficients of interest
-  filter(param %in% var_order) %>% 
-  
-  # reorder rows
-  mutate(param = factor(param, levels = var_order)) %>% 
-  arrange(param) %>%
-  mutate(param = as.character(param)) %>% 
-  
-  # adjust parameter namings
-  mutate(param = case_when(param == "b.compet" ~ "dCWA",
-                           param == "b.gramin_cov" ~ "graminoid cover",
-                           param == "b.precipjja.x" ~ "summer precipitation",
-                           param == "b.precipjja.x2" ~ "summer precipitation ^2",
-                           param == "b.shrub_cov" ~ "other shrub cover",
-                           param == "b.sri" ~ "solar radiation",
-                           param == "b.tempcont.x" ~ "temperature variability",
-                           param == "b.tempcont.x2" ~ "temperature variability ^2",
-                           param == "b.tempjja.x" ~ "summer temperature",
-                           param == "b.tempjja.x" ~ "summer temperature ^2",
-                           param == "b.tri" ~ "terrain ruggedness",
-                           param == "b.twi" ~ "topographic wetness",
-                           TRUE ~ param)) %>% 
-  
-  # build flextable
-  flextable() %>% 
-  theme_vanilla() %>% 
-  colformat_num(j = c("Rhat"), digits = 2)
+# write 
+source(file = file.path("scripts", "jonathan", "plotting_functions", "output_tables.R"))
+
+(AllShr_output_table <- output_table(species = "All shrubs"))
+(AllEve_output_table <- output_table(species = "All evergreens"))
+(AllDec_output_table <- output_table(species = "All deciduous"))
+
+(BetNan_output_table <- output_table(species = "Betula nana"))
+(CasTet_output_table <- output_table(species = "Cassiope tetragona"))
+(EmpNig_output_table <- output_table(species = "Empetrum nigrum"))
+(PhyCae_output_table <- output_table(species = "Phyllodoce caerulea"))
+(RhoGro_output_table <- output_table(species = "Rhododendron groenlandicum"))
+(RhoTom_output_table <- output_table(species = "Rhododendron tomentosum"))
+(SalArc_output_table <- output_table(species = "Salix arctophila"))
+(SalGla_output_table <- output_table(species = "Salix glauca"))
+(VacUli_output_table <- output_table(species = "Vaccinium uliginosum"))
