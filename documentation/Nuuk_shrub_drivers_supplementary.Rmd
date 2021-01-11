@@ -1,0 +1,348 @@
+---
+title: "Drivers of tundra shrub abundance in SW Greenland - supplementary material"
+author: "Jonathan von Oppen"
+date: "08/01/2021"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Dependencies ----
+if (!require('pacman')) install.packages('pacman', repos="https://cloud.r-project.org")
+pacman::p_load(tidyverse, # set of packages for data manipulation, exploration and visualisation
+               tidylog,   # to document dplyr & tidyr operations
+               huxtable,
+               rmarkdown) 
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Study species overview table
+
+```{r}
+(species_overview <- read.csv(file = file.path("data", "processed", "nuuk_traits_PCAscores_cleaned.csv"),
+                               header = T) %>% 
+  
+   # select, reorder and rename columns
+   select(species,
+          fgroup,
+          PC1,
+          PC2) %>% 
+   
+   # filter out graminoids
+   filter(!(species == "graminoids mean")) %>% 
+   
+   # add new col w/ no. species in each taxon to add rows for 2nd Rhododendron and Salix species
+   mutate(n_spec = c(1, 1, 1, 2, 1, 2, 1)) %>% 
+   uncount(n_spec) %>% 
+   
+   mutate(species = case_when(species == "Rhododendron sp." & row_number() == 4 ~ "Rhododendron groenlandicum",
+                              species == "Rhododendron sp." & row_number() == 5 ~ "Rhododendron tomentosum",
+                              species == "Salix sp." & row_number() == 7 ~ "Salix arctophila",
+                              species == "Salix sp." & row_number() == 8 ~ "Salix glauca",
+                              TRUE ~ species))) %>% 
+   
+   # add cols
+   mutate(pollination = case_when(species %in% c("Betula nana", "Salix arctophila", "Salix glauca")  ~ "wind",
+                                         species %in% c("Cassiope tetragona", "Rhododendron groenlandicum", "Rhododendron tomentosum") ~ "insects",
+                                         TRUE ~ ""),
+          dispersal = case_when(species %in% c("Cassiope tetragona", "Phyllodoce caerulea") ~ "animals",
+                                species == "Empetrum nigrum" ~ "animals, clonal",
+                                species == "Vaccinium uliginosum" ~ "animals, (clonal)",
+                                species == "Betula nana" ~ "(wind), clonal",
+                                species %in% c("Rhododendron groenlandicum", "Rhododendron tomentosum", "Salix glauca") ~ "wind, (clonal)",
+                                species == "Salix arctophila" ~ "wind, clonal",
+                                TRUE ~ ""),
+          references = case_when(species == "Betula nana" ~ "Tollefson (2007)",
+                                 species == "Empetrum nigrum" ~ "Matthews (1992a)",
+                                 species == "Rhododendron groenlandicum" ~ "Gucker (2006)",
+                                 species == "Rhododendron tomentosum" ~ "Gucker (2005)",
+                                 species == "Salix glauca" ~ "Uchytil (1992)",
+                                 species == "Vaccinium uliginosum" ~ "Matthews (1992b)")
+          ) %>% 
+  
+  # arrange by acquisitiveness
+  arrange(PC1) %>% 
+  
+  # make flextable and reorder columns
+  flextable(col_keys = c("species", "fgroup", "pollination", "dispersal", "PC1", "PC2", "references")) %>% 
+  
+  # add author names
+  compose(i = 1, j = "species",   # E. nigrum
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " L.")) %>% 
+  compose(i = 2, j = "species",   # C. tetragona
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " L.")) %>% 
+  compose(i = 3, j = "species",   # P. caerulea
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " (L.) Bab.")) %>% 
+  compose(i = 4, j = "species",   # R. groenlandicum
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " (Oeder) Kron & Judd")) %>% 
+  compose(i = 5, j = "species",   # R. tomentosum
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " (Stokes) Harmaja")) %>% 
+  compose(i = 6, j = "species",   # B. nana
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " L.")) %>% 
+  compose(i = 7, j = "species",   # V. uliginosum
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " L.")) %>% 
+  compose(i = 8, j = "species",   # S. arctophila
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " Cockerell")) %>% 
+  compose(i = 9, j = "species",   # S. glauca
+          value = as_paragraph(as_chunk(species,
+                                        props = fp_text(italic = TRUE)),
+                               " L.")) %>% 
+  
+  # add superscripts in PC score cols for Rhododendron and Salix
+  compose(i = 4, j = "PC1",   # R. groenlandicum
+          value = as_paragraph(PC1,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 5, j = "PC1",   # R. tomentosum
+          value = as_paragraph(PC1,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 4, j = "PC2",   # R. groenlandicum
+          value = as_paragraph(PC2,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 5, j = "PC2",   # R. tomentosum
+          value = as_paragraph(PC2,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 8, j = "PC1",   # S. arctophila
+          value = as_paragraph(PC1,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 9, j = "PC1",   # S. glauca
+          value = as_paragraph(PC1,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 8, j = "PC2",   # S. arctophila
+          value = as_paragraph(PC2,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 9, j = "PC2",   # S. glauca
+          value = as_paragraph(PC2,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>%
+  
+  # adjust header labels
+  set_header_labels(species = "species name",
+                    fgroup = "canopy persistence",
+                    pollination = "pollination mode",
+                    dispersal = "dispersal mode / clonality",
+                    PC1 = "PC1 (resource economics)",
+                    PC2 = "PC2 (plant size)") %>% 
+  
+  # add superscripts in PC score cols for Thomas et al. reference
+  compose(j = 5, part = "header",
+          value = as_paragraph("PC1 (resource economics)",
+                               as_chunk(" a",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(j = 6, part = "header",
+          value = as_paragraph("PC2 (plant size)",
+                               as_chunk(" a",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  
+  # # add footnotes
+  # footnote(part = NULL,
+  #   value = as_paragraph(c(" PCA scores based on Thomas et al. (2020)",
+  #                                 " using a common value for species within Rhododendron and Salix genera, respectively. See supplementary text, page XX, for further information"))) %>%
+  
+  # adjust appearance
+  theme_vanilla() %>% 
+  
+  # adjust font size
+  fontsize(size = 10, part = "all")
+)
+
+```
+huxtable approach:
+
+```{r}
+read.csv(file = file.path("data", "processed", "nuuk_traits_PCAscores_cleaned.csv"),
+                               header = T) %>% 
+  
+   # select, reorder and rename columns
+   select(species,
+          fgroup,
+          PC1,
+          PC2) %>% 
+   
+   # filter out graminoids
+   filter(!(species == "graminoids mean")) %>% 
+   
+   # add new col w/ no. species in each taxon to add rows for 2nd Rhododendron and Salix species
+   mutate(n_spec = c(1, 1, 1, 2, 1, 2, 1)) %>% 
+   uncount(n_spec) %>% 
+   
+   mutate(species = case_when(species == "Rhododendron sp." & row_number() == 4 ~ "Rhododendron groenlandicum",
+                              species == "Rhododendron sp." & row_number() == 5 ~ "Rhododendron tomentosum",
+                              species == "Salix sp." & row_number() == 7 ~ "Salix arctophila",
+                              species == "Salix sp." & row_number() == 8 ~ "Salix glauca",
+                              TRUE ~ species)) %>% 
+   
+   # add cols
+   mutate(pollination = case_when(species %in% c("Betula nana", "Salix arctophila", "Salix glauca")  ~ "wind",
+                                         species %in% c("Cassiope tetragona", "Rhododendron groenlandicum", "Rhododendron tomentosum") ~ "insects",
+                                         TRUE ~ ""),
+          dispersal = case_when(species %in% c("Cassiope tetragona", "Phyllodoce caerulea") ~ "animals",
+                                species == "Empetrum nigrum" ~ "animals, clonal",
+                                species == "Vaccinium uliginosum" ~ "animals, (clonal)",
+                                species == "Betula nana" ~ "(wind), clonal",
+                                species %in% c("Rhododendron groenlandicum", "Rhododendron tomentosum", "Salix glauca") ~ "wind, (clonal)",
+                                species == "Salix arctophila" ~ "wind, clonal",
+                                TRUE ~ ""),
+          references = case_when(species == "Betula nana" ~ "Tollefson (2007)",
+                                 species == "Empetrum nigrum" ~ "Matthews (1992a)",
+                                 species == "Rhododendron groenlandicum" ~ "Gucker (2006)",
+                                 species == "Rhododendron tomentosum" ~ "Gucker (2005)",
+                                 species == "Salix glauca" ~ "Uchytil (1992)",
+                                 species == "Vaccinium uliginosum" ~ "Matthews (1992b)")
+          ) %>% 
+  
+  # arrange by acquisitiveness
+  arrange(PC1) %>% 
+  
+  # reorder columns
+  select(species, 
+         fgroup, 
+         pollination, 
+         dispersal, 
+         PC1, 
+         PC2, 
+         references) %>% 
+  
+  # make huxtable
+  hux() %>% 
+  
+  # add author names
+  set_markdown_contents(2, 1,   # E. nigrum
+          "*Empetrum nigrum* L.") %>% 
+  set_markdown_contents(3, 1,   # C. tetragona
+          "*Cassiope tetragona* L.") %>% 
+  set_markdown_contents(4, 1,   # P. caerulea
+          "*Phyllodoce caerulea* (L.) Bab.") %>% 
+  set_markdown_contents(5, 1,   # R. groenlandicum
+          "*Rhododendron groenlandicum* (Oeder) Kron & Judd") %>% 
+  set_markdown_contents(6, 1,   # R. tomentosum
+          "*Rhododendron tomentosum* (Stokes) Harmaja") %>% 
+  set_markdown_contents(7, 1,   # B. nana
+          "*Betula nana* L.") %>% 
+  set_markdown_contents(8, 1,   # V. uliginosum
+          "*Vaccinium uliginosum* L.") %>% 
+  set_markdown_contents(9, 1,   # S. arctophila
+          "*Salix arctophila* Cockerell") %>% 
+  set_markdown_contents(10, 1,   # S. glauca
+          "*Salix glauca* L.") %>% 
+  
+  # add superscripts in PC score cols for Rhododendron and Salix
+  mutate(PC1 = case_when(species %in% c("Rhododendron groenlandicum (Oeder) Kron & Judd", "Rhododendron tomentosum (Stokes) Harmaja") ~ paste0(as.character(PC1), "a"),
+                         TRUE ~ as.character(PC1)),
+         PC2 = case_when(species %in% c("Salix arctophila", "Salix glauca") ~ paste0(as.character(PC2), "b"),
+                         TRUE ~ as.character(PC2)))
+
+  set_mar(i = 4, j = "PC1",   # R. groenlandicum
+          value = as_paragraph(PC1,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 5, j = "PC1",   # R. tomentosum
+          value = as_paragraph(PC1,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 4, j = "PC2",   # R. groenlandicum
+          value = as_paragraph(PC2,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 5, j = "PC2",   # R. tomentosum
+          value = as_paragraph(PC2,
+                               as_chunk(" b",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 8, j = "PC1",   # S. arctophila
+          value = as_paragraph(PC1,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 9, j = "PC1",   # S. glauca
+          value = as_paragraph(PC1,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 8, j = "PC2",   # S. arctophila
+          value = as_paragraph(PC2,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(i = 9, j = "PC2",   # S. glauca
+          value = as_paragraph(PC2,
+                               as_chunk(" c",
+                                        props = fp_text(vertical.align = "superscript")))) %>%
+  
+  # adjust header labels
+  set_header_labels(species = "species name",
+                    fgroup = "canopy persistence",
+                    pollination = "pollination mode",
+                    dispersal = "dispersal mode / clonality",
+                    PC1 = "PC1 (resource economics)",
+                    PC2 = "PC2 (plant size)") %>% 
+  
+  # add superscripts in PC score cols for Thomas et al. reference
+  compose(j = 5, part = "header",
+          value = as_paragraph("PC1 (resource economics)",
+                               as_chunk(" a",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  compose(j = 6, part = "header",
+          value = as_paragraph("PC2 (plant size)",
+                               as_chunk(" a",
+                                        props = fp_text(vertical.align = "superscript")))) %>% 
+  
+  # add footnotes
+  footnote(part = NULL,
+    value = as_paragraph(c(" PCA scores based on Thomas et al. (2020)",
+                                  " using a common value for species within Rhododendron and Salix genera, respectively. See supplementary text, page XX, for further information"))) %>%
+  
+  # adjust appearance
+  theme_vanilla() %>% 
+  
+  # adjust font size
+  fontsize(size = 10, part = "all")
+
+```
+
+## Model output tables
+
+```{r, echo = FALSE}
+# load model outputs
+model_outputs_species <- file.path("data", "processed", "model_outputs", "species_twi", list.files(path = file.path("data", "processed", "model_outputs", "species_twi"), pattern = "*.Rdata"))
+for (model_output in model_outputs_species){
+  load(model_output)
+}
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
