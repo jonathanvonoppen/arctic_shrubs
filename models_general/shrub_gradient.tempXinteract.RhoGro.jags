@@ -26,9 +26,9 @@
   for (i in 1:N_discrete){ 
     abund.dis[i] ~ dbern(mu[i])
     logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-      b.interact[taxon.dis[i]] * interact.dis[i] + 
-      b.tempXinteract[taxon.dis[i]] * tempjja.dis[i] * interact.dis[i] +       # for interaction
-      b.tempXinteract2[taxon.dis[i]] * (tempjja.dis[i]^2) * interact.dis[i]    # for interaction
+      b.interact * interact.dis[i] + 
+      b.tempXinteract * tempjja.dis[i] * interact.dis[i] +       # for interaction
+      b.tempXinteract2 * (tempjja.dis[i]^2) * interact.dis[i]    # for interaction
   }
   
   
@@ -38,9 +38,9 @@
     p[j] <- mu2[j] * phi
     q[j] <- (1 - mu2[j]) * phi
     logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-      b.interact[j] * interact.cont[j] + 
-      b.tempXinteract[j] * tempjja.cont[j] * interact.cont[j] +       # for interaction
-      b.tempXinteract2[j] * (tempjja.cont[j]^2) * interact.cont[j]    # for interaction
+      b.interact * interact.cont[j] + 
+      b.tempXinteract * tempjja.cont[j] * interact.cont[j] +       # for interaction
+      b.tempXinteract2 * (tempjja.cont[j]^2) * interact.cont[j]    # for interaction
   }
   
   
@@ -50,8 +50,8 @@
     mu.plotgroup[k] <- intercept[k] + 
       
       # plot group level predictors, linear and quadratic term
-      b.tempjja.x[k] * tempjja.tot[k] + 
-      b.tempjja.x2[k] * (tempjja.tot[k]^2) 
+      b.tempjja.x * tempjja.tot[k] + 
+      b.tempjja.x2 * (tempjja.tot[k]^2) 
   }
   
   

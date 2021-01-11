@@ -24,8 +24,8 @@
   for (i in 1:N_discrete){ 
     abund.dis[i] ~ dbern(mu[i])
     logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-      b.interact[taxon.dis[i]] * interact.dis[i] + 
-      b.tempXinteract[taxon.dis[i]] * tempjja.dis[i] * interact.dis[i]       # for interaction
+      b.interact * interact.dis[i] + 
+      b.tempXinteract * tempjja.dis[i] * interact.dis[i]       # for interaction
   }
   
   
@@ -35,18 +35,18 @@
     p[j] <- mu2[j] * phi
     q[j] <- (1 - mu2[j]) * phi
     logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-      b.interact[j] * interact.cont[j] + 
-      b.tempXinteract[j] * tempjja.cont[j] * interact.cont[j]       # for interaction
+      b.interact * interact.cont[j] + 
+      b.tempXinteract * tempjja.cont[j] * interact.cont[j]       # for interaction
   }
   
   
   # plotgroup level
   for (k in 1:N_plotgroups){ # length of total plotgroup
     b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
-    mu.plotgroup[k] <- intercept[k] + 
+    mu.plotgroup[k] <- intercept + 
       
       # plot group level predictors, linear and quadratic term
-      b.tempjja.x[k] * tempjja.tot[k]
+      b.tempjja.x * tempjja.tot[k]
   }
   
   

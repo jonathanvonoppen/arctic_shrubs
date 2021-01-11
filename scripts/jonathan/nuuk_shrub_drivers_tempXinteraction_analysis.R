@@ -346,8 +346,8 @@ write("
   for (i in 1:N_discrete){ 
     abund.dis[i] ~ dbern(mu[i])
     logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-      b.interact[taxon.dis[i]] * interact.dis[i] + 
-      b.tempXinteract[taxon.dis[i]] * tempjja.dis[i] * interact.dis[i]       # for interaction
+      b.interact * interact.dis[i] + 
+      b.tempXinteract * tempjja.dis[i] * interact.dis[i]       # for interaction
   }
   
   
@@ -357,18 +357,18 @@ write("
     p[j] <- mu2[j] * phi
     q[j] <- (1 - mu2[j]) * phi
     logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-      b.interact[j] * interact.cont[j] + 
-      b.tempXinteract[j] * tempjja.cont[j] * interact.cont[j]       # for interaction
+      b.interact * interact.cont[j] + 
+      b.tempXinteract * tempjja.cont[j] * interact.cont[j]       # for interaction
   }
   
   
   # plotgroup level
   for (k in 1:N_plotgroups){ # length of total plotgroup
     b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
-    mu.plotgroup[k] <- intercept[k] + 
+    mu.plotgroup[k] <- intercept + 
       
       # plot group level predictors, linear and quadratic term
-      b.tempjja.x[k] * tempjja.tot[k]
+      b.tempjja.x * tempjja.tot[k]
   }
   
   
@@ -414,9 +414,9 @@ write("
   for (i in 1:N_discrete){ 
     abund.dis[i] ~ dbern(mu[i])
     logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
-      b.interact[taxon.dis[i]] * interact.dis[i] + 
-      b.tempXinteract[taxon.dis[i]] * tempjja.dis[i] * interact.dis[i] +       # for interaction
-      b.tempXinteract2[taxon.dis[i]] * (tempjja.dis[i]^2) * interact.dis[i]    # for interaction
+      b.interact * interact.dis[i] + 
+      b.tempXinteract * tempjja.dis[i] * interact.dis[i] +       # for interaction
+      b.tempXinteract2 * (tempjja.dis[i]^2) * interact.dis[i]    # for interaction
   }
   
   
@@ -426,9 +426,9 @@ write("
     p[j] <- mu2[j] * phi
     q[j] <- (1 - mu2[j]) * phi
     logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
-      b.interact[j] * interact.cont[j] + 
-      b.tempXinteract[j] * tempjja.cont[j] * interact.cont[j] +       # for interaction
-      b.tempXinteract2[j] * (tempjja.cont[j]^2) * interact.cont[j]    # for interaction
+      b.interact * interact.cont[j] + 
+      b.tempXinteract * tempjja.cont[j] * interact.cont[j] +       # for interaction
+      b.tempXinteract2 * (tempjja.cont[j]^2) * interact.cont[j]    # for interaction
   }
   
   
@@ -438,8 +438,8 @@ write("
     mu.plotgroup[k] <- intercept[k] + 
       
       # plot group level predictors, linear and quadratic term
-      b.tempjja.x[k] * tempjja.tot[k] + 
-      b.tempjja.x2[k] * (tempjja.tot[k]^2) 
+      b.tempjja.x * tempjja.tot[k] + 
+      b.tempjja.x2 * (tempjja.tot[k]^2) 
   }
   
   
@@ -461,13 +461,23 @@ write("
 # _____________ ----
 # Specify parameters ----
 
-params_tempXinteract <- c("intercept",
-                          "b.tempjja.x", "b.tempjja.x2",
-                          "b.interact", 
-                          "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]",
-                          "sigma.plotgroup",
-                          "phi",
-                          "phat_tempXinteract")
+params_tempXinteract.BetNan_EmpNig_SalGla_VacUli <- c("intercept",
+                                                      "b.tempjja.x",
+                                                      "b.interact", 
+                                                      "b.tempXinteract",
+                                                      "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]",
+                                                      "sigma.plotgroup",
+                                                      "phi",
+                                                      "phat_tempXinteract")
+
+params_tempXinteract.RhoGro <- c("intercept",
+                                 "b.tempjja.x", "b.tempjja.x2",
+                                 "b.interact", 
+                                 "b.tempXinteract", "b.tempXinteract2",
+                                 "b_plotgroup[1]","b_plotgroup[2]","b_plotgroup[3]",
+                                 "sigma.plotgroup",
+                                 "phi",
+                                 "phat_tempXinteract")
 
 
 # _____________ ----
@@ -476,7 +486,7 @@ params_tempXinteract <- c("intercept",
 # >> Betula nana ----
 model_out.shrub_gradient.tempXinteract.BetNan <- jags(BetNan_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
-                                                      params_tempXinteract,              # parameters to be saved
+                                                      params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
                                                       model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
@@ -519,7 +529,7 @@ save(coeff.shrub_gradient.tempXinteract.BetNan, file = file.path("models_general
 # >> Empetrum nigrum ----
 model_out.shrub_gradient.tempXinteract.EmpNig <- jags(EmpNig_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
-                                                      params_tempXinteract,              # parameters to be saved
+                                                      params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
                                                       model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
@@ -562,7 +572,7 @@ save(coeff.shrub_gradient.tempXinteract.EmpNig, file = file.path("models_general
 # >> Rhododendron groenlandicum ----
 model_out.shrub_gradient.tempXinteract.RhoGro <- jags(RhoGro_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
-                                                      params_tempXinteract,              # parameters to be saved
+                                                      params_tempXinteract.RhoGro,       # parameters to be saved
                                                       model.file = file.path("models_general", "shrub_gradient.tempXinteract.RhoGro.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
@@ -605,7 +615,7 @@ save(coeff.shrub_gradient.tempXinteract.RhoGro, file = file.path("models_general
 # >> Salix glauca ----
 model_out.shrub_gradient.tempXinteract.SalGla <- jags(SalGla_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
-                                                      params_tempXinteract,              # parameters to be saved
+                                                      params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
                                                       model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
@@ -648,7 +658,7 @@ save(coeff.shrub_gradient.tempXinteract.SalGla, file = file.path("models_general
 # >> Vaccinium uliginosum ----
 model_out.shrub_gradient.tempXinteract.VacUli <- jags(VacUli_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
-                                                      params_tempXinteract,              # parameters to be saved
+                                                      params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
                                                       model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
