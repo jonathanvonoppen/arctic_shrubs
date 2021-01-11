@@ -58,16 +58,17 @@
   
   
   # derived parameters # have to be calculated at taxon level?
-  # for (m in 1:Nxhat){
-  #   for (p in 1:Nxhat2){
-  #     phat_tempXinteract[m,p] <- intercept +
-  #       b.tempjja.x * xhat_tempjja[m] +
-  #       b.tempjja.x2 * (xhat_tempjja[m]^2) +
-  #       b.interact * xhat_interact2[p] + 
-  #       b.tempXinteract[taxon.dis[i]] * xhat_tempjja[i] * xhat_interact2[i] +       # for interaction
-  #       b.tempXinteract2[taxon.dis[i]] * (xhat_tempjja[i]^2) * xhat_interact2[i]    # for interaction
-  #       
-  #   }
-  # }
+  for (m in 1:Nxhat){
+    for (p in 1:Nxhat2){
+      for (t in 1:N_taxa){
+        phat_tempXinteract[m,p,t] <- intercept[t] +
+          b.tempjja.x[t] * xhat_tempjja[m] +
+          b.tempjja.x2[t] * (xhat_tempjja[m]^2) +
+          b.interact[t] * xhat_interact2[p] +
+          b.tempXinteract[t] * xhat_tempjja[m] * xhat_interact2[p] +       # for interaction
+          b.tempXinteract2[t] * (xhat_tempjja[m]^2) * xhat_interact2[p]    # for interaction
+}
+    }
+  }
   }
 
