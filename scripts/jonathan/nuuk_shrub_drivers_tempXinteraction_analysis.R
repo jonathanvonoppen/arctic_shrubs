@@ -435,7 +435,7 @@ write("
   # plotgroup level
   for (k in 1:N_plotgroups){ # length of total plotgroup
     b_plotgroup[k] ~ dnorm(mu.plotgroup[k],tau.plotgroup)
-    mu.plotgroup[k] <- intercept[k] + 
+    mu.plotgroup[k] <- intercept + 
       
       # plot group level predictors, linear and quadratic term
       b.tempjja.x * tempjja.tot[k] + 
