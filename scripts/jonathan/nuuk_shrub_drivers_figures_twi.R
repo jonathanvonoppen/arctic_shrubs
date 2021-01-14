@@ -71,6 +71,20 @@ lit_driver_freq <- lit %>%
                                             "annual precipitation",
                                             "soil nutrients",
                                             "herbivory"))) %>% 
+  mutate(driver_regime = case_when(driver %in% c("summer temperature",
+                                                 "temperature variability",
+                                                 "summer precipitation",
+                                                 "radiation",
+                                                 "topography",
+                                                 "soil moisture",
+                                                 "winter temperature",
+                                                 "winter precipitation",
+                                                 "annual temperature",
+                                                 "annual precipitation",
+                                                 "soil nutrients") ~ "abiotic",
+                                   driver %in% c("interactions",
+                                                 "herbivory") ~ "biotic",
+                                   TRUE ~ "")) %>% 
   arrange(driver)
 
 # add vector for axis text face
@@ -80,12 +94,12 @@ textface = c(rep("bold", 7),
 
 (driver_frequency_count <- ggplot(data = lit_driver_freq,
                                    aes(x = driver,
-                                       y = sum_investigated)) +
+                                       y = sum_investigated,
+                                       fill = driver_regime)) +
     
     # draw bars
     geom_bar(stat = "identity", 
-             width = .9,
-             fill = "#9349c7") +
+             width = .9) +
     
     # change y axis range
     scale_y_continuous(limits = c(0, 32), 
@@ -97,11 +111,10 @@ textface = c(rep("bold", 7),
     
     # adjust appearance
     theme_bw() +
+    scale_fill_manual(values = c("steelblue3", "#64bd54")) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           plot.margin = margin(t = 1, unit = "cm"),
-          legend.position = c(0.8, 0.8),
-          legend.title = element_text(size = 20),
-          legend.text = element_text(size = 18),
+          legend.position = "none",
           axis.text = element_text(size = 18),
           axis.text.x = element_text(face = textface,
                                      size = 16,
@@ -161,7 +174,7 @@ driver_frequency_count <- driver_frequency_count +
            fill = "#b86969") +
   scale_y_continuous(limits = c(0, 37), 
                      breaks = c(10, 20, 30)) +
-  labs(x = "number of taxa included",
+  labs(x = "number of shrub taxa included",
        y = "number of published studies\n(n = 79)") +
   
   # adjust appearance
