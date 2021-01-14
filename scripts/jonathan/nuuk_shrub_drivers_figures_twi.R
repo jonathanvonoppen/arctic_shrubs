@@ -36,106 +36,49 @@ theme_purple <- "#8757B3"
 
 # >> load data ----
 lit <- read.csv(file.path("data", "processed", "nuuk_shrub_drivers_lit_selection.csv"),
-                header = TRUE)
+                header = TRUE) %>% 
+  
+  # reorder factor levels of driver regimes
+  mutate(driver_regime = factor(driver_regime, levels = c("abiotic",
+                                                          "biotic",
+                                                          "abiotic & biotic")))
 
 
 # >> compile plot panels ----
-# ¨¨¨¨ a) count drivers ----
-(driver_count <- ggplot(data = lit,
-                       aes(x = factor(n_drivers),
-                           fill = driver_regime)) +
-  
-   # draw bars
-   geom_bar(stat = "count", 
-            width = .9) +
-   
-   # change y axis range
-   scale_y_continuous(limits = c(0, 37), 
-                      breaks = c(10, 20, 30)) +
-  
-   # change axis labels
-   labs(x = "number of drivers included",
-        y = "number of published studies\n(n = 79)",
-        fill = "driver regime") +
-   
-   # adjust appearance
-   scale_fill_manual(values = c("steelblue3", "#64bd54", "#ffc16a")) +
-   theme_bw() +
-   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-         plot.margin = margin(t = 1, unit = "cm"),
-         legend.position = c(0.8, 0.8),
-         legend.title = element_text(size = 20),
-         legend.text = element_text(size = 18),
-         axis.text = element_text(size = 18,
-                                  margin = margin(t = 8)),
-         axis.title.x = element_text(size = 20,
-                                     margin = margin(t = 10)),
-         axis.title.y = element_text(size = 20,
-                                     margin = margin(r = 10)),
-         axis.ticks = element_line(size = 1.5),
-         axis.line = element_line(size = 1.5)))
+# ¨¨¨¨ a) count driver frequency ----
 
-# ¨¨¨¨ b) count species ----
-(species_count <- ggplot(data = lit,
-                        aes(x = factor(n_species))) +
-  
-  # draw bars
-  geom_bar(stat = "count", 
-           width = .9,
-           fill = "#b86969") +
-  scale_y_continuous(limits = c(0, 37), 
-                     breaks = c(10, 20, 30)) +
-  labs(x = "number of taxa included",
-       y = "number of published studies\n(n = 79)") +
-  
-  # adjust appearance
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        plot.margin = margin(t = 1, l = 1, unit = "cm"),
-        axis.text = element_text(size = 18,
-                                 margin = margin(t = 8)),
-        axis.title.x = element_text(size = 20,
-                                    margin = margin(t = 10)),
-        axis.title.y = element_text(size = 20,
-                                    margin = margin(r = 10)),
-        axis.ticks = element_line(size = 1.5),
-        axis.line = element_line(size = 1.5)))
-
-
-# ¨¨¨¨ c) count occurrence of drivers ----
-
-lit_driver_sums <- lit %>% 
+lit_driver_freq <- lit %>% 
   summarise_at(vars(ends_with("_count")), sum) %>% 
   pivot_longer(cols = ends_with("_count"),
                names_to = "driver",
                values_to = "sum_investigated") %>% 
   mutate(driver = str_remove(driver, "_count"),
          driver = str_replace_all(driver, c("_" = " ",
-                                      "temp" = "temperature",
-                                      "precip" = "precipitation",
-                                      "var" = "variability",
-                                      "nutrients" = "soil nutrients"))) %>% 
+                                            "temp" = "temperature",
+                                            "precip" = "precipitation",
+                                            "var" = "variability",
+                                            "nutrients" = "soil nutrients"))) %>% 
   mutate(driver = factor(driver, levels = c("summer temperature",
-                    "temperature variability",
-                    "summer precipitation",
-                    "radiation",
-                    "topography",
-                    "soil moisture",
-                    "interactions",
-                    "winter temperature",
-                    "winter precipitation",
-                    "annual temperature",
-                    "annual precipitation",
-                    "soil nutrients",
-                    "herbivory"))) %>% 
+                                            "temperature variability",
+                                            "summer precipitation",
+                                            "radiation",
+                                            "topography",
+                                            "soil moisture",
+                                            "interactions",
+                                            "winter temperature",
+                                            "winter precipitation",
+                                            "annual temperature",
+                                            "annual precipitation",
+                                            "soil nutrients",
+                                            "herbivory"))) %>% 
   arrange(driver)
-  
-  # add vector for axis text face
-  textface = c(rep("bold", 7),
-               rep("italic", 2),
-               rep("plain", 4))
 
-(driver_occurrence_count <- ggplot(data = lit_driver_sums,
+# add vector for axis text face
+textface = c(rep("bold", 7),
+             rep("italic", 2),
+             rep("plain", 4))
+
+(driver_frequency_count <- ggplot(data = lit_driver_freq,
                                    aes(x = driver,
                                        y = sum_investigated)) +
     
@@ -168,16 +111,78 @@ lit_driver_sums <- lit %>%
                                       margin = margin(r = 10)),
           axis.ticks = element_line(size = 1.5),
           axis.line = element_line(size = 1.5)))
+
+driver_frequency_count <- driver_frequency_count +
+  ggpubr::rotate_x_text()
+
+
+# ¨¨¨¨ b) count driver regimes ----
+(driver_regimes_count <- ggplot(data = lit,
+                                aes(x = factor(n_drivers),
+                                    fill = driver_regime)) +
   
-  driver_occurrence_count <- driver_occurrence_count +
-    ggpubr::rotate_x_text()
+   # draw bars
+   geom_bar(stat = "count", 
+            width = .9) +
+   
+   # change y axis range
+   scale_y_continuous(limits = c(0, 37), 
+                      breaks = c(10, 20, 30)) +
+  
+   # change axis labels
+   labs(x = "number of drivers included",
+        y = "number of published studies\n(n = 79)",
+        fill = "driver regime") +
+   
+   # adjust appearance
+   scale_fill_manual(values = c("steelblue3", "#64bd54", "#ffc16a")) +
+   theme_bw() +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         plot.margin = margin(t = 1, unit = "cm"),
+         legend.position = c(0.8, 0.8),
+         legend.title = element_text(size = 20),
+         legend.text = element_text(size = 18),
+         axis.text = element_text(size = 18,
+                                  margin = margin(t = 8)),
+         axis.title.x = element_text(size = 20,
+                                     margin = margin(t = 10)),
+         axis.title.y = element_text(size = 20,
+                                     margin = margin(r = 10)),
+         axis.ticks = element_line(size = 1.5),
+         axis.line = element_line(size = 1.5)))
+
+# ¨¨¨¨ c) count species ----
+(species_count <- ggplot(data = lit,
+                        aes(x = factor(n_species))) +
+  
+  # draw bars
+  geom_bar(stat = "count", 
+           width = .9,
+           fill = "#b86969") +
+  scale_y_continuous(limits = c(0, 37), 
+                     breaks = c(10, 20, 30)) +
+  labs(x = "number of taxa included",
+       y = "number of published studies\n(n = 79)") +
+  
+  # adjust appearance
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        plot.margin = margin(t = 1, l = 1, unit = "cm"),
+        axis.text = element_text(size = 18,
+                                 margin = margin(t = 8)),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(t = 10)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(r = 10)),
+        axis.ticks = element_line(size = 1.5),
+        axis.line = element_line(size = 1.5)))
 
 
 # >> combine plot panels ----
 
-(nuuk_lit_plot <- plot_grid(driver_count,
+(nuuk_lit_plot <- plot_grid(driver_frequency_count,
+                       driver_regimes_count,
                        species_count,
-                       driver_occurrence_count,
                        labels = c("a)", "b)", "c)"),
                        label_size = 20,
                        label_fontface = "bold",
@@ -627,10 +632,85 @@ save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_pretty
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
 
 
+# Fig. 5 NEW) Interaction plots temp X biotic interaction ----
+
+# >> load function ----
+source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot_tempXinteraction.R"))
+
+
+# >> load data ----
+
+# load model output data
+model_outputs_tXi_focal_species <- file.path("models_general", "model_outputs", list.files(path = file.path("models_general", "model_outputs"), pattern = "*.Rdata"))
+for (model_output in model_outputs_tXi_focal_species){
+  load(model_output)
+}
+
+# load input data
+load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradient_species.datasets.Rdata"))
+
+
+# >> plot graphs ----
+(int_plot_tXi_BetNan <- tXi_interaction_plots(species = "Betula nana"))
+(int_plot_tXi_EmpNig <- tXi_interaction_plots(species = "Empetrum nigrum"))
+(int_plot_tXi_RhoGro <- tXi_interaction_plots(species = "Rhododendron groenlandicum"))
+(int_plot_tXi_SalGla <- tXi_interaction_plots(species = "Salix glauca"))
+(int_plot_tXi_VacUli <- tXi_interaction_plots(species = "Vaccinium uliginosum"))
+
+# extract legend
+legend_tempXint_plot <- get_legend(int_plot_tXi_BetNan + 
+                                     theme(legend.box.margin = margin(t = 70, l = 70)))
+
+# make x- and y-axis label
+xlabel <- ggdraw() +
+  draw_label("mean summer temperature [°C]",
+             hjust = 0.5,
+             size = 20,
+             fontface = "bold")
+
+ylabel <- ggdraw() +
+  draw_label("relative abundance per plot group",
+             vjust = 0,
+             angle = 90,
+             size = 20,
+             fontface = "bold")
+
+# combine plot and ylabel
+(nuuk_tempXinteraction_row <- plot_grid(ylabel,
+                                        plot_grid(int_plot_tXi_EmpNig + theme(legend.position = "none"),
+                                                  int_plot_tXi_RhoGro + theme(legend.position = "none"),
+                                                  int_plot_tXi_BetNan + theme(legend.position = "none"),
+                                                  int_plot_tXi_VacUli + theme(legend.position = "none"),
+                                                  int_plot_tXi_SalGla + theme(legend.position = "none"),
+                                                  legend_tempXint_plot,
+                                                  labels = c("a)", "b)", "c)", "d)", "e)"),
+                                                  label_size = 18,
+                                                  label_fontface = "bold",
+                                                  label_x = c(rep(0.02, 8)),
+                                                  ncol = 3,
+                                                  axis = "lt",
+                                                  align = "hv"),
+                                        rel_widths = c(.03, 1)
+))
+
+# add xlabel
+(nuuk_tempXint_plot <- plot_grid(nuuk_tempXinteraction_row,
+                                 xlabel,
+                                 ncol = 1,
+                                 rel_heights = c(1, 0.05)))
+
+# # >> save plot ----
+save_plot(file.path("figures", "nuuk_shrub_drivers_tempXinteraction.pdf"),
+          nuuk_tempXint_plot, base_height = 11, base_aspect_ratio = 1.5)
+
+
+# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
+
+
 # Fig. 6) Interaction plots temp X moisture (TCWS) ----
 
 # >> load function ----
-source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot.R"))
+source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot_tempXwetness.R"))
 
 
 # >> load data ----
@@ -720,7 +800,7 @@ ylabel <- ggdraw() +
 # Fig. 6.1) Interaction plots temp X moisture (TWI) ----
 
 # >> load function ----
-source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot.R"))
+source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot_tempXwetness.R"))
 
 
 # >> load data ----
@@ -802,143 +882,6 @@ ylabel <- ggdraw() +
 # # >> save plot ----
 # save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert_twi.pdf"),
 #           nuuk_interaction_plot_grid_ver_twi, base_height = 15, base_aspect_ratio = 1)
-
-
-# ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
-
-
-# Fig. 6.1) Interaction plots temp X moisture (TWI) ----
-
-# >> load function ----
-source(file = file.path("scripts", "jonathan", "plotting_functions", "interaction_plot.R"))
-
-
-# >> load data ----
-
-# load model output data
-load(file = file.path("models_general", "model_output_temp_x_interact.Rdata"))
-
-# load input data
-load(file = file.path("models_general", "shrub_gradient_temp_x_interact_preddata.Rdata"))
-
-
-# >> plot graphs ----
-species_df <- temp_x_interact_data.tot
-
-# define initial predictions df
-phats <- as.data.frame(matrix(data = NA,
-                              nrow = 100, 
-                              ncol = length(model_coeff_output) + 2))
-names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
-
-# extract predictions into phats data frame 
-phat_predictor <- "phat_tempXinteract"
-
-predictor_min <- min(species_df$tempjjaC)
-predictor_max <- max(species_df$tempjjaC)
-
-# assemble predicted and predictor values, for 100 rows (one predictor) at a time
-phats <- model_coeff_output %>% 
-  
-  # filter for predicted values
-  filter(param %in% c(paste0(phat_predictor,
-                             "[", 
-                             rep(seq(from = 1, to = 100), times = 2),
-                             ",",
-                             rep(seq(from = 1, to = 2), each = 100), 
-                             "]"))) %>% 
-  
-  # add xhats column
-  mutate(xhats = rep(seq(from = predictor_min, 
-                         to = predictor_max,
-                         length.out = 100), times = 2)) %>% 
-  
-  # add column for back-centered and back-scaled values
-  mutate(tempjja = xhats * attr(scale(species_df$tempjja), 'scaled:scale') + attr(scale(species_df$tempjja), 'scaled:center'),
-         
-         # add column for low/high diff. to community acquisitiveness values
-         dca = rep(c("low", "high"),
-                   each = 100))
-
-# graph
-
-int_plot <- ggplot() +
-  # tempjja is modelled at plotgroup level, so reduce base data (points layer) to plotgroup level
-  geom_point(data = species_df %>% group_by(site_alt_plotgroup_id) %>% summarise(tempjja = mean(tempjja), cover = mean(cover)), 
-             aes(x = tempjja, 
-                 y = cover), 
-             size = 2,
-             position = position_jitter(width=0, height=.001),
-             alpha = 0.5) +
-  
-  # draw line of predicted values
-  geom_line(data = phats, 
-            aes(x = tempjja, 
-                y = plogis(mean),
-                colour = dca), 
-            alpha = 1,
-            size = 3) + 
-  
-  # draw predicted 95% CI
-  geom_ribbon(data = phats,
-              aes(x = tempjja, 
-                  ymin = plogis(l95), 
-                  ymax = plogis(u95),
-                  fill = dca),
-              alpha = 0.2) +
-  
-  # set y range limits so ribbons are not cut off
-  coord_cartesian(ylim = c(0, 
-                           max(species_df %>% 
-                                 group_by(site_alt_plotgroup_id) %>% 
-                                 summarise(tempjja = mean(tempjja), cover = mean(cover)) %>% 
-                                 pull(cover)))) +
-  
-  # define appearance
-  scale_colour_manual("difference to\ncommunity\nacquisitiveness", values = c("indianred3", "goldenrod1")) +
-  scale_fill_manual("difference to\ncommunity\nacquisitiveness", values = c("indianred3", "goldenrod1")) +
-  theme_cowplot(18) +
-  theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
-        axis.title = element_blank(),
-        legend.position = "none")
-
-# extract legend
-legend_tempXint_plot <- get_legend(tempXint_plot + 
-                                theme(legend.box.margin = margin(t = 70, l = 70)))
-
-# make x- and y-axis label
-xlabel <- ggdraw() +
-  draw_label("mean summer temperature [°C]",
-             hjust = 0.5,
-             size = 20,
-             fontface = "bold")
-
-ylabel <- ggdraw() +
-  draw_label("relative abundance per plot group",
-             vjust = 0,
-             angle = 90,
-             size = 20,
-             fontface = "bold")
-
-# combine plot and ylabel
-(nuuk_tempXinteraction_row <- plot_grid(ylabel,
-                                    plot_grid(tempXint_plot,
-                                              legend_tempXint_plot,
-                                              ncol = 2,
-                                              axis = "lt",
-                                              align = "hv"),
-                                    rel_widths = c(.03, 1)
-))
-
-# add xlabel
-(nuuk_tempXint_plot <- plot_grid(nuuk_interactions_row,
-                                                 xlabel,
-                                                 ncol = 1,
-                                                 rel_heights = c(1, 0.05)))
-
-# # >> save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_tempXinteraction.pdf"),
-#           nuuk_tempXinteraction_plot, base_height = 15, base_aspect_ratio = 1)
 
 
 # ________________________________________ ----
