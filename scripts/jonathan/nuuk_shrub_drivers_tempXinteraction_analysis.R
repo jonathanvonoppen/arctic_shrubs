@@ -382,7 +382,7 @@ write("
     }
   }
   }
-", file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"))
+", file.path("models_general", "model_files", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"))
 
 
 # >> RhoGro: unimodal relationship with temperature ----
@@ -455,7 +455,7 @@ write("
     }
   }
   }
-", file.path("models_general", "shrub_gradient.tempXinteract.RhoGro.jags"))
+", file.path("models_general", "model_files", "shrub_gradient.tempXinteract.RhoGro.jags"))
 
 
 # _____________ ----
@@ -487,7 +487,7 @@ params_tempXinteract.RhoGro <- c("intercept",
 model_out.shrub_gradient.tempXinteract.BetNan <- jags(BetNan_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
                                                       params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
-                                                      model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
+                                                      model.file = file.path("models_general", "model_files", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
                                                       n.thin = 2,                        # thinning rate
@@ -523,14 +523,14 @@ coeff.shrub_gradient.tempXinteract.BetNan <- coeff.shrub_gradient.tempXinteract.
          u95 = "97.5%",
          Rhat)
 
-save(coeff.shrub_gradient.tempXinteract.BetNan, file = file.path("models_general", "model_output_temp_x_interact.BetNan.Rdata"))
+save(coeff.shrub_gradient.tempXinteract.BetNan, file = file.path("models_general", "model_outputs", "model_output_temp_x_interact.BetNan.Rdata"))
 
 
 # >> Empetrum nigrum ----
 model_out.shrub_gradient.tempXinteract.EmpNig <- jags(EmpNig_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
                                                       params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
-                                                      model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
+                                                      model.file = file.path("models_general", "model_files", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
                                                       n.thin = 2,                        # thinning rate
@@ -566,14 +566,14 @@ coeff.shrub_gradient.tempXinteract.EmpNig <- coeff.shrub_gradient.tempXinteract.
          u95 = "97.5%",
          Rhat)
 
-save(coeff.shrub_gradient.tempXinteract.EmpNig, file = file.path("models_general", "model_output_temp_x_interact.EmpNig.Rdata"))
+save(coeff.shrub_gradient.tempXinteract.EmpNig, file = file.path("models_general", "model_outputs", "model_output_temp_x_interact.EmpNig.Rdata"))
 
 
 # >> Rhododendron groenlandicum ----
 model_out.shrub_gradient.tempXinteract.RhoGro <- jags(RhoGro_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
                                                       params_tempXinteract.RhoGro,       # parameters to be saved
-                                                      model.file = file.path("models_general", "shrub_gradient.tempXinteract.RhoGro.jags"), 
+                                                      model.file = file.path("models_general", "model_files", "shrub_gradient.tempXinteract.RhoGro.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
                                                       n.thin = 2,                        # thinning rate
@@ -609,14 +609,14 @@ coeff.shrub_gradient.tempXinteract.RhoGro <- coeff.shrub_gradient.tempXinteract.
          u95 = "97.5%",
          Rhat)
 
-save(coeff.shrub_gradient.tempXinteract.RhoGro, file = file.path("models_general", "model_output_temp_x_interact.RhoGro.Rdata"))
+save(coeff.shrub_gradient.tempXinteract.RhoGro, file = file.path("models_general", "model_outputs", "model_output_temp_x_interact.RhoGro.Rdata"))
 
 
 # >> Salix glauca ----
 model_out.shrub_gradient.tempXinteract.SalGla <- jags(SalGla_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
                                                       params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
-                                                      model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
+                                                      model.file = file.path("models_general", "model_files", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
                                                       n.thin = 2,                        # thinning rate
@@ -652,14 +652,14 @@ coeff.shrub_gradient.tempXinteract.SalGla <- coeff.shrub_gradient.tempXinteract.
          u95 = "97.5%",
          Rhat)
 
-save(coeff.shrub_gradient.tempXinteract.SalGla, file = file.path("models_general", "model_output_temp_x_interact.SalGla.Rdata"))
+save(coeff.shrub_gradient.tempXinteract.SalGla, file = file.path("models_general", "model_outputs", "model_output_temp_x_interact.SalGla.Rdata"))
 
 
 # >> Vaccinium uliginosum ----
 model_out.shrub_gradient.tempXinteract.VacUli <- jags(VacUli_tXi.jags_data,              # input data
                                                       inits = NULL,                      # JAGS to create initial values
                                                       params_tempXinteract.BetNan_EmpNig_SalGla_VacUli,              # parameters to be saved
-                                                      model.file = file.path("models_general", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
+                                                      model.file = file.path("models_general", "model_files", "shrub_gradient.tempXinteract.BetNan_EmpNig_SalGla_VacUli.jags"), 
                                                       n.chains = 3,                      # no. Markov chains
                                                       n.iter = 100000, n.burnin = 70000, # no. iterations & burn-in fraction per chain
                                                       n.thin = 2,                        # thinning rate
@@ -695,7 +695,7 @@ coeff.shrub_gradient.tempXinteract.VacUli <- coeff.shrub_gradient.tempXinteract.
          u95 = "97.5%",
          Rhat)
 
-save(coeff.shrub_gradient.tempXinteract.VacUli, file = file.path("models_general", "model_output_temp_x_interact.VacUli.Rdata"))
+save(coeff.shrub_gradient.tempXinteract.VacUli, file = file.path("models_general", "model_outputs", "model_output_temp_x_interact.VacUli.Rdata"))
 
 
 # _____________ ----
