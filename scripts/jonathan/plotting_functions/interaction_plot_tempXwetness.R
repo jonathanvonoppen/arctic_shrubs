@@ -10,7 +10,7 @@
 
 # for species ----
 
-interaction_plots_species <- function(species) {
+interaction_plots_species <- function(species, wet.var) {
   
   # # test
   # species <- "Salix glauca"
@@ -98,8 +98,8 @@ interaction_plots_species <- function(species) {
     
     # define appearance
     ggtitle(paste0(species)) +
-    scale_colour_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
-    scale_fill_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
+    scale_colour_manual(paste0("wetness level (", wet.var, ")"), values = c("dodgerblue4", "orange1")) +
+    scale_fill_manual(paste0("wetness level (", wet.var, ")"), values = c("dodgerblue4", "orange1")) +
     theme_cowplot(18) +
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank(),
@@ -112,7 +112,7 @@ interaction_plots_species <- function(species) {
 
 
 # for functional groups ----
-interaction_plots_groups <- function(fgroup) {
+interaction_plots_groups <- function(fgroup, wet.var) {
   
   # # test
   # fgroup <- "all shrubs"
@@ -197,8 +197,8 @@ interaction_plots_groups <- function(fgroup) {
     
     # define appearance
     ggtitle(paste0(fgroup)) +
-    scale_colour_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
-    scale_fill_manual("water\navailability", values = c("dodgerblue4", "orange1")) +
+    scale_colour_manual(paste0("wetness level (", wet.var, ")"), values = c("dodgerblue4", "orange1")) +
+    scale_fill_manual(paste0("wetness level (", wet.var, ")"), values = c("dodgerblue4", "orange1")) +
     theme_cowplot(18) +
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank(),

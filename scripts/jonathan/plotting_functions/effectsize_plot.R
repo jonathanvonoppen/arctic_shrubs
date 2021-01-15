@@ -54,7 +54,7 @@ effectsize_plot_twi <- function(species, plot_width) {
                                    "summer precipitation ^2" = "b.precipjja.x2",
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
-                                   "water availability" = "b.twi",
+                                   "topographic wetness" = "b.twi",
                                    "dCWA" = "b.compet",
                                    " other shrub cover" = "b.shrub_cov",
                                    "graminoid cover" = "b.gramin_cov")
@@ -105,7 +105,7 @@ effectsize_plot_twi <- function(species, plot_width) {
   #              "summer precipitation", bquote(.("summer") *" "* precipitation^2),
   #              "solar radiation",
   #              "terrain ruggedness",
-  #              "water availability",
+  #              "topographic wetness",
   #              "dCWA",
   #              "other shrub cover",
   #              "graminoid cover")) +
@@ -164,7 +164,7 @@ effectsize_plot_tcws <- function(species, plot_width) {
                                    "summer precipitation ^2" = "b.precipjja.x2",
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
-                                   "water availability" = "b.tcws",
+                                   "Tasseled-cap wetness" = "b.tcws",
                                    "dCWA" = "b.compet",
                                    " other shrub cover" = "b.shrub_cov",
                                    "graminoid cover" = "b.gramin_cov")
@@ -215,7 +215,7 @@ effectsize_plot_tcws <- function(species, plot_width) {
   #              "summer precipitation", bquote(.("summer") *" "* precipitation^2),
   #              "solar radiation",
   #              "terrain ruggedness",
-  #              "moisture availability",
+  #              "Tasseled-cap wetness",
   #              "dCWA",
   #              "other shrub cover",
   #              "graminoid cover")) +

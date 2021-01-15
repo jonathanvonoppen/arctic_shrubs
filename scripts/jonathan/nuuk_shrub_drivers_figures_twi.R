@@ -748,14 +748,14 @@ load(file = file.path("data", "processed", "model_input_data_tcws", "shrub_gradi
 
 
 # >> plot graphs ----
-(int_plot_AllShr <- interaction_plots_groups(fgroup = "all shrubs"))
-(int_plot_AllEve <- interaction_plots_groups(fgroup = "evergreen shrubs"))
-(int_plot_AllDec <- interaction_plots_groups(fgroup = "deciduous shrubs"))
-(int_plot_BetNan <- interaction_plots_species(species = "Betula nana"))
-(int_plot_EmpNig <- interaction_plots_species(species = "Empetrum nigrum"))
-(int_plot_RhoGro <- interaction_plots_species(species = "Rhododendron groenlandicum"))
-(int_plot_SalGla <- interaction_plots_species(species = "Salix glauca"))
-(int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
+(int_plot_AllShr <- interaction_plots_groups(fgroup = "all shrubs", wet.var = "TCWS"))
+(int_plot_AllEve <- interaction_plots_groups(fgroup = "evergreen shrubs", wet.var = "TCWS"))
+(int_plot_AllDec <- interaction_plots_groups(fgroup = "deciduous shrubs", wet.var = "TCWS"))
+(int_plot_BetNan <- interaction_plots_species(species = "Betula nana", wet.var = "TCWS"))
+(int_plot_EmpNig <- interaction_plots_species(species = "Empetrum nigrum", wet.var = "TCWS"))
+(int_plot_RhoGro <- interaction_plots_species(species = "Rhododendron groenlandicum", wet.var = "TCWS"))
+(int_plot_SalGla <- interaction_plots_species(species = "Salix glauca", wet.var = "TCWS"))
+(int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum", wet.var = "TCWS"))
 
 # extract legend
 legend_int_plot <- get_legend(int_plot_AllShr + 
@@ -838,14 +838,14 @@ load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradie
 
 
 # >> plot graphs ----
-(int_plot_AllShr <- interaction_plots_groups(fgroup = "all shrubs"))
-(int_plot_AllEve <- interaction_plots_groups(fgroup = "evergreen shrubs"))
-(int_plot_AllDec <- interaction_plots_groups(fgroup = "deciduous shrubs"))
-(int_plot_BetNan <- interaction_plots_species(species = "Betula nana"))
-(int_plot_EmpNig <- interaction_plots_species(species = "Empetrum nigrum"))
-(int_plot_RhoGro <- interaction_plots_species(species = "Rhododendron groenlandicum"))
-(int_plot_SalGla <- interaction_plots_species(species = "Salix glauca"))
-(int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum"))
+(int_plot_AllShr <- interaction_plots_groups(fgroup = "all shrubs", wet.var = "TWI"))
+(int_plot_AllEve <- interaction_plots_groups(fgroup = "evergreen shrubs", wet.var = "TWI"))
+(int_plot_AllDec <- interaction_plots_groups(fgroup = "deciduous shrubs", wet.var = "TWI"))
+(int_plot_BetNan <- interaction_plots_species(species = "Betula nana", wet.var = "TWI"))
+(int_plot_EmpNig <- interaction_plots_species(species = "Empetrum nigrum", wet.var = "TWI"))
+(int_plot_RhoGro <- interaction_plots_species(species = "Rhododendron groenlandicum", wet.var = "TWI"))
+(int_plot_SalGla <- interaction_plots_species(species = "Salix glauca", wet.var = "TWI"))
+(int_plot_VacUli <- interaction_plots_species(species = "Vaccinium uliginosum", wet.var = "TWI"))
 
 # extract legend
 legend_int_plot <- get_legend(int_plot_AllShr + 
