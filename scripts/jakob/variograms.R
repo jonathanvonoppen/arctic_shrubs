@@ -143,12 +143,12 @@ if(!exists("vario_list")){
 lookup_table <- data.frame(
   raster_names = c(unlist(lapply(vario_list[-10], function(x) x$id[1]))),
   pretty_names = c("Insolation",
-                  "Cumulative Summer (JJA) Precipitation [mm] *",
-                  "Topographic Wetness Index (TWI-FD8) [-] *",
-                  "Cumulative Spring (MAM) Precipitation [mm]",
-                  "Tasseled-cap Wetness Index (TCWS) [-] *",
-                  "Annual Temperature Variability [°C] *",
-                  "Mean Summer (JJA) Temperature [°C] *",
+                  "Cumulative Summer (JJA) Precipitation *",
+                  "Topographic Wetness Index (TWI-FD8) *",
+                  "Cumulative Spring (MAM) Precipitation",
+                  "Tasseled-cap Wetness Index (TCWS) *",
+                  "Annual Temperature Variability *",
+                  "Mean Summer (JJA) Temperature *",
                   "Annual Maximum Temperature [°C]",
                   "Annual Minimum Temperature [°C]" #,
                   #"Terrain Ruggedness Index (TRI)",
@@ -204,7 +204,7 @@ vario$id <- names(predictor_raster)
 # Add row to lookup table
 lookup_table <- bind_rows(lookup_table,
                           data.frame(raster_names = "tri", 
-                                     pretty_names = "Terrain Ruggedness Index (TRI) [-] *"))
+                                     pretty_names = "Terrain Ruggedness Index (TRI) *"))
                           
 # Plot variogram using the variogram plotting function.
 plot_variogram(vario) 
@@ -231,7 +231,7 @@ sri_vario_plot <- ggplot(
   geom_point() +
   labs(x = "Distance (km)", 
        y = "Semivariance",
-       title = "Solar Radiation") +
+       title = "Solar Radiation Index *") +
   scale_x_continuous(limits = c(0,40),
                      breaks = seq(0,40,5)) +
   theme_cowplot(15)
