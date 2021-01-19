@@ -149,8 +149,8 @@ lookup_table <- data.frame(
                   "Tasseled-cap Wetness Index (TCWS) *",
                   "Annual Temperature Variability *",
                   "Mean Summer (JJA) Temperature *",
-                  "Annual Maximum Temperature [°C]",
-                  "Annual Minimum Temperature [°C]" #,
+                  "Annual Maximum Temperature",
+                  "Annual Minimum Temperature" #,
                   #"Terrain Ruggedness Index (TRI)",
                   ),
   stringsAsFactors = F)
