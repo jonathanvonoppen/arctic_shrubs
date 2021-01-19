@@ -56,8 +56,8 @@ effectsize_plot_twi <- function(species, plot_width) {
                                    "terrain ruggedness" = "b.tri",
                                    "topographic wetness" = "b.twi",
                                    "dCWA" = "b.compet",
-                                   " other shrub cover" = "b.shrub_cov",
-                                   "graminoid cover" = "b.gramin_cov")
+                                   "other shrub abundance" = "b.shrub_cov",
+                                   "graminoid abundance" = "b.gramin_cov")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
@@ -166,8 +166,8 @@ effectsize_plot_tcws <- function(species, plot_width) {
                                    "terrain ruggedness" = "b.tri",
                                    "Tasseled-cap wetness" = "b.tcws",
                                    "dCWA" = "b.compet",
-                                   " other shrub cover" = "b.shrub_cov",
-                                   "graminoid cover" = "b.gramin_cov")
+                                   "other shrub abundance" = "b.shrub_cov",
+                                   "graminoid abundance" = "b.gramin_cov")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))

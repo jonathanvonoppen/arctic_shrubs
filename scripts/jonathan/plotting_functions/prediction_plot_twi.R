@@ -183,22 +183,22 @@ prediction_plots_species <- function(species) {
                                   "summer temperature [°C]" = "tempjja",
                                   "annual temperature variability [°C]" = "tempcont",
                                   "cumulative summer precipitation [mm]" = "precipjja",
-                                  "Solar Radiation Index" = "sri",
-                                  "Terrain Ruggedness Index" = "tri",
-                                  "Topographic Wetness Index" = "twi",
-                                  "overgrowing competition" = "compet",
-                                  "cover of other shrub species" = "shrub_cover",
-                                  "cover of graminoids" = "graminoid_cover"),
+                                  "Solar Radiation Index [-]" = "sri",
+                                  "Terrain Ruggedness Index [-]" = "tri",
+                                  "Topographic Wetness Index [-]" = "twi",
+                                  "diff. to CWM acquisitiveness" = "compet",
+                                  "rel. abundance of other shrub species" = "shrub_cover",
+                                  "rel. abundance of graminoids" = "graminoid_cover"),
              pred_id = fct_relevel(pred_id,
                                    "summer temperature [°C]",
                                    "annual temperature variability [°C]",
                                    "cumulative summer precipitation [mm]",
-                                   "Solar Radiation Index",
-                                   "Terrain Ruggedness Index",
-                                   "Topographic Wetness Index",
+                                   "Solar Radiation Index [-]",
+                                   "Terrain Ruggedness Index [-]",
+                                   "Topographic Wetness Index [-]",
                                    "overgrowing competition",
-                                   "cover of other shrub species",
-                                   "cover of graminoids"))
+                                   "rel. abundance of other shrub species",
+                                   "rel. abundance of graminoids"))
     
     point_data_pg <- point_data_pg %>% filter(as.character(pred_id) == predictor_id) %>% 
       # rename predictors
@@ -214,19 +214,19 @@ prediction_plots_species <- function(species) {
     point_data_plot <- point_data_plot %>% filter(as.character(pred_id) == predictor_id) %>% 
       # rename predictors
       mutate(pred_id = fct_recode(pred_id,
-                                  "Solar Radiation Index" = "sri",
-                                  "Terrain Ruggedness Index" = "tri",
-                                  "Topographic Wetness Index" = "twi",
-                                  "overgrowing competition" = "compet",
-                                  "cover of other shrub species" = "shrub_cover",
-                                  "cover of graminoids" = "graminoid_cover"),
+                                  "Solar Radiation Index [-]" = "sri",
+                                  "Terrain Ruggedness Index [-]" = "tri",
+                                  "Topographic Wetness Index [-]" = "twi",
+                                  "diff. to CWM acquisitiveness" = "compet",
+                                  "rel. abundance of other shrub species" = "shrub_cover",
+                                  "rel. abundance of graminoids" = "graminoid_cover"),
              pred_id = fct_relevel(pred_id,
-                                   "Solar Radiation Index",
-                                   "Terrain Ruggedness Index",
-                                   "Topographic Wetness Index",
-                                   "overgrowing competition",
-                                   "cover of other shrub species",
-                                   "cover of graminoids"))
+                                   "Solar Radiation Index [-]",
+                                   "Terrain Ruggedness Index [-]",
+                                   "Topographic Wetness Index [-]",
+                                   "diff. to CWM acquisitiveness",
+                                   "rel. abundance of other shrub species",
+                                   "rel. abundance of graminoids"))
     
     # >> compile plot ----
     pred_plot <- ggplot(data = phats_long,
@@ -293,19 +293,20 @@ prediction_plots_species <- function(species) {
   
   # make title and y-axis label
   title <- ggdraw() +
-    draw_label(paste0(figure_no, species, " cover ~ predictors", convergence_string),
-               hjust = 0.5,
-               size = 20)
+    draw_label(paste0(#figure_no, 
+      species, " relative abundance ~ predictors", convergence_string),
+      hjust = 0.5,
+      size = 20)
   
   ylabel_plotgroup <- ggdraw() +
-    draw_label("cover per plot group",
+    draw_label("rel. abund. per plot group",
                vjust = 0,
                angle = 90,
                size = 20,
                fontface = "bold")
   
   ylabel_plot <- ggdraw() +
-    draw_label("cover per plot",
+    draw_label("rel. abundance per plot",
                vjust = 0,
                angle = 90,
                size = 20,
@@ -378,18 +379,18 @@ prediction_plots_groups <- function(fgroup) {
                        "phat_graminoid_cover")
   
   
-  if(fgroup == "all shrub") model_coeff_output <- coeff.shrub_gradient.AllShr2
-  if(fgroup == "evergreen shrub") model_coeff_output <- coeff.shrub_gradient.AllEve2
-  if(fgroup == "deciduous shrub") model_coeff_output <- coeff.shrub_gradient.AllDec2
+  if(fgroup == "all shrubs") model_coeff_output <- coeff.shrub_gradient.AllShr2
+  if(fgroup == "evergreen shrubs") model_coeff_output <- coeff.shrub_gradient.AllEve2
+  if(fgroup == "deciduous shrubs") model_coeff_output <- coeff.shrub_gradient.AllDec2
   
   
-  if(fgroup == "all shrub") group_df <- AllShr.tot
-  if(fgroup == "evergreen shrub") group_df <- AllEve.tot
-  if(fgroup == "deciduous shrub") group_df <- AllDec.tot
+  if(fgroup == "all shrubs") group_df <- AllShr.tot
+  if(fgroup == "evergreen shrubs") group_df <- AllEve.tot
+  if(fgroup == "deciduous shrubs") group_df <- AllDec.tot
   
-  if(fgroup == "all shrub") figure_no <- "Fig. S5: "
-  if(fgroup == "evergreen shrub") figure_no <- "Fig. S6: "
-  if(fgroup == "deciduous shrub") figure_no <- "Fig. S7: "
+  if(fgroup == "all shrubs") figure_no <- "Fig. S5: "
+  if(fgroup == "evergreen shrubs") figure_no <- "Fig. S6: "
+  if(fgroup == "deciduous shrubs") figure_no <- "Fig. S7: "
   
   
   # define initial predictions df
@@ -499,18 +500,18 @@ prediction_plots_groups <- function(fgroup) {
                                   "summer temperature [°C]" = "tempjja",
                                   "annual temperature variability [°C]" = "tempcont",
                                   "cumulative summer precipitation [mm]" = "precipjja",
-                                  "Solar Radiation Index" = "sri",
-                                  "Terrain Ruggedness Index" = "tri",
-                                  "Topographic Wetness Index" = "twi",
-                                  "cover of graminoids" = "graminoid_cover"),
+                                  "Solar Radiation Index [-]" = "sri",
+                                  "Terrain Ruggedness Index [-]" = "tri",
+                                  "Topographic Wetness Index [-]" = "twi",
+                                  "rel. abundance of graminoids" = "graminoid_cover"),
              pred_id = fct_relevel(pred_id,
                                    "summer temperature [°C]",
                                    "annual temperature variability [°C]",
                                    "cumulative summer precipitation [mm]",
-                                   "Solar Radiation Index",
-                                   "Terrain Ruggedness Index",
-                                   "Topographic Wetness Index",
-                                   "cover of graminoids"))
+                                   "Solar Radiation Index [-]",
+                                   "Terrain Ruggedness Index [-]",
+                                   "Topographic Wetness Index [-]",
+                                   "rel. abundance of graminoids"))
     
     point_data_pg <- point_data_pg %>% filter(as.character(pred_id) == predictor_id) %>% 
       # rename predictors
@@ -526,15 +527,15 @@ prediction_plots_groups <- function(fgroup) {
     point_data_plot <- point_data_plot %>% filter(as.character(pred_id) == predictor_id) %>% 
       # rename predictors
       mutate(pred_id = fct_recode(pred_id,
-                                  "Solar Radiation Index" = "sri",
-                                  "Terrain Ruggedness Index" = "tri",
-                                  "Topographic Wetness Index" = "twi",
-                                  "cover of graminoids" = "graminoid_cover"),
+                                  "Solar Radiation Index [-]" = "sri",
+                                  "Terrain Ruggedness Index [-]" = "tri",
+                                  "Topographic Wetness Index [-]" = "twi",
+                                  "rel. abundance of graminoids" = "graminoid_cover"),
              pred_id = fct_relevel(pred_id,
-                                   "Solar Radiation Index",
-                                   "Terrain Ruggedness Index",
-                                   "Topographic Wetness Index",
-                                   "cover of graminoids"))
+                                   "Solar Radiation Index [-]",
+                                   "Terrain Ruggedness Index [-]",
+                                   "Topographic Wetness Index [-]",
+                                   "rel. abundance of graminoids"))
     
     # >> compile plot ----
     pred_plot <- ggplot(data = phats_long,
@@ -600,19 +601,20 @@ prediction_plots_groups <- function(fgroup) {
   
   # make title and y-axis label
   title <- ggdraw() +
-    draw_label(paste0(figure_no, fgroup, " cover ~ predictors"),
-               hjust = 0.5,
-               size = 20)
+    draw_label(paste0(#figure_no, 
+      fgroup, " relative abundance ~ predictors"),
+      hjust = 0.5,
+      size = 20)
   
   ylabel_plotgroup <- ggdraw() +
-    draw_label("cover per plot group",
+    draw_label("rel. abund. per plot group",
                vjust = 0,
                angle = 90,
                size = 20,
                fontface = "bold")
   
   ylabel_plot <- ggdraw() +
-    draw_label("cover per plot",
+    draw_label("rel. abundance per plot",
                vjust = 0,
                angle = 90,
                size = 20,
