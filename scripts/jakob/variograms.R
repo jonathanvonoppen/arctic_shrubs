@@ -141,16 +141,16 @@ if(!exists("vario_list")){
 
 # Look up table for pretty names
 lookup_table <- data.frame(
-  raster_names = c(unlist(lapply(vario_list, function(x) x$id[1]))),
+  raster_names = c(unlist(lapply(vario_list[-10], function(x) x$id[1]))),
   pretty_names = c("Insolation",
-                  "Cumulative Summer Precipitation (mm)",
-                  "Kopecky Topographic Wetness Index",
-                  "Mean Precipitation March-April-May (mm)",
-                  "Tasseled-cap Wetness Index (TCWS)",
-                  "Annual Temperature Variability",
-                  "Mean Summer Temperature (°C)",
-                  "Annual Maximum Temperature (°C)",
-                  "Annual Minimum Temperature (°C)" #,
+                  "Cumulative Summer (JJA) Precipitation [mm] *",
+                  "Topographic Wetness Index (TWI-FD8) [-] *",
+                  "Cumulative Spring (MAM) Precipitation [mm]",
+                  "Tasseled-cap Wetness Index (TCWS) [-] *",
+                  "Annual Temperature Variability [°C] *",
+                  "Mean Summer (JJA) Temperature [°C] *",
+                  "Annual Maximum Temperature [°C]",
+                  "Annual Minimum Temperature [°C]" #,
                   #"Terrain Ruggedness Index (TRI)",
                   ),
   stringsAsFactors = F)
@@ -204,10 +204,11 @@ vario$id <- names(predictor_raster)
 # Add row to lookup table
 lookup_table <- bind_rows(lookup_table,
                           data.frame(raster_names = "tri", 
-                                     pretty_names = "Terrain Ruggedness Index (TRI)"))
+                                     pretty_names = "Terrain Ruggedness Index (TRI) [-] *"))
                           
 # Plot variogram using the variogram plotting function.
-plot_variogram(vario)
+plot_variogram(vario) 
+#plot_variogram(vario_list[[10]]) 
 
 # Save variogram 
 save(vario, file = "data/variograms/tri_vario.Rda")
