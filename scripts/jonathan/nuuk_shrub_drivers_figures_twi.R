@@ -107,14 +107,17 @@ textface = c(rep("bold", 7),
     
     # change axis labels
     labs(x = "explanatory variable",
-         y = "times included\n(no. studies = 79)") +
+         y = "times included\n(no. studies = 79)",
+         fill = "driver regime") +
     
     # adjust appearance
     theme_bw() +
     scale_fill_manual(values = c("steelblue3", "#64bd54")) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           plot.margin = margin(t = 1, unit = "cm"),
-          legend.position = "none",
+          legend.position = c(0.8, 0.8),
+          legend.title = element_text(size = 20),
+          legend.text = element_text(size = 18),
           axis.text = element_text(size = 18),
           axis.text.x = element_text(face = textface,
                                      size = 16,
@@ -164,6 +167,7 @@ driver_frequency_count <- driver_frequency_count +
          axis.ticks = element_line(size = 1.5),
          axis.line = element_line(size = 1.5)))
 
+
 # ¨¨¨¨ c) count species ----
 (species_count <- ggplot(data = lit,
                         aes(x = factor(n_species))) +
@@ -209,7 +213,7 @@ driver_frequency_count <- driver_frequency_count +
 
 
 # save plot
-# save_plot(file.path("figures", "nuuk_shrub_drivers_lit_review_update.pdf"),
+# save_plot(file.path("figures", "nuuk_shrub_drivers_lit_review_update.png"),
 #           nuuk_lit_plot, base_height = 20, base_aspect_ratio = .5)
 
 
@@ -1206,11 +1210,11 @@ load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradie
 
 # >> save plots ----
 prediction_plots_path <- file.path("figures", "prediction_plots_twi")
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllShr.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllShr.png"),
 #           nuuk_prediction_plot_AllShr, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllEve.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllEve.png"),
 #           nuuk_prediction_plot_AllEve, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllDec.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_AllDec.png"),
 #           nuuk_prediction_plot_AllDec, base_height = 15, base_aspect_ratio = 1)
 
 
@@ -1299,23 +1303,23 @@ load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradie
 
 # >> save plots ----
 prediction_plots_path <- file.path("figures", "prediction_plots_twi")
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_BetNan.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_BetNan.png"),
 #           nuuk_prediction_plot_BetNan, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_CasTet.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_CasTet.png"),
 #           nuuk_prediction_plot_CasTet, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_EmpNig.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_EmpNig.png"),
 #           nuuk_prediction_plot_EmpNig, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_PhyCae.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_PhyCae.png"),
 #           nuuk_prediction_plot_PhyCae, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_RhoGro.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_RhoGro.png"),
 #           nuuk_prediction_plot_RhoGro, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_RhoTom.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_RhoTom.png"),
 #           nuuk_prediction_plot_RhoTom, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_SalArc.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_SalArc.png"),
 #           nuuk_prediction_plot_SalArc, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_SalGla.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_SalGla.png"),
 #           nuuk_prediction_plot_SalGla, base_height = 15, base_aspect_ratio = 1)
-# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_VacUli.pdf"),
+# save_plot(file.path(prediction_plots_path, "nuuk_shrub_drivers_prediction_plot_VacUli.png"),
 #           nuuk_prediction_plot_VacUli, base_height = 15, base_aspect_ratio = 1)
 
 
