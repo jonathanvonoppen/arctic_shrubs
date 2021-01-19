@@ -1,0 +1,566 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Drivers of tundra shrub abundance in SW Greenland - supplementary material},
+  pdfauthor={Jonathan von Oppen},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{colortbl}
+\usepackage{hhline}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+
+\title{Drivers of tundra shrub abundance in SW Greenland - supplementary
+material}
+\author{Jonathan von Oppen}
+\date{08/01/2021}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{r-markdown}{%
+\subsection{R Markdown}\label{r-markdown}}
+
+This is an R Markdown document. Markdown is a simple formatting syntax
+for authoring HTML, PDF, and MS Word documents. For more details on
+using R Markdown see \url{http://rmarkdown.rstudio.com}.
+
+When you click the \textbf{Knit} button a document will be generated
+that includes both content as well as the output of any embedded R code
+chunks within the document. You can embed an R code chunk like this:
+
+\hypertarget{study-species-overview-table}{%
+\subsection{Study species overview
+table}\label{study-species-overview-table}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(species_overview <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{file.path}\NormalTok{(}\StringTok{".."}\NormalTok{, }\StringTok{"data"}\NormalTok{, }\StringTok{"processed"}\NormalTok{, }\StringTok{"nuuk_traits_PCAscores_cleaned.csv"}\NormalTok{),}
+                               \DataTypeTok{header =}\NormalTok{ T) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{   }\CommentTok{# select, reorder and rename columns}
+\StringTok{   }\KeywordTok{select}\NormalTok{(species,}
+\NormalTok{          fgroup,}
+\NormalTok{          PC1,}
+\NormalTok{          PC2) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{   }
+\StringTok{   }\CommentTok{# filter out graminoids}
+\StringTok{   }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\NormalTok{(species }\OperatorTok{==}\StringTok{ "graminoids mean"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{   }
+\StringTok{   }\CommentTok{# add new col w/ no. species in each taxon to add rows for 2nd Rhododendron and Salix species}
+\StringTok{   }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{n_spec =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{   }\KeywordTok{uncount}\NormalTok{(n_spec) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{   }
+\StringTok{   }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{species =} \KeywordTok{case_when}\NormalTok{(species }\OperatorTok{==}\StringTok{ "Rhododendron sp."} \OperatorTok{&}\StringTok{ }\KeywordTok{row_number}\NormalTok{() }\OperatorTok{==}\StringTok{ }\DecValTok{4} \OperatorTok{~}\StringTok{ "Rhododendron groenlandicum"}\NormalTok{,}
+\NormalTok{                              species }\OperatorTok{==}\StringTok{ "Rhododendron sp."} \OperatorTok{&}\StringTok{ }\KeywordTok{row_number}\NormalTok{() }\OperatorTok{==}\StringTok{ }\DecValTok{5} \OperatorTok{~}\StringTok{ "Rhododendron tomentosum"}\NormalTok{,}
+\NormalTok{                              species }\OperatorTok{==}\StringTok{ "Salix sp."} \OperatorTok{&}\StringTok{ }\KeywordTok{row_number}\NormalTok{() }\OperatorTok{==}\StringTok{ }\DecValTok{7} \OperatorTok{~}\StringTok{ "Salix arctophila"}\NormalTok{,}
+\NormalTok{                              species }\OperatorTok{==}\StringTok{ "Salix sp."} \OperatorTok{&}\StringTok{ }\KeywordTok{row_number}\NormalTok{() }\OperatorTok{==}\StringTok{ }\DecValTok{8} \OperatorTok{~}\StringTok{ "Salix glauca"}\NormalTok{,}
+                              \OtherTok{TRUE} \OperatorTok{~}\StringTok{ }\NormalTok{species)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{   }
+\StringTok{   }\CommentTok{# add cols}
+\StringTok{   }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{pollination =} \KeywordTok{case_when}\NormalTok{(species }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Betula nana"}\NormalTok{, }\StringTok{"Salix arctophila"}\NormalTok{, }\StringTok{"Salix glauca"}\NormalTok{)  }\OperatorTok{~}\StringTok{ "wind"}\NormalTok{,}
+\NormalTok{                                         species }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Cassiope tetragona"}\NormalTok{, }\StringTok{"Rhododendron groenlandicum"}\NormalTok{, }\StringTok{"Rhododendron tomentosum"}\NormalTok{) }\OperatorTok{~}\StringTok{ "insects"}\NormalTok{,}
+                                         \OtherTok{TRUE} \OperatorTok{~}\StringTok{ ""}\NormalTok{),}
+          \DataTypeTok{dispersal =} \KeywordTok{case_when}\NormalTok{(species }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Cassiope tetragona"}\NormalTok{, }\StringTok{"Phyllodoce caerulea"}\NormalTok{) }\OperatorTok{~}\StringTok{ "animals"}\NormalTok{,}
+\NormalTok{                                species }\OperatorTok{==}\StringTok{ "Empetrum nigrum"} \OperatorTok{~}\StringTok{ "animals, clonal"}\NormalTok{,}
+\NormalTok{                                species }\OperatorTok{==}\StringTok{ "Vaccinium uliginosum"} \OperatorTok{~}\StringTok{ "animals, (clonal)"}\NormalTok{,}
+\NormalTok{                                species }\OperatorTok{==}\StringTok{ "Betula nana"} \OperatorTok{~}\StringTok{ "(wind), clonal"}\NormalTok{,}
+\NormalTok{                                species }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Rhododendron groenlandicum"}\NormalTok{, }\StringTok{"Rhododendron tomentosum"}\NormalTok{, }\StringTok{"Salix glauca"}\NormalTok{) }\OperatorTok{~}\StringTok{ "wind, (clonal)"}\NormalTok{,}
+\NormalTok{                                species }\OperatorTok{==}\StringTok{ "Salix arctophila"} \OperatorTok{~}\StringTok{ "wind, clonal"}\NormalTok{,}
+                                \OtherTok{TRUE} \OperatorTok{~}\StringTok{ ""}\NormalTok{),}
+          \DataTypeTok{references =} \KeywordTok{case_when}\NormalTok{(species }\OperatorTok{==}\StringTok{ "Betula nana"} \OperatorTok{~}\StringTok{ "Tollefson (2007)"}\NormalTok{,}
+\NormalTok{                                 species }\OperatorTok{==}\StringTok{ "Empetrum nigrum"} \OperatorTok{~}\StringTok{ "Matthews (1992a)"}\NormalTok{,}
+\NormalTok{                                 species }\OperatorTok{==}\StringTok{ "Rhododendron groenlandicum"} \OperatorTok{~}\StringTok{ "Gucker (2006)"}\NormalTok{,}
+\NormalTok{                                 species }\OperatorTok{==}\StringTok{ "Rhododendron tomentosum"} \OperatorTok{~}\StringTok{ "Gucker (2005)"}\NormalTok{,}
+\NormalTok{                                 species }\OperatorTok{==}\StringTok{ "Salix glauca"} \OperatorTok{~}\StringTok{ "Uchytil (1992)"}\NormalTok{,}
+\NormalTok{                                 species }\OperatorTok{==}\StringTok{ "Vaccinium uliginosum"} \OperatorTok{~}\StringTok{ "Matthews (1992b)"}\NormalTok{)}
+\NormalTok{          ) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# arrange by acquisitiveness}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(PC1) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# make flextable and reorder columns}
+\StringTok{  }\KeywordTok{flextable}\NormalTok{(}\DataTypeTok{col_keys =} \KeywordTok{c}\NormalTok{(}\StringTok{"species"}\NormalTok{, }\StringTok{"fgroup"}\NormalTok{, }\StringTok{"pollination"}\NormalTok{, }\StringTok{"dispersal"}\NormalTok{, }\StringTok{"PC1"}\NormalTok{, }\StringTok{"PC2"}\NormalTok{, }\StringTok{"references"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# add author names}
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{1}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# E. nigrum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" L."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{2}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# C. tetragona}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" L."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{3}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# P. caerulea}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" (L.) Bab."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{4}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# R. groenlandicum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" (Oeder) Kron & Judd"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{5}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# R. tomentosum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" (Stokes) Harmaja"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{6}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# B. nana}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" L."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{7}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# V. uliginosum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" L."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{8}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# S. arctophila}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" Cockerell"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{9}\NormalTok{, }\DataTypeTok{j =} \StringTok{"species"}\NormalTok{,   }\CommentTok{# S. glauca}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\KeywordTok{as_chunk}\NormalTok{(species,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{italic =} \OtherTok{TRUE}\NormalTok{)),}
+                               \StringTok{" L."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# add superscripts in PC score cols for Rhododendron and Salix}
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{4}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC1"}\NormalTok{,   }\CommentTok{# R. groenlandicum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC1,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" b"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{5}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC1"}\NormalTok{,   }\CommentTok{# R. tomentosum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC1,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" b"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{4}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC2"}\NormalTok{,   }\CommentTok{# R. groenlandicum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC2,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" b"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{5}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC2"}\NormalTok{,   }\CommentTok{# R. tomentosum}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC2,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" b"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{8}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC1"}\NormalTok{,   }\CommentTok{# S. arctophila}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC1,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" c"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{9}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC1"}\NormalTok{,   }\CommentTok{# S. glauca}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC1,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" c"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{8}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC2"}\NormalTok{,   }\CommentTok{# S. arctophila}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC2,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" c"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{i =} \DecValTok{9}\NormalTok{, }\DataTypeTok{j =} \StringTok{"PC2"}\NormalTok{,   }\CommentTok{# S. glauca}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(PC2,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" c"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}
+\StringTok{  }
+\StringTok{  }\CommentTok{# adjust header labels}
+\StringTok{  }\KeywordTok{set_header_labels}\NormalTok{(}\DataTypeTok{species =} \StringTok{"species name"}\NormalTok{,}
+                    \DataTypeTok{fgroup =} \StringTok{"canopy persistence"}\NormalTok{,}
+                    \DataTypeTok{pollination =} \StringTok{"pollination mode"}\NormalTok{,}
+                    \DataTypeTok{dispersal =} \StringTok{"dispersal mode / clonality"}\NormalTok{,}
+                    \DataTypeTok{PC1 =} \StringTok{"PC1}\CharTok{\textbackslash{}n}\StringTok{(resource economics)"}\NormalTok{,}
+                    \DataTypeTok{PC2 =} \StringTok{"PC2 (plant size)"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# add superscripts in PC score cols for Thomas et al. reference}
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{j =} \DecValTok{5}\NormalTok{, }\DataTypeTok{part =} \StringTok{"header"}\NormalTok{,}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\StringTok{"PC1}\CharTok{\textbackslash{}n}\StringTok{(resource economics)"}\NormalTok{,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" a"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{compose}\NormalTok{(}\DataTypeTok{j =} \DecValTok{6}\NormalTok{, }\DataTypeTok{part =} \StringTok{"header"}\NormalTok{,}
+          \DataTypeTok{value =} \KeywordTok{as_paragraph}\NormalTok{(}\StringTok{"PC2 (plant size)"}\NormalTok{,}
+                               \KeywordTok{as_chunk}\NormalTok{(}\StringTok{" a"}\NormalTok{,}
+                                        \DataTypeTok{props =} \KeywordTok{fp_text}\NormalTok{(}\DataTypeTok{vertical.align =} \StringTok{"superscript"}\NormalTok{)))) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# # add footnotes}
+\StringTok{  }\CommentTok{# footnote(part = NULL,}
+\StringTok{  }\CommentTok{#   value = as_paragraph(c(" PCA scores based on Thomas et al. (2020)",}
+\StringTok{  }\CommentTok{#                                 " using a common value for species within Rhododendron and Salix genera, respectively. See supplementary text, page XX, for further information"))) %>%}
+\StringTok{  }
+\StringTok{  }\CommentTok{# adjust appearance}
+\StringTok{  }\KeywordTok{theme_vanilla}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# adjust font size}
+\StringTok{  }\KeywordTok{fontsize}\NormalTok{(}\DataTypeTok{size =} \DecValTok{9}\NormalTok{, }\DataTypeTok{part =} \StringTok{"all"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }
+\StringTok{  }\CommentTok{# adjust width}
+\StringTok{  }\KeywordTok{set_table_properties}\NormalTok{(}\DataTypeTok{width =} \DecValTok{1}\NormalTok{, }\DataTypeTok{layout =} \StringTok{"autofit"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## select: dropped 5 variables (X, PC3, PC4, PC5, PC6)
+\end{verbatim}
+
+\begin{verbatim}
+## filter: removed one row (12%), 7 rows remaining
+\end{verbatim}
+
+\begin{verbatim}
+## mutate: new variable 'n_spec' (double) with 2 unique values and 0% NA
+\end{verbatim}
+
+\begin{verbatim}
+## uncount: now 9 rows and 4 columns, ungrouped
+\end{verbatim}
+
+\begin{verbatim}
+## mutate: changed 4 values (44%) of 'species' (0 new NA)
+\end{verbatim}
+
+\begin{verbatim}
+## mutate: new variable 'pollination' (character) with 3 unique values and 0% NA
+\end{verbatim}
+
+\begin{verbatim}
+##         new variable 'dispersal' (character) with 6 unique values and 0% NA
+\end{verbatim}
+
+\begin{verbatim}
+##         new variable 'references' (character) with 7 unique values and 33% NA
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Warning: fonts used in `flextable` are ignored because the `pdflatex`
+## engine is used and not `xelatex` or `lualatex`. You can avoid this warning
+## by using the `set_flextable_defaults(fonts_ignore=TRUE)` command or use a
+## compatible engine by defining `latex_engine: xelatex` in the YAML header of the
+## R Markdown document.
+\end{verbatim}
+
+\providecommand{\docline}[3]{\noalign{\global\setlength{\arrayrulewidth}{#1}}\arrayrulecolor[HTML]{#2}\cline{#3}}
+
+\setlength{\tabcolsep}{8pt}
+
+\renewcommand*{\arraystretch}{1.5}
+
+\begin{table}
+
+\centering
+
+\begin{longtable}{ccccccc}
+
+
+
+\hhline{>{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}-}
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{species name}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{canopy persistence}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{pollination mode}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{dispersal mode / clonality}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{PC1
+(resource economics)}}}\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ a}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{PC2 (plant size)}}}\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ a}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{references}}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{2pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+\endfirsthead
+
+\hhline{>{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}-}
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{species name}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{canopy persistence}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{pollination mode}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{dispersal mode / clonality}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{PC1
+(resource economics)}}}\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ a}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{PC2 (plant size)}}}\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ a}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{\textbf{references}}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{2pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}\endhead
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Empetrum nigrum}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ L.}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{evergreen}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{animals, clonal}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-3.59}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.79}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{Matthews (1992a)}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Cassiope tetragona}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ L.}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{evergreen}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{insects}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{animals}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-3.46}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.66}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Phyllodoce caerulea}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ (L.) Bab.}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{evergreen}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{animals}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-3.27}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.28}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Rhododendron groenlandicum}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ (Oeder) Kron \& Judd}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{evergreen}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{insects}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind, (clonal)}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ b}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-3.22}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ b}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.46}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{Gucker (2006)}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Rhododendron tomentosum}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ (Stokes) Harmaja}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{evergreen}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{insects}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind, (clonal)}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ b}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-3.22}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ b}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.46}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{Gucker (2005)}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Betula nana}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ L.}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{deciduous}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{(wind), clonal}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-1.47}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.64}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{Tollefson (2007)}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Vaccinium uliginosum}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ L.}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{deciduous}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{animals, (clonal)}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-1.33}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{0.23}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{Matthews (1992b)}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Salix arctophila}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ Cockerell}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{deciduous}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind, clonal}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ c}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-0.93}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ c}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{1.71}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{0.5pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{10}{12}\selectfont{\textcolor[HTML]{000000}{\textit{Salix glauca}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{ L.}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{deciduous}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{wind, (clonal)}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ c}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{-0.93}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}r}{\fontsize{10}{12}\selectfont{\textsuperscript{\textcolor[HTML]{000000}{ c}}}\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{1.71}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{}l!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{9}{11}\selectfont{\textcolor[HTML]{000000}{Uchytil (1992)}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{2pt}}\arrayrulecolor[HTML]{000000}\cline{1-7}
+
+\end{longtable}
+
+\end{table}
+
+\hypertarget{model-output-tables}{%
+\subsection{Model output tables}\label{model-output-tables}}
+
+\begin{verbatim}
+## filter: removed 1,104 rows (99%), 12 rows remaining
+\end{verbatim}
+
+\begin{verbatim}
+## mutate: converted 'param' from character to factor (0 new NA)
+\end{verbatim}
+
+\begin{verbatim}
+## mutate: converted 'param' from factor to character (0 new NA)
+\end{verbatim}
+
+\begin{verbatim}
+## mutate: changed 9 values (75%) of 'param' (0 new NA)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Warning: fonts used in `flextable` are ignored because the `pdflatex`
+## engine is used and not `xelatex` or `lualatex`. You can avoid this warning
+## by using the `set_flextable_defaults(fonts_ignore=TRUE)` command or use a
+## compatible engine by defining `latex_engine: xelatex` in the YAML header of the
+## R Markdown document.
+\end{verbatim}
+
+\providecommand{\docline}[3]{\noalign{\global\setlength{\arrayrulewidth}{#1}}\arrayrulecolor[HTML]{#2}\cline{#3}}
+
+\setlength{\tabcolsep}{8pt}
+
+\renewcommand*{\arraystretch}{1.5}
+
+\begin{table}
+
+\centering
+
+\begin{longtable}{|p{0.75in}|p{0.75in}|p{0.75in}|p{0.75in}|p{0.75in}|p{0.75in}|p{0.75in}|p{0.75in}}
+
+
+
+\hhline{>{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}-}
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{param}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{mean}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{sd}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{l95}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{l90}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{u90}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{u95}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{Rhat}}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{2pt}}\arrayrulecolor[HTML]{000000}\cline{1-8}
+
+\endfirsthead
+
+\hhline{>{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}->{\arrayrulecolor[HTML]{000000}\global\arrayrulewidth=2pt}-}
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{param}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{mean}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{sd}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{l95}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{l90}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{u90}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{u95}}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{\textbf{Rhat}}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{2pt}}\arrayrulecolor[HTML]{000000}\cline{1-8}\endhead
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{intercept}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-2.22}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.25}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-2.73}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-2.99}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-1.71}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-1.76}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.003}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{summer temperature}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.09}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.13}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.35}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.30}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.12}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.16}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{temperature variability}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.74}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.21}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.34}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.40}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.10}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.18}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{summer precipitation}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.07}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.18}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.27}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.22}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.36}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.42}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{solar radiation}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.02}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.10}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.21}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.18}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.14}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.17}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{terrain ruggedness}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.02}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.12}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.26}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.22}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.17}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.20}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{topographic wetness}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.18}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.13}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.09}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.04}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.40}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.44}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{dCWA}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.65}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.20}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.27}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.33}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.99}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.05}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.004}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{graminoid cover}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.34}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.11}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.56}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.52}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.17}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.13}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{other shrub cover}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.07}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.09}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.24}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{-0.21}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.08}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.11}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.002}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{phi}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{6.58}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.71}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{5.26}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{NA}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{NA}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{8.07}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{1pt}}\arrayrulecolor[HTML]{FFFFFF}\cline{1-8}
+
+
+
+\multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedright}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{sigma.plotgroup}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.63}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.12}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.41}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{NA}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{NA}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{0.88}}} & \multicolumn{1}{!{\color[HTML]{000000}\vrule width 0pt}>{\raggedleft}p{\dimexpr 0.75in+0\tabcolsep+0\arrayrulewidth}!{\color[HTML]{000000}\vrule width 0pt}}{\fontsize{11}{13}\selectfont{\textcolor[HTML]{000000}{1.001}}} \\
+
+\noalign{\global\setlength{\arrayrulewidth}{2pt}}\arrayrulecolor[HTML]{000000}\cline{1-8}
+
+\end{longtable}
+
+\end{table}
+
+\hypertarget{including-plots}{%
+\subsection{Including Plots}\label{including-plots}}
+
+You can also embed plots, for example:
+
+\includegraphics{Nuuk_shrub_drivers_supplementary_files/figure-latex/pressure-1.pdf}
+
+Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
+chunk to prevent printing of the R code that generated the plot.
+
+\hypertarget{section}{%
+\section{-----------}\label{section}}
+
+huxtable approach:
+
+\end{document}
