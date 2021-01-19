@@ -24,7 +24,7 @@ output_table_sp <- function(species){
   # set row name order
   var_order <- c("intercept", 
                  "b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", 
-                 "b.sri", "b.tri", "b.twi", 
+                 "b.sri", "b.tri", "b.twi", "b.tcws", 
                  "b.compet", "b.gramin_cov", "b.shrub_cov", 
                  "phi", "sigma.plotgroup")
   
@@ -52,6 +52,7 @@ output_table_sp <- function(species){
                              param == "b.tempjja.x2" ~ "summer temperature ^2",
                              param == "b.tri" ~ "terrain ruggedness",
                              param == "b.twi" ~ "topographic wetness",
+                             param == "b.tcws" ~ "Tasseled-cap wetness",
                              TRUE ~ param)) %>% 
     
     # build flextable
@@ -95,7 +96,7 @@ output_table_gr <- function(fgroup){
   # set row name order
   var_order <- c("intercept", 
                  "b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", 
-                 "b.sri", "b.tri", "b.twi", 
+                 "b.sri", "b.tri", "b.twi", "b.tcws",
                  "b.gramin_cov", 
                  "phi", "sigma.plotgroup")
   
@@ -121,6 +122,7 @@ output_table_gr <- function(fgroup){
                              param == "b.tempjja.x2" ~ "summer temperature ^2",
                              param == "b.tri" ~ "terrain ruggedness",
                              param == "b.twi" ~ "topographic wetness",
+                             param == "b.tcws" ~ "Tasseled-cap wetness",
                              TRUE ~ param)) %>% 
     
     # build flextable
