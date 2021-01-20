@@ -479,7 +479,7 @@ legend_hor <- get_legend(xplot)
                                              align = "hv"))
 
 # save plot
-# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels_twi.pdf"),
+# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels_twi.png"),
 #           nuuk_effect_size_plot_grid_ver_twi, base_height = 22, base_aspect_ratio = .6)
 
 
@@ -509,8 +509,8 @@ legend_hor <- get_legend(xplot)
                                                  rel_heights = c(1, 0.07)))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_twi.pdf"),
-          nuuk_effect_size_plot_grid_hor_twi, base_height = 18, base_aspect_ratio = 1.3)
+# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_twi.png"),
+#           nuuk_effect_size_plot_grid_hor_twi, base_height = 18, base_aspect_ratio = 1.3)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
@@ -642,7 +642,7 @@ legend_hor <- get_legend(xplot)
                                                   rel_heights = c(1, 0.07)))
 
 # save plot
-save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_tcws.pdf"),
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_tcws.png"),
           nuuk_effect_size_plot_grid_hor_tcws, base_height = 18, base_aspect_ratio = 1.3)
 
 
@@ -1204,9 +1204,9 @@ load(file = file.path("data", "processed", "model_input_data_twi", "shrub_gradie
 
 
 # >> plot graphs ----
-(nuuk_prediction_plot_AllShr <- prediction_plots_groups(fgroup = "all shrub"))
-(nuuk_prediction_plot_AllEve <- prediction_plots_groups(fgroup = "evergreen shrub"))
-(nuuk_prediction_plot_AllDec <- prediction_plots_groups(fgroup = "deciduous shrub"))
+(nuuk_prediction_plot_AllShr <- prediction_plots_groups(fgroup = "all shrubs"))
+(nuuk_prediction_plot_AllEve <- prediction_plots_groups(fgroup = "evergreen shrubs"))
+(nuuk_prediction_plot_AllDec <- prediction_plots_groups(fgroup = "deciduous shrubs"))
 
 # >> save plots ----
 prediction_plots_path <- file.path("figures", "prediction_plots_twi")
