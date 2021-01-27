@@ -69,7 +69,7 @@
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
-          phat_tempXmoist[m,p] <- intercept +
+          phat_tempXwet[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.twi * xhat_twi2[p] +
