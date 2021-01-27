@@ -58,8 +58,8 @@
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
-                        b.tempXcompet * tempjja.cont[i] * compet.cont[i] +       # for interaction
-                        b.tempXcompet2 * (tempjja.cont[i]^2) * compet.cont[i] +  # for interaction
+                        b.tempXcompet * tempjja.cont[j] * compet.cont[j] +       # for interaction
+                        b.tempXcompet2 * (tempjja.cont[j]^2) * compet.cont[j] +  # for interaction
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtwi * tempjja.cont[j] * twi.cont[j] +       # for interaction
