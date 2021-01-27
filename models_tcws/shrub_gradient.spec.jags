@@ -26,6 +26,9 @@
       b.tempXtcws ~ dnorm(0, 0.001)
       b.tempXtcws2 ~ dnorm(0, 0.001)
       
+      b.tempXcompet ~ dnorm(0, 0.001)
+      b.tempXcompet2 ~ dnorm(0, 0.001)
+      
       phi ~ dgamma(0.1, 0.1)
       
       
@@ -35,6 +38,8 @@
         cov.dis[i] ~ dbern(mu[i])
         logit(mu[i]) <- b_plotgroup[plotgroup.dis[i]] + # ~= random effect of plot group
                         b.compet * compet.dis[i] + 
+                        b.tempXcompet * tempjja.dis[i] * compet.dis[i] +       # for interaction
+                        b.tempXcompet2 * (tempjja.dis[i]^2) * compet.dis[i] +  # for interaction
                         b.shrub_cov * shrub_cov.dis[i] + 
                         b.gramin_cov * gramin_cov.dis[i] + 
                         b.tempXtcws * tempjja.dis[i] * tcws.dis[i] +       # for interaction
@@ -53,6 +58,8 @@
         q[j] <- (1 - mu2[j]) * phi
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
+                        b.tempXcompet * tempjja.cont[j] * compet.cont[j] +       # for interaction
+                        b.tempXcompet2 * (tempjja.cont[j]^2) * compet.cont[j] +  # for interaction
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
@@ -90,12 +97,19 @@
         phat_precipjja[m] <- intercept + b.precipjja.x * xhat_precipjja[m] + b.precipjja.x2 * (xhat_precipjja[m]^2)
       
         for (p in 1:Nxhat2){
-          phat_tempXmoist[m,p] <- intercept +
+          phat_tempXwet[m,p] <- intercept +
                                       b.tempjja.x * xhat_tempjja[m] +
                                       b.tempjja.x2 * (xhat_tempjja[m]^2) +
                                       b.tcws * xhat_tcws2[p] +
                                       b.tempXtcws * xhat_tempjja[m] * xhat_tcws2[p] +
                                       b.tempXtcws2 * (xhat_tempjja[m]^2) * xhat_tcws2[p]
+          
+          phat_tempXcompet[m,p] <- intercept +
+                                      b.tempjja.x * xhat_tempjja[m] +
+                                      b.tempjja.x2 * (xhat_tempjja[m]^2) +
+                                      b.compet * xhat_compet2[p] +
+                                      b.tempXcompet * xhat_tempjja[m] * xhat_compet2[p] + 
+                                      b.tempXcompet2 * (xhat_tempjja[m]^2) * xhat_compet2[p]
           }
         }
 
