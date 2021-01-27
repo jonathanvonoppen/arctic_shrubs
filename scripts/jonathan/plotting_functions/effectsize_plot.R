@@ -29,7 +29,9 @@ effectsize_plot_twi <- function(species, plot_width) {
                    "b.twi", 
                    "b.shrub_cov",
                    "b.gramin_cov",
-                   "b.compet")
+                   "b.compet",
+                   "b.tempXtcws", "b.tempXtcws2",
+                   "b.tempXcompet", "b.tempXcompet2")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
   solutions <- solutions %>% 
@@ -43,7 +45,9 @@ effectsize_plot_twi <- function(species, plot_width) {
                                     "b.twi",
                                     "b.compet",
                                     "b.shrub_cov",
-                                    "b.gramin_cov")
+                                    "b.gramin_cov",
+                                    "b.tempXtwi", "b.tempXtwi2",
+                                    "b.tempXcompet", "b.tempXcompet2")
   # comment next bit ou if solved the labelling issue for discrete axis in the plotting code below
   solutions$variable <- fct_recode(solutions$variable,
                                    "summer temperature" = "b.tempjja.x",
@@ -55,9 +59,13 @@ effectsize_plot_twi <- function(species, plot_width) {
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
                                    "topographic wetness" = "b.twi",
+                                   "summer temperature X\ntopographic wetness" = "b.tempXtwi", 
+                                   "summer temperature ^2\nX topographic wetness" = "b.tempXtwi2",
                                    "dCWA" = "b.compet",
                                    "other shrub abundance" = "b.shrub_cov",
-                                   "graminoid abundance" = "b.gramin_cov")
+                                   "graminoid abundance" = "b.gramin_cov",
+                                   "summer temperature\nX dCWA", "b.tempXcompet", 
+                                   "summer temperature ^2\nX dCWA" = "b.tempXcompet2")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
@@ -139,7 +147,9 @@ effectsize_plot_tcws <- function(species, plot_width) {
                    "b.tcws", 
                    "b.shrub_cov",
                    "b.gramin_cov",
-                   "b.compet")
+                   "b.compet",
+                   "b.tempXtcws", "b.tempXtcws2",
+                   "b.tempXcompet", "b.tempXcompet2")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
   solutions <- solutions %>% 
@@ -151,9 +161,11 @@ effectsize_plot_tcws <- function(species, plot_width) {
                                     "b.sri",
                                     "b.tri",
                                     "b.tcws",
+                                    "b.tempXtcws", "b.tempXtcws2",
                                     "b.compet",
                                     "b.shrub_cov",
-                                    "b.gramin_cov")
+                                    "b.gramin_cov",
+                                    "b.tempXcompet", "b.tempXcompet2")
   # comment next bit ou if solved the labelling issue for discrete axis in the plotting code below
   solutions$variable <- fct_recode(solutions$variable,
                                    "summer temperature" = "b.tempjja.x",
@@ -165,9 +177,13 @@ effectsize_plot_tcws <- function(species, plot_width) {
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
                                    "Tasseled-cap wetness" = "b.tcws",
+                                   "summer temperature X\nTasseled-cap wetness" = "b.tempXtwi", 
+                                   "summer temperature ^2\nX Tasseled-cap wetness" = "b.tempXtwi2",
                                    "dCWA" = "b.compet",
                                    "other shrub abundance" = "b.shrub_cov",
-                                   "graminoid abundance" = "b.gramin_cov")
+                                   "graminoid abundance" = "b.gramin_cov",
+                                   "summer temperature\nX dCWA", "b.tempXcompet", 
+                                   "summer temperature ^2\nX dCWA" = "b.tempXcompet2")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
