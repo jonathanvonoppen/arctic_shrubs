@@ -13,11 +13,11 @@ tXi_interaction_plots <- function(species) {
   # # test
   # species <- "Salix glauca"
   
-  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.tempXinteract.BetNan
-  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.tempXinteract.EmpNig
-  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.tempXinteract.RhoGro
-  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.tempXinteract.SalGla
-  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.tempXinteract.VacUli
+  if(species == "Betula nana") model_coeff_output <- coeff.shrub_gradient.BetNan2
+  if(species == "Empetrum nigrum") model_coeff_output <- coeff.shrub_gradient.EmpNig2
+  if(species == "Rhododendron groenlandicum") model_coeff_output <- coeff.shrub_gradient.RhoGro2
+  if(species == "Salix glauca") model_coeff_output <- coeff.shrub_gradient.SalGla2
+  if(species == "Vaccinium uliginosum") model_coeff_output <- coeff.shrub_gradient.VacUli2
   
   if(species == "Betula nana") species_df <- BetNan.tot
   if(species == "Empetrum nigrum") species_df <- EmpNig.tot
@@ -32,7 +32,7 @@ tXi_interaction_plots <- function(species) {
   names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
   
   # extract predictions into phats data frame 
-  phat_predictor <- "phat_tempXinteract"
+  phat_predictor <- "phat_tempXcompet"
   
   predictor_min <- min(species_df$tempjjaC)
   predictor_max <- max(species_df$tempjjaC)
