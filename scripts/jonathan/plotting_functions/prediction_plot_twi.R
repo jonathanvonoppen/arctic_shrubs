@@ -291,13 +291,22 @@ prediction_plots_species <- function(species) {
   plot_list <- lapply(unique(param_lookup$phats[param_lookup$phats %in% as.character(phats_long$pred_id)]),
                       plot_predictor)
   
-  # make title and y-axis label
-  title <- ggdraw() +
-    draw_label(paste0(#figure_no, 
-      species, " relative abundance ~ predictors", convergence_string),
-      hjust = 0.5,
-      size = 20)
+  # # make title and y-axis label
+  # title <- ggdraw() +
+  #   draw_label(paste0(#figure_no, 
+  #     species, " relative abundance ~ predictors", convergence_string),
+  #     hjust = 0.5,
+  #     size = 20)
   
+  # make species ylabel
+  ylabel_species <- ggdraw() +
+    draw_label(paste0(species),
+               vjust = 0,
+               angle = 90,
+               size = 20,
+               fontface = "bold.italic")
+  
+  # make inner ylabel
   ylabel_plotgroup <- ggdraw() +
     draw_label("rel. abund. per plot group",
                vjust = 0,
@@ -312,11 +321,11 @@ prediction_plots_species <- function(species) {
                size = 20,
                fontface = "bold")
   
-  # combine ylabels
-  ylabel <- plot_grid(ylabel_plotgroup,
-                      ylabel_plot,
-                      ncol = 1,
-                      rel_heights = c(0.5, 1))
+  # combine inner ylabels
+  ylabel_inner <- plot_grid(ylabel_plotgroup,
+                            ylabel_plot,
+                            ncol = 1,
+                            rel_heights = c(0.5, 1))
   
   # draw extra plot to extract legend from
   xplot <- ggplot(data = data.frame(x = c(1:6),
@@ -346,7 +355,8 @@ prediction_plots_species <- function(species) {
   legend_hor <- get_legend(xplot)
   
   # combine axis label and plots
-  pred_plots_row <- plot_grid(ylabel,
+  pred_plots_row <- plot_grid(ylabel_species,
+                              ylabel_inner,
                               plot_grid(plotlist = plot_list,
                                         labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)", "i)"),
                                         label_size = 18,
@@ -355,15 +365,18 @@ prediction_plots_species <- function(species) {
                                         ncol = 3,
                                         axis = "lt",
                                         align = "hv"),
-                              rel_widths = c(.03, 1)
+                              nrow = 1,
+                              rel_widths = c(.03, .03, 1)
   )
   
-  # add title and legend
-  pred_plot <- plot_grid(title,
+  # add (title and) legend
+  pred_plot <- plot_grid(#title,
                          pred_plots_row,
                          legend_hor,
                          ncol = 1,
-                         rel_heights = c(0.1, 1, 0.07))
+                         rel_heights = c(#0.1, 
+                                         1, 
+                                         0.07))
   
   
   return(pred_plot)
@@ -599,13 +612,22 @@ prediction_plots_groups <- function(fgroup) {
   plot_list <- lapply(unique(param_lookup$phats[param_lookup$phats %in% as.character(phats_long$pred_id)]),
                       plot_predictor)
   
-  # make title and y-axis label
-  title <- ggdraw() +
-    draw_label(paste0(#figure_no, 
-      fgroup, " relative abundance ~ predictors"),
-      hjust = 0.5,
-      size = 20)
+  # # make title and y-axis label
+  # title <- ggdraw() +
+  #   draw_label(paste0(#figure_no, 
+  #     species, " relative abundance ~ predictors", convergence_string),
+  #     hjust = 0.5,
+  #     size = 20)
   
+  # make functional group ylabel
+  ylabel_fgroup <- ggdraw() +
+    draw_label(paste0(fgroup),
+               vjust = 0,
+               angle = 90,
+               size = 20,
+               fontface = "bold")
+  
+  # make inner ylabel
   ylabel_plotgroup <- ggdraw() +
     draw_label("rel. abund. per plot group",
                vjust = 0,
@@ -620,11 +642,11 @@ prediction_plots_groups <- function(fgroup) {
                size = 20,
                fontface = "bold")
   
-  # combine ylabels
-  ylabel <- plot_grid(ylabel_plotgroup,
-                      ylabel_plot,
-                      ncol = 1,
-                      rel_heights = c(0.5, 1))
+  # combine inner ylabels
+  ylabel_inner <- plot_grid(ylabel_plotgroup,
+                            ylabel_plot,
+                            ncol = 1,
+                            rel_heights = c(0.5, 1))
   
   # draw extra plot to extract legend from
   xplot <- ggplot(data = data.frame(x = c(1:6),
@@ -654,7 +676,8 @@ prediction_plots_groups <- function(fgroup) {
   legend_hor <- get_legend(xplot)
   
   # combine axis label and plots
-  pred_plots_row <- plot_grid(ylabel,
+  pred_plots_row <- plot_grid(ylabel_fgroup,
+                              ylabel_inner,
                               plot_grid(plotlist = plot_list,
                                         labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)"),
                                         label_size = 18,
@@ -663,15 +686,18 @@ prediction_plots_groups <- function(fgroup) {
                                         ncol = 3,
                                         axis = "lt",
                                         align = "hv"),
-                              rel_widths = c(.03, 1)
+                              nrow = 1,
+                              rel_widths = c(.03, .03, 1)
   )
   
-  # add title
-  pred_plot <- plot_grid(title,
+  # add (title and) legend
+  pred_plot <- plot_grid(#title,
                          pred_plots_row,
                          legend_hor,
                          ncol = 1,
-                         rel_heights = c(0.1, 1, .07))
+                         rel_heights = c(#0.1, 
+                                          1, 
+                                          .07))
   
   
   return(pred_plot)
