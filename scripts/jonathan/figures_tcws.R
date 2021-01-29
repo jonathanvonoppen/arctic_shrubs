@@ -56,14 +56,14 @@ for (model_output in model_outputs_groups){
 
 
 # >> plot graphs ----
-(es_plot_AllShr <- effectsize_plot_tcws(species = "all shrubs", plot_width = 7.5))
-(es_plot_AllEve <- effectsize_plot_tcws(species = "evergreen shrubs", plot_width = 8.5))
-(es_plot_AllDec <- effectsize_plot_tcws(species = "deciduous shrubs", plot_width = 8.5))
-(es_plot_BetNan <- effectsize_plot_tcws(species = "Betula nana", plot_width = 9.5))
-(es_plot_EmpNig <- effectsize_plot_tcws(species = "Empetrum nigrum", plot_width = 9.5))
-(es_plot_RhoGro <- effectsize_plot_tcws(species = "Rhododendron groenlandicum", plot_width = 9.5))
-(es_plot_SalGla <- effectsize_plot_tcws(species = "Salix glauca", plot_width = 9.5))
-(es_plot_VacUli <- effectsize_plot_tcws(species = "Vaccinium uliginosum", plot_width = 9.5))
+(es_plot_AllShr <- effectsize_plot_tcws(species = "all shrubs", plot_width = 8.5))
+(es_plot_AllEve <- effectsize_plot_tcws(species = "evergreen shrubs", plot_width = 10.5))
+(es_plot_AllDec <- effectsize_plot_tcws(species = "deciduous shrubs", plot_width = 9.5))
+(es_plot_BetNan <- effectsize_plot_tcws(species = "Betula nana", plot_width = 11.5))
+(es_plot_EmpNig <- effectsize_plot_tcws(species = "Empetrum nigrum", plot_width = 11.5))
+(es_plot_RhoGro <- effectsize_plot_tcws(species = "Rhododendron groenlandicum", plot_width = 11.5))
+(es_plot_SalGla <- effectsize_plot_tcws(species = "Salix glauca", plot_width = 11.5))
+(es_plot_VacUli <- effectsize_plot_tcws(species = "Vaccinium uliginosum", plot_width = 11.5))
 
 # make y label
 ylabel_es <- ggdraw() +
@@ -102,34 +102,34 @@ legend_hor <- get_legend(xplot)
 
 
 # >> save plot ----
-# ¨¨¨¨4x2 grid (vertical layout) ----
-(nuuk_effect_size_plot_grid_ver <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
-                                                                    axis.title = element_blank()),
-                                             es_plot_AllEve + theme(legend.position = "none", 
-                                                                    axis.title = element_blank()),
-                                             es_plot_AllDec + theme(legend.position = "none", 
-                                                                    axis.title = element_blank()),
-                                             es_plot_EmpNig + theme(legend.position = "none", 
-                                                                    axis.title = element_blank()), 
-                                             es_plot_RhoGro + theme(legend.position = "none", 
-                                                                    axis.title = element_blank()), 
-                                             es_plot_BetNan + theme(legend.position = "none", 
-                                                                    axis.title = element_blank()), 
-                                             es_plot_VacUli + theme(legend.position = "none",
-                                                                    axis.title = element_blank()),
-                                             es_plot_SalGla + theme(legend.position = "none",
-                                                                    axis.title = element_blank()),
-                                             labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
-                                             label_size = 20,
-                                             label_fontface = "plain",
-                                             label_x = c(.05, .05, .05, .05, .05, .05, .05, .05),
-                                             ncol = 2,
-                                             axis = "lt",
-                                             align = "hv"))
-
-# save plot
-# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels.pdf"),
-#           nuuk_effect_size_plot_grid_ver, base_height = 22, base_aspect_ratio = .6)
+# # ¨¨¨¨4x2 grid (vertical layout) ----
+# (nuuk_effect_size_plot_grid_ver <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
+#                                                                     axis.title = element_blank()),
+#                                              es_plot_AllEve + theme(legend.position = "none", 
+#                                                                     axis.title = element_blank()),
+#                                              es_plot_AllDec + theme(legend.position = "none", 
+#                                                                     axis.title = element_blank()),
+#                                              es_plot_EmpNig + theme(legend.position = "none", 
+#                                                                     axis.title = element_blank()), 
+#                                              es_plot_RhoGro + theme(legend.position = "none", 
+#                                                                     axis.title = element_blank()), 
+#                                              es_plot_BetNan + theme(legend.position = "none", 
+#                                                                     axis.title = element_blank()), 
+#                                              es_plot_VacUli + theme(legend.position = "none",
+#                                                                     axis.title = element_blank()),
+#                                              es_plot_SalGla + theme(legend.position = "none",
+#                                                                     axis.title = element_blank()),
+#                                              labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+#                                              label_size = 20,
+#                                              label_fontface = "plain",
+#                                              label_x = c(.05, .05, .05, .05, .05, .05, .05, .05),
+#                                              ncol = 2,
+#                                              axis = "lt",
+#                                              align = "hv"))
+# 
+# # save plot
+# # save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels.pdf"),
+# #           nuuk_effect_size_plot_grid_ver, base_height = 22, base_aspect_ratio = .6)
 
 
 # ¨¨¨¨3x3 grid (horizontal layout) ----

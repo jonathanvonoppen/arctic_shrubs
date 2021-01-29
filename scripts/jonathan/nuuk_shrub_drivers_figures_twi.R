@@ -680,34 +680,34 @@ legend_hor <- get_legend(xplot)
 
 
 # >> save plot ----
-# ¨¨¨¨4x2 grid (vertical layout) ----
-(nuuk_effect_size_plot_grid_ver_twi <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
-                                                                        axis.title = element_blank()),
-                                                 es_plot_AllEve + theme(legend.position = "none", 
-                                                                        axis.title = element_blank()),
-                                                 es_plot_AllDec + theme(legend.position = "none", 
-                                                                        axis.title = element_blank()),
-                                                 es_plot_EmpNig + theme(legend.position = "none", 
-                                                                        axis.title = element_blank()), 
-                                                 es_plot_RhoGro + theme(legend.position = "none", 
-                                                                        axis.title = element_blank()), 
-                                                 es_plot_BetNan + theme(legend.position = "none", 
-                                                                        axis.title = element_blank()), 
-                                                 es_plot_VacUli + theme(legend.position = "none",
-                                                                        axis.title = element_blank()),
-                                                 es_plot_SalGla + theme(legend.position = "none",
-                                                                        axis.title = element_blank()),
-                                                 labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
-                                                 label_size = 20,
-                                                 label_fontface = "plain",
-                                                 label_x = c(.05, .05, .05, .05, .05, .05, .05, .05),
-                                                 ncol = 2,
-                                                 axis = "lt",
-                                                 align = "hv"))
-
-# save plot
-# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels_twi.png"),
-#           nuuk_effect_size_plot_grid_ver_twi, base_height = 22, base_aspect_ratio = .6)
+# # ¨¨¨¨4x2 grid (vertical layout) ----
+# (nuuk_effect_size_plot_grid_ver_twi <- plot_grid(es_plot_AllShr + theme(legend.position = "none", 
+#                                                                         axis.title = element_blank()),
+#                                                  es_plot_AllEve + theme(legend.position = "none", 
+#                                                                         axis.title = element_blank()),
+#                                                  es_plot_AllDec + theme(legend.position = "none", 
+#                                                                         axis.title = element_blank()),
+#                                                  es_plot_EmpNig + theme(legend.position = "none", 
+#                                                                         axis.title = element_blank()), 
+#                                                  es_plot_RhoGro + theme(legend.position = "none", 
+#                                                                         axis.title = element_blank()), 
+#                                                  es_plot_BetNan + theme(legend.position = "none", 
+#                                                                         axis.title = element_blank()), 
+#                                                  es_plot_VacUli + theme(legend.position = "none",
+#                                                                         axis.title = element_blank()),
+#                                                  es_plot_SalGla + theme(legend.position = "none",
+#                                                                         axis.title = element_blank()),
+#                                                  labels = c("a)", "b)", "c)", "d)", "e)", "f)", "g)", "h)"),
+#                                                  label_size = 20,
+#                                                  label_fontface = "plain",
+#                                                  label_x = c(.05, .05, .05, .05, .05, .05, .05, .05),
+#                                                  ncol = 2,
+#                                                  axis = "lt",
+#                                                  align = "hv"))
+# 
+# # save plot
+# # save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_vert_prettylabels_twi.png"),
+# #           nuuk_effect_size_plot_grid_ver_twi, base_height = 22, base_aspect_ratio = .6)
 
 
 # ¨¨¨¨3x3 grid (horizontal layout) ----
@@ -736,8 +736,8 @@ legend_hor <- get_legend(xplot)
                                                  rel_heights = c(1, 0.07)))
 
 # save plot
-# save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_twi.png"),
-#           nuuk_effect_size_plot_grid_hor_twi, base_height = 18, base_aspect_ratio = 1.3)
+save_plot(file.path("figures", "nuuk_shrub_drivers_effect_size_panels_hor_prettylabels_twi.png"),
+          nuuk_effect_size_plot_grid_hor_twi, base_height = 18, base_aspect_ratio = 1.3)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨-----
