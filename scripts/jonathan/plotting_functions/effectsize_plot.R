@@ -43,10 +43,10 @@ effectsize_plot_twi <- function(species, plot_width) {
                                     "b.sri",
                                     "b.tri",
                                     "b.twi",
+                                    "b.tempXtwi", "b.tempXtwi2",
                                     "b.compet",
                                     "b.shrub_cov",
                                     "b.gramin_cov",
-                                    "b.tempXtwi", "b.tempXtwi2",
                                     "b.tempXcompet", "b.tempXcompet2")
   # comment next bit ou if solved the labelling issue for discrete axis in the plotting code below
   solutions$variable <- fct_recode(solutions$variable,
@@ -177,8 +177,8 @@ effectsize_plot_tcws <- function(species, plot_width) {
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
                                    "TCWS" = "b.tcws",
-                                   "summer temp. X TCWS" = "b.tempXtwi", 
-                                   "summer temp. ^2 X TCWS" = "b.tempXtwi2",
+                                   "summer temp. X TCWS" = "b.tempXtcws", 
+                                   "summer temp. ^2 X TCWS" = "b.tempXtcws2",
                                    "dCWA" = "b.compet",
                                    "other shrub abundance" = "b.shrub_cov",
                                    "graminoid abundance" = "b.gramin_cov",
