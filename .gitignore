@@ -5,3 +5,6 @@
 
 # intermediate steps of analysis development workflow
 scripts/jonathan/former_analysis_scripts/*
+
+# literature review (excluded from manuscript)
+literature_review/

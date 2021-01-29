@@ -34,7 +34,7 @@ interaction_plots_species <- function(species, wet.var) {
   names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
   
   # extract predictions into phats data frame 
-  phat_predictor <- "phat_tempXmoist"
+  phat_predictor <- "phat_tempXwet"
   
   predictor_min <- min(species_df$tempjjaC)
   predictor_max <- max(species_df$tempjjaC)
@@ -133,7 +133,7 @@ interaction_plots_groups <- function(fgroup, wet.var) {
   names(phats)[1:length(model_coeff_output)] <- names(model_coeff_output)
   
   # extract predictions into phats data frame 
-  phat_predictor <- "phat_tempXmoist"
+  phat_predictor <- "phat_tempXwet"
   
   predictor_min <- min(group_df$tempjjaC)
   predictor_max <- max(group_df$tempjjaC)

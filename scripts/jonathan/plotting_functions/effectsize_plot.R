@@ -30,7 +30,7 @@ effectsize_plot_twi <- function(species, plot_width) {
                    "b.shrub_cov",
                    "b.gramin_cov",
                    "b.compet",
-                   "b.tempXtcws", "b.tempXtcws2",
+                   "b.tempXtwi", "b.tempXtwi2",
                    "b.tempXcompet", "b.tempXcompet2")
   solutions <- model_coeff_output
   names(solutions) <- c("variable", "post.mean", "post.sd", "l95", "l90", "u90", "u95", "Rhat")
@@ -58,14 +58,14 @@ effectsize_plot_twi <- function(species, plot_width) {
                                    "summer precipitation ^2" = "b.precipjja.x2",
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
-                                   "topographic wetness" = "b.twi",
-                                   "summer temperature X\ntopographic wetness" = "b.tempXtwi", 
-                                   "summer temperature ^2\nX topographic wetness" = "b.tempXtwi2",
+                                   "topographic wetness (TWI)" = "b.twi",
+                                   "summer temp. X TWI" = "b.tempXtwi", 
+                                   "summer temp. ^2 X TWI" = "b.tempXtwi2",
                                    "dCWA" = "b.compet",
                                    "other shrub abundance" = "b.shrub_cov",
                                    "graminoid abundance" = "b.gramin_cov",
-                                   "summer temperature\nX dCWA", "b.tempXcompet", 
-                                   "summer temperature ^2\nX dCWA" = "b.tempXcompet2")
+                                   "summer temp. X dCWA" = "b.tempXcompet", 
+                                   "summer temp. ^2 X dCWA" = "b.tempXcompet2")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
@@ -176,14 +176,14 @@ effectsize_plot_tcws <- function(species, plot_width) {
                                    "summer precipitation ^2" = "b.precipjja.x2",
                                    "solar radiation" = "b.sri",
                                    "terrain ruggedness" = "b.tri",
-                                   "Tasseled-cap wetness" = "b.tcws",
-                                   "summer temperature X\nTasseled-cap wetness" = "b.tempXtwi", 
-                                   "summer temperature ^2\nX Tasseled-cap wetness" = "b.tempXtwi2",
+                                   "TCWS" = "b.tcws",
+                                   "summer temp. X TCWS" = "b.tempXtwi", 
+                                   "summer temp. ^2 X TCWS" = "b.tempXtwi2",
                                    "dCWA" = "b.compet",
                                    "other shrub abundance" = "b.shrub_cov",
                                    "graminoid abundance" = "b.gramin_cov",
-                                   "summer temperature\nX dCWA", "b.tempXcompet", 
-                                   "summer temperature ^2\nX dCWA" = "b.tempXcompet2")
+                                   "summer temp. X dCWA" = "b.tempXcompet", 
+                                   "summer temp. X dCWA" = "b.tempXcompet2")
   solutions <- solutions[order(solutions$variable),]
   min_value <- floor(min(solutions$l95))
   max_value <- ceiling(max(solutions$u95))
