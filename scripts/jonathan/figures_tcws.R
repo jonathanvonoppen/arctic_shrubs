@@ -248,7 +248,7 @@ ylabel <- ggdraw() +
                                              rel_heights = c(1, 0.05)))
 
 # # >> save plot ----
-# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert_tcws.pdf"),
+# save_plot(file.path("figures", "nuuk_shrub_drivers_interaction_panels_vert_tcws.png"),
 #           nuuk_interaction_plot_grid_ver_tcws, base_height = 15, base_aspect_ratio = 1)
 
 
