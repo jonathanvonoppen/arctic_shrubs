@@ -1,5 +1,5 @@
 ---
-title: 'Temperature variability, moisture and biotic interactions drive shrub species abundance along a coastal-inland gradient in arctic Greenland'
+title: 'Temperature variability and biotic interactions explain shrub species abundance along a coastal-inland gradient in arctic Greenland'
 subtitle: <center>- Secondary analysis workflow | Tasseled-cap Wetness Index as wetness predictor -</center>
 author: "Jonathan von Oppen (jonathan.vonoppen@bio.au.dk) et al."
 date: "`r format(Sys.time(), '%d %B %Y')`"
@@ -776,7 +776,7 @@ save(coeff.shrub_gradient.AllShr,
 <br>
 
 As none of the quadratic terms for climatic variables came out significant, re-run without them:
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -985,7 +985,7 @@ save(coeff.shrub_gradient.AllEve, file = file.path("..", "data", "processed", "m
 
 <br>
 
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -1103,7 +1103,7 @@ model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllEve2 <- model_out.shrub_gradient.AllEve2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -1194,7 +1194,7 @@ save(coeff.shrub_gradient.AllDec, file = file.path("..", "data", "processed", "m
 
 <br>
 
-```{r, eval = FALSE}
+```{r}
 write("
   
   model{
@@ -1311,7 +1311,7 @@ model_out.shrub_gradient.AllDec2 <- jags(shrub_gradient_jags.AllDec.data,    # i
 # plot(model_out.shrub_gradient.AllDec2) #check convergence, etc.
 ```
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.AllDec2 <- model_out.shrub_gradient.AllDec2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2047,16 +2047,16 @@ coeff.shrub_gradient.BetNan <- coeff.shrub_gradient.BetNan %>%
 save(coeff.shrub_gradient.BetNan, file = file.path("..", "data", "processed", "model_outputs", "species_tcws", "first_runs_converged", "model_output_BetNan.Rdata"))
 # load(file.path("..", "data", "processed", "model_outputs", "species_tcws", "first_runs_converged", "model_output_BetNan.Rdata"))
 print(coeff.shrub_gradient.BetNan)
-(effect_size_plot.BetNan <- model_plot_sig_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 16.5))
+(effect_size_plot.BetNan <- model_plot_marg_function(coeff.shrub_gradient.BetNan, title_string = "Betula nana", plot_width = 16.5))
 ```
 
-* **positive relationship with more conservative communities, negative response to graminoid cover (sig.)** 
+* **negative response to graminoid cover (sig.)** 
 * *unimodal relationship with temperature variability (m.s.)*
 
 <br>
 
 As none of the quadratic terms for climatic variables were significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2119,7 +2119,7 @@ write("
         logit(mu2[j]) <- b_plotgroup[plotgroup.cont[j]] + # ~= random effect of plot group
                         b.compet * compet.cont[j] +
                         b.tempXcompet * tempjja.cont[j] * compet.cont[j] +       # for interaction
-                        b.tempXcompet2 * (tempjja.cont[j]^2) * compet.cont[j] +  # for interaction
+                        # b.tempXcompet2 * (tempjja.cont[j]^2) * compet.cont[j] +  # for interaction
                         b.shrub_cov * shrub_cov.cont[j] +
                         b.gramin_cov * gramin_cov.cont[j] +
                         b.tempXtcws * tempjja.cont[j] * tcws.cont[j] +       # for interaction
@@ -2213,7 +2213,7 @@ model_out.shrub_gradient.BetNan2 <- jags(shrub_gradient_jags.BetNan.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.BetNan2 <- model_out.shrub_gradient.BetNan2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2364,7 +2364,7 @@ save(coeff.shrub_gradient.EmpNig, file = file.path("..", "data", "processed", "m
 <br>
 
 As none of the quadratic terms for climatic variables were significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2521,7 +2521,7 @@ model_out.shrub_gradient.EmpNig2 <- jags(shrub_gradient_jags.EmpNig.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.EmpNig2 <- model_out.shrub_gradient.EmpNig2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2608,7 +2608,7 @@ save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **not converged well** relatively large R-hat values (~ 1.02) (only 10 non-zero values across plot groups)
+* **not converged well** relatively large R-hat values (~ 1.2) (only 10 non-zero values across plot groups)
 
 <br>
 
@@ -2664,13 +2664,13 @@ save(coeff.shrub_gradient.RhoGro, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **negative response to graminoid cover (m.s.)** 
-* slightly positive response to temperature variability, solar radiation, terrain heterogeneity, TC wetness; slightly unimodal response to summer temperature (n.s.)
+* **negative response to graminoid cover, positive response to TC wetness (m.s.)** 
+* slightly positive response to temperature variability, solar radiation, terrain heterogeneity; slightly unimodal response to summer temperature (n.s.)
 
 <br>
 
 As the quadratic terms for climatic variables were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -2828,7 +2828,7 @@ model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # i
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.RhoGro2 <- model_out.shrub_gradient.RhoGro2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -2916,7 +2916,7 @@ save(coeff.shrub_gradient.RhoTom, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **not converging**: really large R-hat values (~ 2.7), large variation in parameter estimates (only 13 non-zero values)
+* **not converging**: really large R-hat values (~ 1.7), large variation in parameter estimates (only 13 non-zero values)
 
 <br>
 
@@ -2971,7 +2971,7 @@ save(coeff.shrub_gradient.SalArc, file = file.path("..", "data", "processed", "m
 
 ```
 
-* **not converging well**: relatively large R-hat values (< 1.04), and quite some variation in trace plots, especially for climatic parameters (only 13 non-zero values across plot groups)
+* **not converging well**: relatively large R-hat values (~ 1.1), and quite some variation in trace plots, especially for climatic parameters (only 13 non-zero values across plot groups)
 
 <br>
 
@@ -3033,7 +3033,7 @@ save(coeff.shrub_gradient.SalGla, file = file.path("..", "data", "processed", "m
 <br>
 
 As the quadratic terms for summer temperature, temperature variability and summer precipitation were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -3190,7 +3190,7 @@ model_out.shrub_gradient.SalGla2 <- jags(shrub_gradient_jags.SalGla.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.SalGla2 <- model_out.shrub_gradient.SalGla2$BUGSoutput$summary %>% 
   as.data.frame %>% 
@@ -3200,7 +3200,7 @@ coeff.shrub_gradient.SalGla2 <- model_out.shrub_gradient.SalGla2$BUGSoutput$summ
 
 # add 90% CIs
 ci_90.SalGla2 <- data.frame(q5 = NA, q95 = NA, param = NA)
-for (param in 1:(length(model_out.shrub_gradient.SalGla$BUGSoutput$sims.list)-4)){
+for (param in 1:(length(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list)-4)){
   ci_90.SalGla2[param,1:2] <- quantile(data.frame(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list[param])[,1], probs = c(0.05, 0.95))
   ci_90.SalGla2[param, 3] <- names(data.frame(model_out.shrub_gradient.SalGla2$BUGSoutput$sims.list))[param]
 }
@@ -3287,7 +3287,7 @@ save(coeff.shrub_gradient.VacUli, file = file.path("..", "data", "processed", "m
 <br>
 
 As the quadratic terms for summer temperature, precipitation and temperature variability were not significant, they were removed from the model before re-running:
-```{r, eval = FALSE}
+```{r}
 # new model object with terms removed
 write("
   
@@ -3444,7 +3444,7 @@ model_out.shrub_gradient.VacUli2 <- jags(shrub_gradient_jags.VacUli.data,   # in
 ```
 
 Extract coefficients and plot effect sizes:
-```{r, warning = FALSE, eval = FALSE}
+```{r, warning = FALSE}
 # extract coefficients 
 coeff.shrub_gradient.VacUli2 <- model_out.shrub_gradient.VacUli2$BUGSoutput$summary %>% 
   as.data.frame %>% 
