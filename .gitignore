@@ -18,3 +18,6 @@ documentation/
 analyses_tcws/*.Rmd
 analyses_main_twi/*.Rmd
 analyses_main_twi/*.rmd
+
+# original script for wetness predictor comparison
+analyses_tcws/wetness_predictor_assessment.R
