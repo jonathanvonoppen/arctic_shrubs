@@ -4,7 +4,12 @@
 .Ruserdata
 
 # intermediate steps of analysis development workflow
-scripts/jonathan/former_analysis_scripts/*
+scripts/JvO/former_analysis_scripts/*
+scripts/JvO/nuuk_shrub_drivers*
+scripts/NathalieChardon/extract_tri_jonathan_plots_nuuk_JA.R
 
 # literature review (excluded from manuscript)
 literature_review/
+
+# detailed workflow documentation
+documentation/
