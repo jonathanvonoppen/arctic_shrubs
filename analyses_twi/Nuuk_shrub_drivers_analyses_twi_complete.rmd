@@ -696,7 +696,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.groups.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.groups.jags"))
 ```
 
 Specify the parameters to be monitored:
@@ -727,7 +727,7 @@ params_groups <- c("intercept",
 model_out.shrub_gradient.AllShr <- jags(shrub_gradient_jags.AllShr.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_groups,                      # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.groups.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -861,7 +861,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.AllShr2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.AllShr2.jags"))
 
 # specify new set of parameters
 params_AllShr2 <- c("intercept",
@@ -884,7 +884,7 @@ params_AllShr2 <- c("intercept",
 model_out.shrub_gradient.AllShr2 <- jags(shrub_gradient_jags.AllShr.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_AllShr2,                      # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.AllShr2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.AllShr2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -938,7 +938,7 @@ save(coeff.shrub_gradient.AllShr2, file = file.path("..", "data", "processed", "
 model_out.shrub_gradient.AllEve <- jags(shrub_gradient_jags.AllEve.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_groups,                      # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.groups.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -1070,7 +1070,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.AllEve2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.AllEve2.jags"))
 
 # specify new set of parameters
 params_AllEve2 <- c("intercept",
@@ -1093,7 +1093,7 @@ params_AllEve2 <- c("intercept",
 model_out.shrub_gradient.AllEve2 <- jags(shrub_gradient_jags.AllEve.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_AllEve2,                      # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.AllEve2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.AllEve2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -1147,7 +1147,7 @@ save(coeff.shrub_gradient.AllEve2, file = file.path("..", "data", "processed", "
 model_out.shrub_gradient.AllDec <- jags(shrub_gradient_jags.AllDec.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_groups,                      # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.groups.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.groups.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -1279,7 +1279,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.AllDec2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.AllDec2.jags"))
 
 # specify new set of parameters
 params_AllDec2 <- c("intercept",
@@ -1302,7 +1302,7 @@ params_AllDec2 <- c("intercept",
 model_out.shrub_gradient.AllDec2 <- jags(shrub_gradient_jags.AllDec.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_AllDec2,                      # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.AllDec2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.AllDec2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -1973,7 +1973,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.spec.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.spec.jags"))
 ```
 
 Specify the parameters to be monitored:
@@ -2008,7 +2008,7 @@ params <- c("intercept",
 model_out.shrub_gradient.BetNan <- jags(shrub_gradient_jags.BetNan.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2177,7 +2177,7 @@ write("
         }
 
       }
-  ", file.path("..", "models_twi", "shrub_gradient.BetNan2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.BetNan2.jags"))
 
 # specify new set of parameters to be monitored
 params_BetNan2 <- c("intercept",
@@ -2203,7 +2203,7 @@ params_BetNan2 <- c("intercept",
 model_out.shrub_gradient.BetNan2 <- jags(shrub_gradient_jags.BetNan.data,   # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_BetNan2,                     # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.BetNan2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.BetNan2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2260,7 +2260,7 @@ save(coeff.shrub_gradient.BetNan2, file = file.path("..", "data", "processed", "
 model_out.shrub_gradient.CasTet <- jags(shrub_gradient_jags.CasTet.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2314,7 +2314,7 @@ save(coeff.shrub_gradient.CasTet, file = file.path("..", "data", "processed", "m
 model_out.shrub_gradient.EmpNig <- jags(shrub_gradient_jags.EmpNig.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2485,7 +2485,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.EmpNig2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.EmpNig2.jags"))
 
 # specify new set of parameters to be monitored
 params_EmpNig2 <- c("intercept",
@@ -2511,7 +2511,7 @@ params_EmpNig2 <- c("intercept",
 model_out.shrub_gradient.EmpNig2 <- jags(shrub_gradient_jags.EmpNig.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_EmpNig2,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.EmpNig2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.EmpNig2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2567,7 +2567,7 @@ save(coeff.shrub_gradient.EmpNig2, file = file.path("..", "data", "processed", "
 model_out.shrub_gradient.PhyCae <- jags(shrub_gradient_jags.PhyCae.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2619,7 +2619,7 @@ save(coeff.shrub_gradient.PhyCae, file = file.path("..", "data", "processed", "m
 model_out.shrub_gradient.RhoGro <- jags(shrub_gradient_jags.RhoGro.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2792,7 +2792,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.RhoGro2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.RhoGro2.jags"))
 
 # specify new set of parameters to be monitored
 params_RhoGro2 <- c("intercept",
@@ -2819,7 +2819,7 @@ params_RhoGro2 <- c("intercept",
 model_out.shrub_gradient.RhoGro2 <- jags(shrub_gradient_jags.RhoGro.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_RhoGro2,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.RhoGro2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.RhoGro2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2876,7 +2876,7 @@ save(coeff.shrub_gradient.RhoGro2, file = file.path("..", "data", "processed", "
 model_out.shrub_gradient.RhoTom <- jags(shrub_gradient_jags.RhoTom.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2928,7 +2928,7 @@ save(coeff.shrub_gradient.RhoTom, file = file.path("..", "data", "processed", "m
 model_out.shrub_gradient.SalArc <- jags(shrub_gradient_jags.SalArc.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -2983,7 +2983,7 @@ save(coeff.shrub_gradient.SalArc, file = file.path("..", "data", "processed", "m
 model_out.shrub_gradient.SalGla <- jags(shrub_gradient_jags.SalGla.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -3155,7 +3155,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.SalGla2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.SalGla2.jags"))
 
 # specify new set of parameters to be monitored
 params_SalGla2 <- c("intercept",
@@ -3181,7 +3181,7 @@ params_SalGla2 <- c("intercept",
 model_out.shrub_gradient.SalGla2 <- jags(shrub_gradient_jags.SalGla.data,   # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_SalGla2,                     # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.SalGla2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.SalGla2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -3238,7 +3238,7 @@ save(coeff.shrub_gradient.SalGla2, file = file.path("..", "data", "processed", "
 model_out.shrub_gradient.VacUli <- jags(shrub_gradient_jags.VacUli.data,    # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params,                             # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.spec.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.spec.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
@@ -3409,7 +3409,7 @@ write("
 
     
       }
-  ", file.path("..", "models_twi", "shrub_gradient.VacUli2.jags"))
+  ", file.path("model_files_twi", "shrub_gradient.VacUli2.jags"))
 
 # specify new set of parameters to be monitored
 params_VacUli2 <- c("intercept",
@@ -3435,7 +3435,7 @@ params_VacUli2 <- c("intercept",
 model_out.shrub_gradient.VacUli2 <- jags(shrub_gradient_jags.VacUli.data,   # input data
                                         inits = NULL,                       # JAGS to create initial values
                                         params_VacUli2,                     # parameters to be saved
-                                        model.file = file.path("..", "models_twi", "shrub_gradient.VacUli2.jags"), 
+                                        model.file = file.path("model_files_twi", "shrub_gradient.VacUli2.jags"), 
                                         n.chains = 3,                       # no. Markov chains
                                         n.iter = 100000, n.burnin = 70000,  # no. iterations & burn-in fraction per chain
                                         n.thin = 2,                         # thinning rate
