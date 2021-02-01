@@ -13,3 +13,8 @@ literature_review/
 
 # detailed workflow documentation
 documentation/
+
+# markdown files in analysis folders
+analyses_tcws/*.Rmd
+analyses_main_twi/*.Rmd
+analyses_main_twi/*.rmd
