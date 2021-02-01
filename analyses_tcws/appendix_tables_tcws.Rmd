@@ -228,7 +228,7 @@ for (model_output in model_outputs_groups){
 }
 
 # load output table function
-source(file = file.path("..", "scripts", "jonathan", "plotting_functions", "output_tables.R"))
+source(file = file.path("..", "scripts", "JvO", "plotting_functions", "output_tables.R"))
 ```
 
 ### All shrubs
@@ -334,7 +334,7 @@ for (model_output in model_outputs_groups){
 }
 
 # load output table function
-source(file = file.path("..", "scripts", "jonathan", "plotting_functions", "output_tables.R"))
+source(file = file.path("..", "scripts", "JvO", "plotting_functions", "output_tables.R"))
 ```
 
 ### All shrubs
