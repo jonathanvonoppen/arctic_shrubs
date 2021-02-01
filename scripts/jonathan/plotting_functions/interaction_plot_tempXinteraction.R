@@ -57,8 +57,12 @@ tXi_interaction_plots <- function(species) {
     mutate(tempjja = xhats * attr(scale(species_df$tempjja), 'scaled:scale') + attr(scale(species_df$tempjja), 'scaled:center'),
            
            # add column for low/high diff. to community acquisitiveness values
-           dcwa = rep(c("low", "high"),
-                     each = 100))
+           dcwa = rep(c("more negative", "more positive"),
+                     each = 100),
+           
+           dcwa = fct_relevel(dcwa,
+                              "more positive",
+                              "more negative"))
   
   # graph
   
@@ -96,8 +100,8 @@ tXi_interaction_plots <- function(species) {
     
     # define appearance
     ggtitle(paste0(species)) +
-    scale_colour_manual("difference to\ncommunity\nacquisitiveness", values = c("indianred3", "gold")) +
-    scale_fill_manual("difference to\ncommunity\nacquisitiveness", values = c("indianred3", "gold")) +
+    scale_colour_manual("difference to\ncommunity\nacquisitiveness", values = c("firebrick", "snow3")) +
+    scale_fill_manual("difference to\ncommunity\nacquisitiveness", values = c("firebrick", "snow3")) +
     theme_cowplot(18) +
     theme(plot.title = element_text(colour = "grey10", face = "italic", size = 18),
           axis.title = element_blank(),
