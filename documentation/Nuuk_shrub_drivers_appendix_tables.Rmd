@@ -71,8 +71,13 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
    # arrange by acquisitiveness
    arrange(PC1) %>% 
    
+   # select columns to display
+   select(species, fgroup, PC1, PC2) %>% 
+   
    # make flextable and reorder columns
-   flextable(col_keys = c("species", "fgroup", "pollination", "dispersal", "PC1", "PC2", "references")) %>% 
+   flextable(col_keys = c("species", "fgroup", 
+                          #"pollination", "dispersal", 
+                          "PC1", "PC2")) %>%  #, "references")) %>% 
    
    # add author names
    compose(i = 1, j = "species",   # E. nigrum
@@ -155,11 +160,11 @@ pacman::p_load(tidyverse, # set of packages for data manipulation, exploration a
                      PC2 = "PC2 (plant size)") %>% 
    
    # add superscripts in PC score cols for Thomas et al. reference
-   compose(j = 5, part = "header",
+   compose(j = "PC1", part = "header",
            value = as_paragraph("PC1\n(resource economics)",
                                 as_chunk(" a",
                                          props = fp_text(vertical.align = "superscript")))) %>% 
-   compose(j = 6, part = "header",
+   compose(j = "PC2", part = "header",
            value = as_paragraph("PC2 (plant size)",
                                 as_chunk(" a",
                                          props = fp_text(vertical.align = "superscript")))) %>% 
@@ -211,8 +216,8 @@ library(corrr)
            "wetness\n(TWI)" = twi_fd8,
            "wetness\n(TCWS)" = tcws,
            "diff. to\nCWM\nacquisitiveness" = compet,
-           "total\nshrub\ncover" = shrub_cover,
-           "graminoid\ncover" = graminoid_cover) %>% 
+           "total shrub\nabundance" = shrub_cover,
+           "graminoid\nabundance" = graminoid_cover) %>% 
     
     # create basic correlation matrix
     correlate(diagonal = 1,
@@ -265,8 +270,8 @@ env_cov_bio_sub <- read.csv(file.path("..", "data", "processed", "nuuk_env_cover
            "terrain ruggedness (TRI)" = tri,
            "wetness (TWI)" = twi_fd8,
            "diff. to CWM acquisitiveness" = compet,
-           "total shrub cover" = shrub_cover,
-           "graminoid cover" = graminoid_cover) 
+           "total shrub\nabundance" = shrub_cover,
+           "graminoid\nabundance" = graminoid_cover) 
 
 predictors_set <- env_cov_bio_sub %>% names()
   
@@ -383,8 +388,8 @@ env_cov_bio_sub <- read.csv(file.path("..", "data", "processed", "nuuk_env_cover
            "terrain ruggedness (TRI)" = tri,
            "wetness (TCWS)" = tcws,
            "diff. to CWM acquisitiveness" = compet,
-           "total shrub cover" = shrub_cover,
-           "graminoid cover" = graminoid_cover) 
+           "total shrub\nabundance" = shrub_cover,
+           "graminoid\nabundance" = graminoid_cover) 
 
 predictors_set <- env_cov_bio_sub %>% names()
   

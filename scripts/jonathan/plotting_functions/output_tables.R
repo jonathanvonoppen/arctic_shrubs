@@ -24,8 +24,8 @@ output_table_sp <- function(species){
   # set row name order
   var_order <- c("intercept", 
                  "b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", 
-                 "b.sri", "b.tri", "b.twi", "b.tcws", 
-                 "b.compet", "b.gramin_cov", "b.shrub_cov", 
+                 "b.sri", "b.tri", "b.twi", "b.tcws", "b.tempXtwi", "b.tempXtwi2", "b.tempXtcws", "b.tempXtcws2",
+                 "b.compet", "b.shrub_cov", "b.gramin_cov", "b.tempXcompet", "b.tempXcompet2",
                  "phi", "sigma.plotgroup")
   
   # wrangle output table
@@ -41,15 +41,21 @@ output_table_sp <- function(species){
     
     # adjust parameter namings
     mutate(param = case_when(param == "b.compet" ~ "dCWA",
-                             param == "b.gramin_cov" ~ "graminoid cover",
+                             param == "b.gramin_cov" ~ "graminoid abundance",
                              param == "b.precipjja.x" ~ "summer precipitation",
                              param == "b.precipjja.x2" ~ "summer precipitation ^2",
-                             param == "b.shrub_cov" ~ "other shrub cover",
+                             param == "b.shrub_cov" ~ "other shrub abundance",
                              param == "b.sri" ~ "solar radiation",
                              param == "b.tempcont.x" ~ "temperature variability",
                              param == "b.tempcont.x2" ~ "temperature variability ^2",
                              param == "b.tempjja.x" ~ "summer temperature",
                              param == "b.tempjja.x2" ~ "summer temperature ^2",
+                             param == "b.tempXtwi" ~ "summer temp. X wetness",
+                             param == "b.tempXtwi2" ~ "summer temp. ^2 X wetness",
+                             param == "b.tempXtcws" ~ "summer temp. X wetness",
+                             param == "b.tempXtcws2" ~ "summer temp. ^2 X wetness",
+                             param == "b.tempXcompet" ~ "summer temp. X dCWA",
+                             param == "b.tempXcompet2" ~ "summer temp. ^2 X dCWA",
                              param == "b.tri" ~ "terrain ruggedness",
                              param == "b.twi" ~ "topographic wetness",
                              param == "b.tcws" ~ "Tasseled-cap wetness",
@@ -96,7 +102,7 @@ output_table_gr <- function(fgroup){
   # set row name order
   var_order <- c("intercept", 
                  "b.tempjja.x", "b.tempjja.x2", "b.tempcont.x", "b.tempcont.x2", "b.precipjja.x", "b.precipjja.x2", 
-                 "b.sri", "b.tri", "b.twi", "b.tcws",
+                 "b.sri", "b.tri", "b.twi", "b.tcws", "b.tempXtwi", "b.tempXtwi2", "b.tempXtcws", "b.tempXtcws2",
                  "b.gramin_cov", 
                  "phi", "sigma.plotgroup")
   
@@ -112,7 +118,7 @@ output_table_gr <- function(fgroup){
     mutate(param = as.character(param)) %>% 
     
     # adjust parameter namings
-    mutate(param = case_when(param == "b.gramin_cov" ~ "graminoid cover",
+    mutate(param = case_when(param == "b.gramin_cov" ~ "graminoid abundance",
                              param == "b.precipjja.x" ~ "summer precipitation",
                              param == "b.precipjja.x2" ~ "summer precipitation ^2",
                              param == "b.sri" ~ "solar radiation",
@@ -120,6 +126,10 @@ output_table_gr <- function(fgroup){
                              param == "b.tempcont.x2" ~ "temperature variability ^2",
                              param == "b.tempjja.x" ~ "summer temperature",
                              param == "b.tempjja.x2" ~ "summer temperature ^2",
+                             param == "b.tempXtwi" ~ "summer temp. X wetness",
+                             param == "b.tempXtwi2" ~ "summer temp. ^2 X wetness",
+                             param == "b.tempXtcws" ~ "summer temp. X wetness",
+                             param == "b.tempXtcws2" ~ "summer temp. ^2 X wetness",
                              param == "b.tri" ~ "terrain ruggedness",
                              param == "b.twi" ~ "topographic wetness",
                              param == "b.tcws" ~ "Tasseled-cap wetness",
