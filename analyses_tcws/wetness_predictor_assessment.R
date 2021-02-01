@@ -1,6 +1,9 @@
-# Nuuk Fjord
+# Temperature variability and biotic interactions explain shrub species abundance along a coastal-inland gradient in arctic Greenland
+
+# von Oppen, J. et al. 2021
 
 # Comparison of wetness predictor power for predicting Cyperaceae & bryophyte abundance
+
 
 # dependencies
 library(tidyverse)
