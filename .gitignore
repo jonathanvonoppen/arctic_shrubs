@@ -6,7 +6,7 @@
 # intermediate steps of analysis development workflow
 scripts/JvO/former_analysis_scripts/*
 scripts/JvO/nuuk_shrub_drivers*
-scripts/NathalieChardon/extract_tri_jonathan_plots_nuuk_JA.R
+scripts/NathalieChardon/extract_tri_jonathan_plots_nuuk_JJA.R
 
 # literature review (excluded from manuscript)
 literature_review/
