@@ -23,19 +23,19 @@ precip <- '/Volumes/Nat_Ecoinformatics/B_Read/Arctic/Microclimate/NuukFjord/FINA
 ins <- '/Volumes/ST_Ecoinformatics/B_Read/Arctic/Microclimate/NuukFjord/FINAL_SolarRadiation/'
 
 # DEM in Stere proj
-output <- '/Volumes/Nat_Ecoinformatics/C_Write/_User/NathalieChardon_au653181/input_data/maps/nuuk_dem/'
+output <- '/Volumes/...' # (truncated, containing sensible data - JvO)
 
 # Output rasters
-out.ras <- '/Volumes/Nat_Ecoinformatics/C_Write/_User/NathalieChardon_au653181/input_data/processed/'
+out.ras <- '/Volumes/...' # (truncated, containing sensible data - JvO)
 
 # Plot-level Rdata  
-my.dat <- '/Volumes/Nat_Ecoinformatics/C_Write/_User/NathalieChardon_au653181/scripts/RData/'
+my.dat <- '/Volumes/...' # (truncated, containing sensible data - JvO)
 
 # Local directory independent of AU server
-loc <- '/Volumes/MILKBONE/Greenland/processed_data/'
+loc <- '/Volumes/...' # (truncated, containing sensible data - JvO)
 
 # Figures
-figs <- '/Volumes/Nat_Ecoinformatics/C_Write/_User/NathalieChardon_au653181/figs/stats_Apr2020/'
+figs <- '/Volumes/...' # (truncated, containing sensible data - JvO)
 
 
 
@@ -412,7 +412,7 @@ save(ts_plot, file = 'ts_plot.RData')
 
 ####################################################################################################
 
-# # CONTINENTALITY # #
+# # ANNUAL TEMPERATURE VARIABILITY (a.k.a. continentality) # #
 
 ####################################################################################################
 
@@ -792,136 +792,4 @@ save(ts_plot, file = 'ts_plot.RData')
 
 
 
-####################################################################################################
-
-# # SUMMER INSOLATION: DATA # # 
-
-####################################################################################################
-
-# Specify multiple conditions to create file list
-ts <- paste(c(1982:2013), collapse = '|') #years of interest
-
-insols <- Reduce(intersect, list(list.files(ins, pattern = '_06|_07|_08'),
-                                 list.files(ins, pattern = ts)))
-
-
-# Read in data for this section 
-setwd(ins)
-i_stack <- stack(lapply(insols, raster)) #JJA insolation
-i_stack
-nlayers(i_stack)
-
-setwd(my.dat) 
-load('ts_plot.RData') #plot metadata + downscaled clim time series (ts_90m.R; NC)
-setwd(out.ras)
-main_ras <- raster('main_ras.tif') #main raster to project climate rasters to (ts_90m.R; NC)
-
-
-# Change R temporary file location to local drive in case of AU server connection disruption
-rasterOptions(tmpdir = loc)
-
-
-# Parallel computing to reproject Stack to template raster
-start_time <- Sys.time()
-beginCluster()
-
-insols_ts <- projectRaster(from = i_stack, to = main_ras)
-
-endCluster()
-end_time <- Sys.time()
-end_time - start_time #
-
-
-# Extract data from raster
-gps <- as.matrix(ts_plot[,c('x_stere', 'y_stere')]) #matrix of long, lat to use for clim data extraction
-vals <- data.frame(id = ts_plot$id, year = ts_plot$year, extract(insols_ts, gps)) #extract clim values for each raster layer to new DF
-
-
-# Check data distribution
-colMax <- function(data) sapply(data, max, na.rm = TRUE) #max value per column
-mx <- colMax(vals[3:ncol(vals)])
-
-colMin <- function(data) sapply(data, min, na.rm = TRUE) #min value per column
-mn <- colMin(vals[3:ncol(vals)])
-
-par(mfrow = c(4,2), mar = c(5,4,2,1))
-hist(mx, breaks = 100)
-hist(mn, breaks = 100)
-boxplot(mx, horizontal = T) #following Zuur et al. 2009
-boxplot(mn, horizontal = T)
-dotchart(mx, labels = '') 
-dotchart(mn, labels = '')
-
-hist(vals[,3], breaks = nrow(vals), xlim = c(min(mn), max(mx)), ylim = c(0, 15), 
-     main = 'All Values', xlab = '')
-for (i in ncol(vals)) {
-  hist(vals[,i], breaks = nrow(vals), add = T)
-}
-
-ms <- rowMeans(vals[,3:ncol(vals)])
-plot(ms ~ ts_plot$inclin_dir) #mean insolation ~ aspect
-
-
-# Save all extracted values
-setwd(my.dat) 
-save(vals, file = 'vals_insol_jja.RData')
-
-
-
-
-####################################################################################################
-
-# # SUMMER INSOLATION: COMPUTE SUMMER MEAN # # in progress: check adjustments before running
-
-####################################################################################################
-
-# Load data for this section
-setwd(my.dat) 
-load('vals_insol_jja.RData') #summer insolation (ts_90m.R; NC)
-load('ts_plot.RData') #plot metadata + downscaled clim time series (ts_90m.R; NC)
-load('ts_pattern.RData') #reference DF used in time series computation (ts_90m.R; NC)
-
-
-## Calculate average JJA insolation ##
-
-for (j in 1:nrow(ts_pattern)) {
-  
-  df <- 'NA' #initialize intermediary DF to dump values into
-  
-  # ID and subset appropriate columns
-  for (i in 3:ncol(vals)) { #loop through columns = clim data from diff rasters
-    
-    nn <- grep(ts_pattern[j, 3], colnames(vals[i]), value = T) #extract colname_i from ts_j
-    cc <- vals[which(colnames(vals) == nn)] #extract corresponding values
-    df <- cbind(df, cc) #dump into new DF
-  }
-  
-  df2 <- df[-1] #delete first column with NAs
-  
-  for (h in 1:nrow(ts_plot)) { #loop through rows = plots
-    if (ts_plot$year[h] == ts_pattern[j, 2]) { #if sampling year matches current ts
-      
-      # Calculate yearly JJA avgs per row_h and add to main DF
-      ts_plot[h, paste('insoljja_ts', (ts_pattern$ts[j] + 1), sep = '_')] <- rowMeans(df2[h,])
-    }
-  }
-}
-head(ts_plot)
-
-
-# Check data distribution
-nstart <- 39 #first column with new clim data
-cend <- ncol(ts_plot) #last column with new clim data
-
-par(mfrow = c(3, 2))
-for (i in nstart:cend) {
-  dotchart(ts_plot[,i])
-}
-
-
-# Save main DF
-setwd(my.dat)
-save(ts_plot, file = 'ts_plot.RData')
-
-
-
+# end of script ----
