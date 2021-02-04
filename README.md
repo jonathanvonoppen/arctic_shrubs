@@ -1,4 +1,8 @@
-# Annual air temperature variability and biotic interactions explain tundra shrub species abundance: Data and Code Repository
+# Annual air temperature variability and biotic interactions explain tundra shrub species abundance
+
+### von Oppen, J., et al.
+
+# Data and Code Repository
 
 
 ## Background
@@ -23,7 +27,7 @@ The repository contains the following folders:
 
 * [analyses_main_twi](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/analyses_main_twi) contains all files related to the *main text analysis using topographic wetness (TWI)* as the wetness variable. This includes 
     + a [workflow documentation](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/blob/master/analyses_main_twi/Nuuk_shrub_drivers_analyses_twi_complete.nb.html) including all code to prepare data and run models, 
-    + JAGS [model code files](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/analyses_main_twi/model_files_twi) for both general models species and groups (\*.spec.jags or \*.groups.jags) as well as species- and group-specific 2^nd^-step models (\*2.jags), 
+    + JAGS [model code files](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/analyses_main_twi/model_files_twi) for both general models species and groups (\*.spec.jags or \*.groups.jags) as well as species- and group-specific 2 ^nd^ -step models (\*2.jags), 
     + [model coefficient tables](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/blob/master/analyses_main_twi/appendix_tables_twi.html), and 
     + [figure code and files](https://github.com/jonathanvonoppen/nuuk_shrub_drivers/tree/master/analyses_main_twi/figures) (including figures for Appendix S1-S6).
 
