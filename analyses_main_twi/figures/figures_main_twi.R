@@ -113,7 +113,7 @@ text_left <- textGrob("conservative", gp = gpar(fontsize = 13, fontface = "bold"
 
 # >> save plot ----
 save_plot(file.path("analyses_main_twi", "figures", "Fig1_species_PCA_scores.png"),
-          traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5)
+          traits_scores_plot, base_height = 3, base_aspect_ratio = 2.5, dpi = 600)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -280,7 +280,7 @@ ylabel <- ggdraw() +
 
 # # >> save plot ----
 save_plot(file.path("analyses_main_twi", "figures", "Fig4_tempXwetness_twi.png"),
-          nuuk_interaction_plot_grid_ver_twi, base_height = 15, base_aspect_ratio = 1)
+          nuuk_interaction_plot_grid_ver_twi, base_height = 15, base_aspect_ratio = 1, dpi = 600)
 
 
 # ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ ----
@@ -355,7 +355,7 @@ ylabel <- ggdraw() +
 
 # # >> save plot ----
 save_plot(file.path("analyses_main_twi", "figures", "Fig5_tempXdCWA.png"),
-          nuuk_tempXint_plot, base_height = 11, base_aspect_ratio = 1.5)
+          nuuk_tempXint_plot, base_height = 11, base_aspect_ratio = 1.5, dpi = 600)
 
 
 # ________________________________________ ----
