@@ -40,7 +40,7 @@ writeRaster(GIMP_dem_cropped,
             overwrite = T)
 
 # Load Plot Geometries
-nuuk_plots <- read_sf("scripts/jakob/nuuk_plots.shp")
+nuuk_plots <- read_sf("scripts/JJA/nuuk_plots.shp")
 
 # Load nuuk plot data frame
 nuuk_plots_df <- read.csv("data/processed/nuuk_env_cover_plots_topo_variables.csv")
